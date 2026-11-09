@@ -1,0 +1,62 @@
+# Quartus outputs
+db/
+incremental_db/
+output_files/
+simulation/
+greybox_tmp/
+hc_output/
+.qsys_edit/
+hps_isw_handoff/
+sys/.qsys_edit/
+sys/vip/
+sys/*_sim/
+rtl/*_sim/
+build_id.v
+c5_pin_model_dump.txt
+PLLJ_PLLSPE_INFO.txt
+*.qws
+*.ppf
+*.ddb
+*.csv
+*.cmp
+*.sip
+*.spd
+*.bsf
+*.f
+*.sopcinfo
+*.xml
+*.cdf
+*.rpt
+*.bak
+*.orig
+*.rej
+*~
+new_rtl_netlist
+old_rtl_netlist
+jtag.cdf
+
+# Verilator
+obj_dir/
+
+# Firmware images are not distributed with the core
+*.rom
+
+# Bench build directories
+tb/*/obj_*/
+tb/*/obj_*.log
+tb/*/obj_dir.log
+
+# 8049 mask ROM image, generated from the firmware
+
+# Pinned GHDL (scripts/get_ghdl.sh)
+tools/
+__pycache__/
+
+# Disk images
+*.img
+*.imd
+*.td0
+
+# Whole-machine bench frames and logs
+tb/core/out*/
+tb/video/out/

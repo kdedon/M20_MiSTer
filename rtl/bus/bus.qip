@@ -1,0 +1,8 @@
+# Mainboard block (m20_mainboard).  The k8000 Z8001 sources are listed in files.qip.
+set_global_assignment -name SYSTEMVERILOG_FILE [file join $::quartus(qip_path) m20_clkgen.sv]
+set_global_assignment -name SYSTEMVERILOG_FILE [file join $::quartus(qip_path) m20_prom.sv]
+set_global_assignment -name SYSTEMVERILOG_FILE [file join $::quartus(qip_path) m20_boot_rom.sv]
+set_global_assignment -name SYSTEMVERILOG_FILE [file join $::quartus(qip_path) m20_dram.sv]
+set_global_assignment -name SYSTEMVERILOG_FILE [file join $::quartus(qip_path) m20_iodec.sv]
+set_global_assignment -name SYSTEMVERILOG_FILE [file join $::quartus(qip_path) m20_mainboard.sv]
+set_global_assignment -name HEX_FILE [file join $::quartus(qip_path) m20_prom.hex]

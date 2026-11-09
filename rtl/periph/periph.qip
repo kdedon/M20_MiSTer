@@ -1,0 +1,22 @@
+# Peripheral block: 8259 PIC, 8253 PIT, 8255 PPI, two 8251 USARTs, keyboard HLE.
+# The KF headers missing from rtl/vendor are in rtl/periph/inc.
+set_global_assignment -name SEARCH_PATH rtl/periph/inc
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/vendor/KF8259/KF8259_Bus_Control_Logic.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/periph/KF8259_Control_Logic.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/vendor/KF8259/KF8259_In_Service.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/vendor/KF8259/KF8259_Interrupt_Request.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/vendor/KF8259/KF8259_Priority_Resolver.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/vendor/KF8259/KF8259.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/vendor/KF8253/KF8253_Control_Logic.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/vendor/KF8253/KF8253_Counter.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/vendor/KF8253/KF8253.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/vendor/KF8255/KF8255_Control_Logic.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/vendor/KF8255/KF8255_Group.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/vendor/KF8255/KF8255_Port.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/vendor/KF8255/KF8255_Port_C.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/vendor/KF8255/KF8255.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/periph/m20_pic.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/periph/m20_pit.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/periph/m20_ppi.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/periph/i8251.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/periph/m20_kbd.sv

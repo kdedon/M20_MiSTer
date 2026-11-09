@@ -1,0 +1,6600 @@
+// DERIVED FILE, but a COMMITTED SOURCE of k8000: check it in, review its
+// diffs, and build from it. Nothing in k8000's lint/build/test reads any
+// other repo.
+//
+// Do not hand-edit: it is emitted by cmd/mcrom from the Z8000 Go golden
+// model's machine-cycle programs, and 'make refresh-rtl' (maintainers only,
+// needs that model) will overwrite it. What proves it correct HERE is
+// tb_mc_table replaying rtl/k800x_cpu/z8000_mc_table.txt against it.
+//
+// The machine-cycle program ROM: which program a first word runs, and its
+// cycles. Readable form, with every form's programs: z8000_mc_table.txt.
+
+// z8000_mc_index_gen: (w0, w1[3:0]) -> form. Only a block form depends on
+// the second word (single or repeat); 0 before that word is in.
+module z8000_mc_index_gen
+  import z8000_mc_pkg::*;
+(
+  input  logic [15:0]          w0,
+  input  logic [3:0]           w1_lo,
+  output logic [MC_FORM_W-1:0] form
+);
+
+  always_comb begin
+    form = MC_FORM_W'(0);
+    unique case (w0[15:8])
+      8'h00: begin
+        unique case (w0[7:0])
+          8'h00, 8'h01, 8'h02, 8'h03, 8'h04, 8'h05, 8'h06, 8'h07, 8'h08, 8'h09, 8'h0A, 8'h0B,
+          8'h0C, 8'h0D, 8'h0E, 8'h0F: form = 9'd1;
+          default: form = 9'd2;
+        endcase
+      end
+      8'h01: begin
+        unique case (w0[7:0])
+          8'h00, 8'h01, 8'h02, 8'h03, 8'h04, 8'h05, 8'h06, 8'h07, 8'h08, 8'h09, 8'h0A, 8'h0B,
+          8'h0C, 8'h0D, 8'h0E, 8'h0F: form = 9'd3;
+          default: form = 9'd4;
+        endcase
+      end
+      8'h02: begin
+        unique case (w0[7:0])
+          8'h00, 8'h01, 8'h02, 8'h03, 8'h04, 8'h05, 8'h06, 8'h07, 8'h08, 8'h09, 8'h0A, 8'h0B,
+          8'h0C, 8'h0D, 8'h0E, 8'h0F: form = 9'd5;
+          default: form = 9'd6;
+        endcase
+      end
+      8'h03: begin
+        unique case (w0[7:0])
+          8'h00, 8'h01, 8'h02, 8'h03, 8'h04, 8'h05, 8'h06, 8'h07, 8'h08, 8'h09, 8'h0A, 8'h0B,
+          8'h0C, 8'h0D, 8'h0E, 8'h0F: form = 9'd7;
+          default: form = 9'd8;
+        endcase
+      end
+      8'h04: begin
+        unique case (w0[7:0])
+          8'h00, 8'h01, 8'h02, 8'h03, 8'h04, 8'h05, 8'h06, 8'h07, 8'h08, 8'h09, 8'h0A, 8'h0B,
+          8'h0C, 8'h0D, 8'h0E, 8'h0F: form = 9'd9;
+          default: form = 9'd10;
+        endcase
+      end
+      8'h05: begin
+        unique case (w0[7:0])
+          8'h00, 8'h01, 8'h02, 8'h03, 8'h04, 8'h05, 8'h06, 8'h07, 8'h08, 8'h09, 8'h0A, 8'h0B,
+          8'h0C, 8'h0D, 8'h0E, 8'h0F: form = 9'd11;
+          default: form = 9'd12;
+        endcase
+      end
+      8'h06: begin
+        unique case (w0[7:0])
+          8'h00, 8'h01, 8'h02, 8'h03, 8'h04, 8'h05, 8'h06, 8'h07, 8'h08, 8'h09, 8'h0A, 8'h0B,
+          8'h0C, 8'h0D, 8'h0E, 8'h0F: form = 9'd13;
+          default: form = 9'd14;
+        endcase
+      end
+      8'h07: begin
+        unique case (w0[7:0])
+          8'h00, 8'h01, 8'h02, 8'h03, 8'h04, 8'h05, 8'h06, 8'h07, 8'h08, 8'h09, 8'h0A, 8'h0B,
+          8'h0C, 8'h0D, 8'h0E, 8'h0F: form = 9'd15;
+          default: form = 9'd16;
+        endcase
+      end
+      8'h08: begin
+        unique case (w0[7:0])
+          8'h00, 8'h01, 8'h02, 8'h03, 8'h04, 8'h05, 8'h06, 8'h07, 8'h08, 8'h09, 8'h0A, 8'h0B,
+          8'h0C, 8'h0D, 8'h0E, 8'h0F: form = 9'd17;
+          default: form = 9'd18;
+        endcase
+      end
+      8'h09: begin
+        unique case (w0[7:0])
+          8'h00, 8'h01, 8'h02, 8'h03, 8'h04, 8'h05, 8'h06, 8'h07, 8'h08, 8'h09, 8'h0A, 8'h0B,
+          8'h0C, 8'h0D, 8'h0E, 8'h0F: form = 9'd19;
+          default: form = 9'd20;
+        endcase
+      end
+      8'h0A: begin
+        unique case (w0[7:0])
+          8'h00, 8'h01, 8'h02, 8'h03, 8'h04, 8'h05, 8'h06, 8'h07, 8'h08, 8'h09, 8'h0A, 8'h0B,
+          8'h0C, 8'h0D, 8'h0E, 8'h0F: form = 9'd21;
+          default: form = 9'd22;
+        endcase
+      end
+      8'h0B: begin
+        unique case (w0[7:0])
+          8'h00, 8'h01, 8'h02, 8'h03, 8'h04, 8'h05, 8'h06, 8'h07, 8'h08, 8'h09, 8'h0A, 8'h0B,
+          8'h0C, 8'h0D, 8'h0E, 8'h0F: form = 9'd23;
+          default: form = 9'd24;
+        endcase
+      end
+      8'h0C: begin
+        unique case (w0[7:0])
+          8'h00, 8'h10, 8'h20, 8'h30, 8'h40, 8'h50, 8'h60, 8'h70, 8'h80, 8'h90, 8'hA0, 8'hB0,
+          8'hC0, 8'hD0, 8'hE0, 8'hF0: form = 9'd25;
+          8'h01, 8'h11, 8'h21, 8'h31, 8'h41, 8'h51, 8'h61, 8'h71, 8'h81, 8'h91, 8'hA1, 8'hB1,
+          8'hC1, 8'hD1, 8'hE1, 8'hF1: form = 9'd26;
+          8'h02, 8'h12, 8'h22, 8'h32, 8'h42, 8'h52, 8'h62, 8'h72, 8'h82, 8'h92, 8'hA2, 8'hB2,
+          8'hC2, 8'hD2, 8'hE2, 8'hF2: form = 9'd27;
+          8'h04, 8'h14, 8'h24, 8'h34, 8'h44, 8'h54, 8'h64, 8'h74, 8'h84, 8'h94, 8'hA4, 8'hB4,
+          8'hC4, 8'hD4, 8'hE4, 8'hF4: form = 9'd28;
+          8'h05, 8'h15, 8'h25, 8'h35, 8'h45, 8'h55, 8'h65, 8'h75, 8'h85, 8'h95, 8'hA5, 8'hB5,
+          8'hC5, 8'hD5, 8'hE5, 8'hF5: form = 9'd29;
+          8'h06, 8'h16, 8'h26, 8'h36, 8'h46, 8'h56, 8'h66, 8'h76, 8'h86, 8'h96, 8'hA6, 8'hB6,
+          8'hC6, 8'hD6, 8'hE6, 8'hF6: form = 9'd30;
+          8'h08, 8'h18, 8'h28, 8'h38, 8'h48, 8'h58, 8'h68, 8'h78, 8'h88, 8'h98, 8'hA8, 8'hB8,
+          8'hC8, 8'hD8, 8'hE8, 8'hF8: form = 9'd31;
+          default: form = 9'd0;
+        endcase
+      end
+      8'h0D: begin
+        unique case (w0[7:0])
+          8'h00, 8'h10, 8'h20, 8'h30, 8'h40, 8'h50, 8'h60, 8'h70, 8'h80, 8'h90, 8'hA0, 8'hB0,
+          8'hC0, 8'hD0, 8'hE0, 8'hF0: form = 9'd32;
+          8'h01, 8'h11, 8'h21, 8'h31, 8'h41, 8'h51, 8'h61, 8'h71, 8'h81, 8'h91, 8'hA1, 8'hB1,
+          8'hC1, 8'hD1, 8'hE1, 8'hF1: form = 9'd33;
+          8'h02, 8'h12, 8'h22, 8'h32, 8'h42, 8'h52, 8'h62, 8'h72, 8'h82, 8'h92, 8'hA2, 8'hB2,
+          8'hC2, 8'hD2, 8'hE2, 8'hF2: form = 9'd34;
+          8'h04, 8'h14, 8'h24, 8'h34, 8'h44, 8'h54, 8'h64, 8'h74, 8'h84, 8'h94, 8'hA4, 8'hB4,
+          8'hC4, 8'hD4, 8'hE4, 8'hF4: form = 9'd35;
+          8'h05, 8'h15, 8'h25, 8'h35, 8'h45, 8'h55, 8'h65, 8'h75, 8'h85, 8'h95, 8'hA5, 8'hB5,
+          8'hC5, 8'hD5, 8'hE5, 8'hF5: form = 9'd36;
+          8'h06, 8'h16, 8'h26, 8'h36, 8'h46, 8'h56, 8'h66, 8'h76, 8'h86, 8'h96, 8'hA6, 8'hB6,
+          8'hC6, 8'hD6, 8'hE6, 8'hF6: form = 9'd37;
+          8'h08, 8'h18, 8'h28, 8'h38, 8'h48, 8'h58, 8'h68, 8'h78, 8'h88, 8'h98, 8'hA8, 8'hB8,
+          8'hC8, 8'hD8, 8'hE8, 8'hF8: form = 9'd38;
+          8'h09, 8'h19, 8'h29, 8'h39, 8'h49, 8'h59, 8'h69, 8'h79, 8'h89, 8'h99, 8'hA9, 8'hB9,
+          8'hC9, 8'hD9, 8'hE9, 8'hF9: form = 9'd39;
+          default: form = 9'd0;
+        endcase
+      end
+      8'h0E: begin
+        unique case (w0[7:0])
+          8'h08, 8'h09, 8'h0A, 8'h0B, 8'h0C, 8'h0D, 8'h0E, 8'h0F, 8'h18, 8'h19, 8'h1A, 8'h1B,
+          8'h1C, 8'h1D, 8'h1E, 8'h1F, 8'h28, 8'h29, 8'h2A, 8'h2B, 8'h2C, 8'h2D, 8'h2E, 8'h2F,
+          8'h38, 8'h39, 8'h3A, 8'h3B, 8'h3C, 8'h3D, 8'h3E, 8'h3F, 8'h48, 8'h49, 8'h4A, 8'h4B,
+          8'h4C, 8'h4D, 8'h4E, 8'h4F, 8'h58, 8'h59, 8'h5A, 8'h5B, 8'h5C, 8'h5D, 8'h5E, 8'h5F,
+          8'h68, 8'h69, 8'h6A, 8'h6B, 8'h6C, 8'h6D, 8'h6E, 8'h6F, 8'h78, 8'h79, 8'h7A, 8'h7B,
+          8'h7C, 8'h7D, 8'h7E, 8'h7F, 8'h88, 8'h89, 8'h8A, 8'h8B, 8'h8C, 8'h8D, 8'h8E, 8'h8F,
+          8'h98, 8'h99, 8'h9A, 8'h9B, 8'h9C, 8'h9D, 8'h9E, 8'h9F, 8'hA8, 8'hA9, 8'hAA, 8'hAB,
+          8'hAC, 8'hAD, 8'hAE, 8'hAF, 8'hB8, 8'hB9, 8'hBA, 8'hBB, 8'hBC, 8'hBD, 8'hBE, 8'hBF,
+          8'hC8, 8'hC9, 8'hCA, 8'hCB, 8'hCC, 8'hCD, 8'hCE, 8'hCF, 8'hD8, 8'hD9, 8'hDA, 8'hDB,
+          8'hDC, 8'hDD, 8'hDE, 8'hDF, 8'hE8, 8'hE9, 8'hEA, 8'hEB, 8'hEC, 8'hED, 8'hEE, 8'hEF,
+          8'hF8, 8'hF9, 8'hFA, 8'hFB, 8'hFC, 8'hFD, 8'hFE, 8'hFF: form = 9'd41;
+          default: form = 9'd40;
+        endcase
+      end
+      8'h0F: begin
+        unique case (w0[7:0])
+          8'h08, 8'h09, 8'h0A, 8'h0B, 8'h0C, 8'h0D, 8'h0E, 8'h0F, 8'h18, 8'h19, 8'h1A, 8'h1B,
+          8'h1C, 8'h1D, 8'h1E, 8'h1F, 8'h28, 8'h29, 8'h2A, 8'h2B, 8'h2C, 8'h2D, 8'h2E, 8'h2F,
+          8'h38, 8'h39, 8'h3A, 8'h3B, 8'h3C, 8'h3D, 8'h3E, 8'h3F, 8'h48, 8'h49, 8'h4A, 8'h4B,
+          8'h4C, 8'h4D, 8'h4E, 8'h4F, 8'h58, 8'h59, 8'h5A, 8'h5B, 8'h5C, 8'h5D, 8'h5E, 8'h5F,
+          8'h68, 8'h69, 8'h6A, 8'h6B, 8'h6C, 8'h6D, 8'h6E, 8'h6F, 8'h78, 8'h79, 8'h7A, 8'h7B,
+          8'h7C, 8'h7D, 8'h7E, 8'h7F, 8'h88, 8'h89, 8'h8A, 8'h8B, 8'h8C, 8'h8D, 8'h8E, 8'h8F,
+          8'h98, 8'h99, 8'h9A, 8'h9B, 8'h9C, 8'h9D, 8'h9E, 8'h9F, 8'hA8, 8'hA9, 8'hAA, 8'hAB,
+          8'hAC, 8'hAD, 8'hAE, 8'hAF, 8'hB8, 8'hB9, 8'hBA, 8'hBB, 8'hBC, 8'hBD, 8'hBE, 8'hBF,
+          8'hC8, 8'hC9, 8'hCA, 8'hCB, 8'hCC, 8'hCD, 8'hCE, 8'hCF, 8'hD8, 8'hD9, 8'hDA, 8'hDB,
+          8'hDC, 8'hDD, 8'hDE, 8'hDF, 8'hE8, 8'hE9, 8'hEA, 8'hEB, 8'hEC, 8'hED, 8'hEE, 8'hEF,
+          8'hF8, 8'hF9, 8'hFA, 8'hFB, 8'hFC, 8'hFD, 8'hFE, 8'hFF: form = 9'd41;
+          default: form = 9'd40;
+        endcase
+      end
+      8'h10: begin
+        unique case (w0[7:0])
+          8'h00, 8'h01, 8'h02, 8'h03, 8'h04, 8'h05, 8'h06, 8'h07, 8'h08, 8'h09, 8'h0A, 8'h0B,
+          8'h0C, 8'h0D, 8'h0E, 8'h0F: form = 9'd42;
+          default: form = 9'd43;
+        endcase
+      end
+      8'h11: form = 9'd44;
+      8'h12: begin
+        unique case (w0[7:0])
+          8'h00, 8'h01, 8'h02, 8'h03, 8'h04, 8'h05, 8'h06, 8'h07, 8'h08, 8'h09, 8'h0A, 8'h0B,
+          8'h0C, 8'h0D, 8'h0E, 8'h0F: form = 9'd45;
+          default: form = 9'd46;
+        endcase
+      end
+      8'h13: form = 9'd47;
+      8'h14: begin
+        unique case (w0[7:0])
+          8'h00, 8'h01, 8'h02, 8'h03, 8'h04, 8'h05, 8'h06, 8'h07, 8'h08, 8'h09, 8'h0A, 8'h0B,
+          8'h0C, 8'h0D, 8'h0E, 8'h0F: form = 9'd48;
+          default: form = 9'd49;
+        endcase
+      end
+      8'h15: form = 9'd50;
+      8'h16: begin
+        unique case (w0[7:0])
+          8'h00, 8'h01, 8'h02, 8'h03, 8'h04, 8'h05, 8'h06, 8'h07, 8'h08, 8'h09, 8'h0A, 8'h0B,
+          8'h0C, 8'h0D, 8'h0E, 8'h0F: form = 9'd51;
+          default: form = 9'd52;
+        endcase
+      end
+      8'h17: form = 9'd53;
+      8'h18: begin
+        unique case (w0[7:0])
+          8'h00, 8'h01, 8'h02, 8'h03, 8'h04, 8'h05, 8'h06, 8'h07, 8'h08, 8'h09, 8'h0A, 8'h0B,
+          8'h0C, 8'h0D, 8'h0E, 8'h0F: form = 9'd54;
+          default: form = 9'd55;
+        endcase
+      end
+      8'h19: begin
+        unique case (w0[7:0])
+          8'h00, 8'h01, 8'h02, 8'h03, 8'h04, 8'h05, 8'h06, 8'h07, 8'h08, 8'h09, 8'h0A, 8'h0B,
+          8'h0C, 8'h0D, 8'h0E, 8'h0F: form = 9'd56;
+          default: form = 9'd57;
+        endcase
+      end
+      8'h1A: begin
+        unique case (w0[7:0])
+          8'h00, 8'h01, 8'h02, 8'h03, 8'h04, 8'h05, 8'h06, 8'h07, 8'h08, 8'h09, 8'h0A, 8'h0B,
+          8'h0C, 8'h0D, 8'h0E, 8'h0F: form = 9'd58;
+          default: form = 9'd59;
+        endcase
+      end
+      8'h1B: begin
+        unique case (w0[7:0])
+          8'h00, 8'h01, 8'h02, 8'h03, 8'h04, 8'h05, 8'h06, 8'h07, 8'h08, 8'h09, 8'h0A, 8'h0B,
+          8'h0C, 8'h0D, 8'h0E, 8'h0F: form = 9'd60;
+          default: form = 9'd61;
+        endcase
+      end
+      8'h1C: begin
+        unique case (w0[7:0])
+          8'h01, 8'h11, 8'h21, 8'h31, 8'h41, 8'h51, 8'h61, 8'h71, 8'h81, 8'h91, 8'hA1, 8'hB1,
+          8'hC1, 8'hD1, 8'hE1, 8'hF1: form = 9'd62;
+          8'h08, 8'h18, 8'h28, 8'h38, 8'h48, 8'h58, 8'h68, 8'h78, 8'h88, 8'h98, 8'hA8, 8'hB8,
+          8'hC8, 8'hD8, 8'hE8, 8'hF8: form = 9'd63;
+          8'h09, 8'h19, 8'h29, 8'h39, 8'h49, 8'h59, 8'h69, 8'h79, 8'h89, 8'h99, 8'hA9, 8'hB9,
+          8'hC9, 8'hD9, 8'hE9, 8'hF9: form = 9'd64;
+          default: form = 9'd0;
+        endcase
+      end
+      8'h1D: form = 9'd65;
+      8'h1E: form = 9'd66;
+      8'h1F: form = 9'd67;
+      8'h20: begin
+        unique case (w0[7:0])
+          8'h00, 8'h01, 8'h02, 8'h03, 8'h04, 8'h05, 8'h06, 8'h07, 8'h08, 8'h09, 8'h0A, 8'h0B,
+          8'h0C, 8'h0D, 8'h0E, 8'h0F: form = 9'd68;
+          default: form = 9'd69;
+        endcase
+      end
+      8'h21: begin
+        unique case (w0[7:0])
+          8'h00, 8'h01, 8'h02, 8'h03, 8'h04, 8'h05, 8'h06, 8'h07, 8'h08, 8'h09, 8'h0A, 8'h0B,
+          8'h0C, 8'h0D, 8'h0E, 8'h0F: form = 9'd70;
+          default: form = 9'd71;
+        endcase
+      end
+      8'h22: begin
+        unique case (w0[7:0])
+          8'h00, 8'h01, 8'h02, 8'h03, 8'h04, 8'h05, 8'h06, 8'h07, 8'h08, 8'h09, 8'h0A, 8'h0B,
+          8'h0C, 8'h0D, 8'h0E, 8'h0F: form = 9'd72;
+          default: form = 9'd73;
+        endcase
+      end
+      8'h23: begin
+        unique case (w0[7:0])
+          8'h00, 8'h01, 8'h02, 8'h03, 8'h04, 8'h05, 8'h06, 8'h07, 8'h08, 8'h09, 8'h0A, 8'h0B,
+          8'h0C, 8'h0D, 8'h0E, 8'h0F: form = 9'd74;
+          default: form = 9'd75;
+        endcase
+      end
+      8'h24: begin
+        unique case (w0[7:0])
+          8'h00, 8'h01, 8'h02, 8'h03, 8'h04, 8'h05, 8'h06, 8'h07, 8'h08, 8'h09, 8'h0A, 8'h0B,
+          8'h0C, 8'h0D, 8'h0E, 8'h0F: form = 9'd76;
+          default: form = 9'd77;
+        endcase
+      end
+      8'h25: begin
+        unique case (w0[7:0])
+          8'h00, 8'h01, 8'h02, 8'h03, 8'h04, 8'h05, 8'h06, 8'h07, 8'h08, 8'h09, 8'h0A, 8'h0B,
+          8'h0C, 8'h0D, 8'h0E, 8'h0F: form = 9'd78;
+          default: form = 9'd79;
+        endcase
+      end
+      8'h26: begin
+        unique case (w0[7:0])
+          8'h00, 8'h01, 8'h02, 8'h03, 8'h04, 8'h05, 8'h06, 8'h07, 8'h08, 8'h09, 8'h0A, 8'h0B,
+          8'h0C, 8'h0D, 8'h0E, 8'h0F: form = 9'd80;
+          default: form = 9'd81;
+        endcase
+      end
+      8'h27: begin
+        unique case (w0[7:0])
+          8'h00, 8'h01, 8'h02, 8'h03, 8'h04, 8'h05, 8'h06, 8'h07, 8'h08, 8'h09, 8'h0A, 8'h0B,
+          8'h0C, 8'h0D, 8'h0E, 8'h0F: form = 9'd82;
+          default: form = 9'd83;
+        endcase
+      end
+      8'h28: form = 9'd84;
+      8'h29: form = 9'd85;
+      8'h2A: form = 9'd86;
+      8'h2B: form = 9'd87;
+      8'h2C: form = 9'd88;
+      8'h2D: form = 9'd89;
+      8'h2E: form = 9'd90;
+      8'h2F: form = 9'd91;
+      8'h30: begin
+        unique case (w0[7:0])
+          8'h00, 8'h01, 8'h02, 8'h03, 8'h04, 8'h05, 8'h06, 8'h07, 8'h08, 8'h09, 8'h0A, 8'h0B,
+          8'h0C, 8'h0D, 8'h0E, 8'h0F: form = 9'd92;
+          default: form = 9'd93;
+        endcase
+      end
+      8'h31: begin
+        unique case (w0[7:0])
+          8'h00, 8'h01, 8'h02, 8'h03, 8'h04, 8'h05, 8'h06, 8'h07, 8'h08, 8'h09, 8'h0A, 8'h0B,
+          8'h0C, 8'h0D, 8'h0E, 8'h0F: form = 9'd94;
+          default: form = 9'd95;
+        endcase
+      end
+      8'h32: begin
+        unique case (w0[7:0])
+          8'h00, 8'h01, 8'h02, 8'h03, 8'h04, 8'h05, 8'h06, 8'h07, 8'h08, 8'h09, 8'h0A, 8'h0B,
+          8'h0C, 8'h0D, 8'h0E, 8'h0F: form = 9'd96;
+          default: form = 9'd97;
+        endcase
+      end
+      8'h33: begin
+        unique case (w0[7:0])
+          8'h00, 8'h01, 8'h02, 8'h03, 8'h04, 8'h05, 8'h06, 8'h07, 8'h08, 8'h09, 8'h0A, 8'h0B,
+          8'h0C, 8'h0D, 8'h0E, 8'h0F: form = 9'd98;
+          default: form = 9'd99;
+        endcase
+      end
+      8'h34: begin
+        unique case (w0[7:0])
+          8'h00, 8'h01, 8'h02, 8'h03, 8'h04, 8'h05, 8'h06, 8'h07, 8'h08, 8'h09, 8'h0A, 8'h0B,
+          8'h0C, 8'h0D, 8'h0E, 8'h0F: form = 9'd100;
+          default: form = 9'd101;
+        endcase
+      end
+      8'h35: begin
+        unique case (w0[7:0])
+          8'h00, 8'h01, 8'h02, 8'h03, 8'h04, 8'h05, 8'h06, 8'h07, 8'h08, 8'h09, 8'h0A, 8'h0B,
+          8'h0C, 8'h0D, 8'h0E, 8'h0F: form = 9'd102;
+          default: form = 9'd103;
+        endcase
+      end
+      8'h37: begin
+        unique case (w0[7:0])
+          8'h00, 8'h01, 8'h02, 8'h03, 8'h04, 8'h05, 8'h06, 8'h07, 8'h08, 8'h09, 8'h0A, 8'h0B,
+          8'h0C, 8'h0D, 8'h0E, 8'h0F: form = 9'd104;
+          default: form = 9'd105;
+        endcase
+      end
+      8'h39: form = 9'd106;
+      8'h3A: begin
+        unique case (w0[7:0])
+          8'h00, 8'h10, 8'h20, 8'h30, 8'h40, 8'h50, 8'h60, 8'h70, 8'h80, 8'h90, 8'hA0, 8'hB0,
+          8'hC0, 8'hD0, 8'hE0, 8'hF0:
+            unique case (w1_lo)
+              4'h0, 4'h1, 4'h2, 4'h3, 4'h4, 4'h5, 4'h6, 4'h7, 4'h9, 4'hA, 4'hB, 4'hC,
+              4'hD, 4'hE, 4'hF: form = 9'd108;
+              default: form = 9'd107;
+            endcase
+          8'h01, 8'h11, 8'h21, 8'h31, 8'h41, 8'h51, 8'h61, 8'h71, 8'h81, 8'h91, 8'hA1, 8'hB1,
+          8'hC1, 8'hD1, 8'hE1, 8'hF1:
+            unique case (w1_lo)
+              4'h0, 4'h1, 4'h2, 4'h3, 4'h4, 4'h5, 4'h6, 4'h7, 4'h9, 4'hA, 4'hB, 4'hC,
+              4'hD, 4'hE, 4'hF: form = 9'd110;
+              default: form = 9'd109;
+            endcase
+          8'h02, 8'h12, 8'h22, 8'h32, 8'h42, 8'h52, 8'h62, 8'h72, 8'h82, 8'h92, 8'hA2, 8'hB2,
+          8'hC2, 8'hD2, 8'hE2, 8'hF2:
+            unique case (w1_lo)
+              4'h0, 4'h1, 4'h2, 4'h3, 4'h4, 4'h5, 4'h6, 4'h7, 4'h9, 4'hA, 4'hB, 4'hC,
+              4'hD, 4'hE, 4'hF: form = 9'd112;
+              default: form = 9'd111;
+            endcase
+          8'h03, 8'h13, 8'h23, 8'h33, 8'h43, 8'h53, 8'h63, 8'h73, 8'h83, 8'h93, 8'hA3, 8'hB3,
+          8'hC3, 8'hD3, 8'hE3, 8'hF3:
+            unique case (w1_lo)
+              4'h0, 4'h1, 4'h2, 4'h3, 4'h4, 4'h5, 4'h6, 4'h7, 4'h9, 4'hA, 4'hB, 4'hC,
+              4'hD, 4'hE, 4'hF: form = 9'd114;
+              default: form = 9'd113;
+            endcase
+          8'h04, 8'h14, 8'h24, 8'h34, 8'h44, 8'h54, 8'h64, 8'h74, 8'h84, 8'h94, 8'hA4, 8'hB4,
+          8'hC4, 8'hD4, 8'hE4, 8'hF4: form = 9'd115;
+          8'h05, 8'h15, 8'h25, 8'h35, 8'h45, 8'h55, 8'h65, 8'h75, 8'h85, 8'h95, 8'hA5, 8'hB5,
+          8'hC5, 8'hD5, 8'hE5, 8'hF5: form = 9'd116;
+          8'h06, 8'h16, 8'h26, 8'h36, 8'h46, 8'h56, 8'h66, 8'h76, 8'h86, 8'h96, 8'hA6, 8'hB6,
+          8'hC6, 8'hD6, 8'hE6, 8'hF6: form = 9'd117;
+          8'h07, 8'h17, 8'h27, 8'h37, 8'h47, 8'h57, 8'h67, 8'h77, 8'h87, 8'h97, 8'hA7, 8'hB7,
+          8'hC7, 8'hD7, 8'hE7, 8'hF7: form = 9'd118;
+          8'h08, 8'h18, 8'h28, 8'h38, 8'h48, 8'h58, 8'h68, 8'h78, 8'h88, 8'h98, 8'hA8, 8'hB8,
+          8'hC8, 8'hD8, 8'hE8, 8'hF8:
+            unique case (w1_lo)
+              4'h0, 4'h1, 4'h2, 4'h3, 4'h4, 4'h5, 4'h6, 4'h7, 4'h9, 4'hA, 4'hB, 4'hC,
+              4'hD, 4'hE, 4'hF: form = 9'd120;
+              default: form = 9'd119;
+            endcase
+          8'h09, 8'h19, 8'h29, 8'h39, 8'h49, 8'h59, 8'h69, 8'h79, 8'h89, 8'h99, 8'hA9, 8'hB9,
+          8'hC9, 8'hD9, 8'hE9, 8'hF9:
+            unique case (w1_lo)
+              4'h0, 4'h1, 4'h2, 4'h3, 4'h4, 4'h5, 4'h6, 4'h7, 4'h9, 4'hA, 4'hB, 4'hC,
+              4'hD, 4'hE, 4'hF: form = 9'd122;
+              default: form = 9'd121;
+            endcase
+          8'h0A, 8'h1A, 8'h2A, 8'h3A, 8'h4A, 8'h5A, 8'h6A, 8'h7A, 8'h8A, 8'h9A, 8'hAA, 8'hBA,
+          8'hCA, 8'hDA, 8'hEA, 8'hFA:
+            unique case (w1_lo)
+              4'h0, 4'h1, 4'h2, 4'h3, 4'h4, 4'h5, 4'h6, 4'h7, 4'h9, 4'hA, 4'hB, 4'hC,
+              4'hD, 4'hE, 4'hF: form = 9'd124;
+              default: form = 9'd123;
+            endcase
+          8'h0B, 8'h1B, 8'h2B, 8'h3B, 8'h4B, 8'h5B, 8'h6B, 8'h7B, 8'h8B, 8'h9B, 8'hAB, 8'hBB,
+          8'hCB, 8'hDB, 8'hEB, 8'hFB:
+            unique case (w1_lo)
+              4'h0, 4'h1, 4'h2, 4'h3, 4'h4, 4'h5, 4'h6, 4'h7, 4'h9, 4'hA, 4'hB, 4'hC,
+              4'hD, 4'hE, 4'hF: form = 9'd126;
+              default: form = 9'd125;
+            endcase
+          default: form = 9'd0;
+        endcase
+      end
+      8'h3B: begin
+        unique case (w0[7:0])
+          8'h00, 8'h10, 8'h20, 8'h30, 8'h40, 8'h50, 8'h60, 8'h70, 8'h80, 8'h90, 8'hA0, 8'hB0,
+          8'hC0, 8'hD0, 8'hE0, 8'hF0:
+            unique case (w1_lo)
+              4'h0, 4'h1, 4'h2, 4'h3, 4'h4, 4'h5, 4'h6, 4'h7, 4'h9, 4'hA, 4'hB, 4'hC,
+              4'hD, 4'hE, 4'hF: form = 9'd128;
+              default: form = 9'd127;
+            endcase
+          8'h01, 8'h11, 8'h21, 8'h31, 8'h41, 8'h51, 8'h61, 8'h71, 8'h81, 8'h91, 8'hA1, 8'hB1,
+          8'hC1, 8'hD1, 8'hE1, 8'hF1:
+            unique case (w1_lo)
+              4'h0, 4'h1, 4'h2, 4'h3, 4'h4, 4'h5, 4'h6, 4'h7, 4'h9, 4'hA, 4'hB, 4'hC,
+              4'hD, 4'hE, 4'hF: form = 9'd130;
+              default: form = 9'd129;
+            endcase
+          8'h02, 8'h12, 8'h22, 8'h32, 8'h42, 8'h52, 8'h62, 8'h72, 8'h82, 8'h92, 8'hA2, 8'hB2,
+          8'hC2, 8'hD2, 8'hE2, 8'hF2:
+            unique case (w1_lo)
+              4'h0, 4'h1, 4'h2, 4'h3, 4'h4, 4'h5, 4'h6, 4'h7, 4'h9, 4'hA, 4'hB, 4'hC,
+              4'hD, 4'hE, 4'hF: form = 9'd132;
+              default: form = 9'd131;
+            endcase
+          8'h03, 8'h13, 8'h23, 8'h33, 8'h43, 8'h53, 8'h63, 8'h73, 8'h83, 8'h93, 8'hA3, 8'hB3,
+          8'hC3, 8'hD3, 8'hE3, 8'hF3:
+            unique case (w1_lo)
+              4'h0, 4'h1, 4'h2, 4'h3, 4'h4, 4'h5, 4'h6, 4'h7, 4'h9, 4'hA, 4'hB, 4'hC,
+              4'hD, 4'hE, 4'hF: form = 9'd134;
+              default: form = 9'd133;
+            endcase
+          8'h04, 8'h14, 8'h24, 8'h34, 8'h44, 8'h54, 8'h64, 8'h74, 8'h84, 8'h94, 8'hA4, 8'hB4,
+          8'hC4, 8'hD4, 8'hE4, 8'hF4: form = 9'd135;
+          8'h05, 8'h15, 8'h25, 8'h35, 8'h45, 8'h55, 8'h65, 8'h75, 8'h85, 8'h95, 8'hA5, 8'hB5,
+          8'hC5, 8'hD5, 8'hE5, 8'hF5: form = 9'd136;
+          8'h06, 8'h16, 8'h26, 8'h36, 8'h46, 8'h56, 8'h66, 8'h76, 8'h86, 8'h96, 8'hA6, 8'hB6,
+          8'hC6, 8'hD6, 8'hE6, 8'hF6: form = 9'd137;
+          8'h07, 8'h17, 8'h27, 8'h37, 8'h47, 8'h57, 8'h67, 8'h77, 8'h87, 8'h97, 8'hA7, 8'hB7,
+          8'hC7, 8'hD7, 8'hE7, 8'hF7: form = 9'd138;
+          8'h08, 8'h18, 8'h28, 8'h38, 8'h48, 8'h58, 8'h68, 8'h78, 8'h88, 8'h98, 8'hA8, 8'hB8,
+          8'hC8, 8'hD8, 8'hE8, 8'hF8:
+            unique case (w1_lo)
+              4'h0, 4'h1, 4'h2, 4'h3, 4'h4, 4'h5, 4'h6, 4'h7, 4'h9, 4'hA, 4'hB, 4'hC,
+              4'hD, 4'hE, 4'hF: form = 9'd140;
+              default: form = 9'd139;
+            endcase
+          8'h09, 8'h19, 8'h29, 8'h39, 8'h49, 8'h59, 8'h69, 8'h79, 8'h89, 8'h99, 8'hA9, 8'hB9,
+          8'hC9, 8'hD9, 8'hE9, 8'hF9:
+            unique case (w1_lo)
+              4'h0, 4'h1, 4'h2, 4'h3, 4'h4, 4'h5, 4'h6, 4'h7, 4'h9, 4'hA, 4'hB, 4'hC,
+              4'hD, 4'hE, 4'hF: form = 9'd142;
+              default: form = 9'd141;
+            endcase
+          8'h0A, 8'h1A, 8'h2A, 8'h3A, 8'h4A, 8'h5A, 8'h6A, 8'h7A, 8'h8A, 8'h9A, 8'hAA, 8'hBA,
+          8'hCA, 8'hDA, 8'hEA, 8'hFA:
+            unique case (w1_lo)
+              4'h0, 4'h1, 4'h2, 4'h3, 4'h4, 4'h5, 4'h6, 4'h7, 4'h9, 4'hA, 4'hB, 4'hC,
+              4'hD, 4'hE, 4'hF: form = 9'd144;
+              default: form = 9'd143;
+            endcase
+          8'h0B, 8'h1B, 8'h2B, 8'h3B, 8'h4B, 8'h5B, 8'h6B, 8'h7B, 8'h8B, 8'h9B, 8'hAB, 8'hBB,
+          8'hCB, 8'hDB, 8'hEB, 8'hFB:
+            unique case (w1_lo)
+              4'h0, 4'h1, 4'h2, 4'h3, 4'h4, 4'h5, 4'h6, 4'h7, 4'h9, 4'hA, 4'hB, 4'hC,
+              4'hD, 4'hE, 4'hF: form = 9'd146;
+              default: form = 9'd145;
+            endcase
+          default: form = 9'd0;
+        endcase
+      end
+      8'h3C: form = 9'd147;
+      8'h3D: form = 9'd148;
+      8'h3E: form = 9'd149;
+      8'h3F: form = 9'd150;
+      8'h40: begin
+        unique case (w0[7:0])
+          8'h00, 8'h01, 8'h02, 8'h03, 8'h04, 8'h05, 8'h06, 8'h07, 8'h08, 8'h09, 8'h0A, 8'h0B,
+          8'h0C, 8'h0D, 8'h0E, 8'h0F: form = 9'd151;
+          default: form = 9'd152;
+        endcase
+      end
+      8'h41: begin
+        unique case (w0[7:0])
+          8'h00, 8'h01, 8'h02, 8'h03, 8'h04, 8'h05, 8'h06, 8'h07, 8'h08, 8'h09, 8'h0A, 8'h0B,
+          8'h0C, 8'h0D, 8'h0E, 8'h0F: form = 9'd153;
+          default: form = 9'd154;
+        endcase
+      end
+      8'h42: begin
+        unique case (w0[7:0])
+          8'h00, 8'h01, 8'h02, 8'h03, 8'h04, 8'h05, 8'h06, 8'h07, 8'h08, 8'h09, 8'h0A, 8'h0B,
+          8'h0C, 8'h0D, 8'h0E, 8'h0F: form = 9'd155;
+          default: form = 9'd156;
+        endcase
+      end
+      8'h43: begin
+        unique case (w0[7:0])
+          8'h00, 8'h01, 8'h02, 8'h03, 8'h04, 8'h05, 8'h06, 8'h07, 8'h08, 8'h09, 8'h0A, 8'h0B,
+          8'h0C, 8'h0D, 8'h0E, 8'h0F: form = 9'd157;
+          default: form = 9'd158;
+        endcase
+      end
+      8'h44: begin
+        unique case (w0[7:0])
+          8'h00, 8'h01, 8'h02, 8'h03, 8'h04, 8'h05, 8'h06, 8'h07, 8'h08, 8'h09, 8'h0A, 8'h0B,
+          8'h0C, 8'h0D, 8'h0E, 8'h0F: form = 9'd159;
+          default: form = 9'd160;
+        endcase
+      end
+      8'h45: begin
+        unique case (w0[7:0])
+          8'h00, 8'h01, 8'h02, 8'h03, 8'h04, 8'h05, 8'h06, 8'h07, 8'h08, 8'h09, 8'h0A, 8'h0B,
+          8'h0C, 8'h0D, 8'h0E, 8'h0F: form = 9'd161;
+          default: form = 9'd162;
+        endcase
+      end
+      8'h46: begin
+        unique case (w0[7:0])
+          8'h00, 8'h01, 8'h02, 8'h03, 8'h04, 8'h05, 8'h06, 8'h07, 8'h08, 8'h09, 8'h0A, 8'h0B,
+          8'h0C, 8'h0D, 8'h0E, 8'h0F: form = 9'd163;
+          default: form = 9'd164;
+        endcase
+      end
+      8'h47: begin
+        unique case (w0[7:0])
+          8'h00, 8'h01, 8'h02, 8'h03, 8'h04, 8'h05, 8'h06, 8'h07, 8'h08, 8'h09, 8'h0A, 8'h0B,
+          8'h0C, 8'h0D, 8'h0E, 8'h0F: form = 9'd165;
+          default: form = 9'd166;
+        endcase
+      end
+      8'h48: begin
+        unique case (w0[7:0])
+          8'h00, 8'h01, 8'h02, 8'h03, 8'h04, 8'h05, 8'h06, 8'h07, 8'h08, 8'h09, 8'h0A, 8'h0B,
+          8'h0C, 8'h0D, 8'h0E, 8'h0F: form = 9'd167;
+          default: form = 9'd168;
+        endcase
+      end
+      8'h49: begin
+        unique case (w0[7:0])
+          8'h00, 8'h01, 8'h02, 8'h03, 8'h04, 8'h05, 8'h06, 8'h07, 8'h08, 8'h09, 8'h0A, 8'h0B,
+          8'h0C, 8'h0D, 8'h0E, 8'h0F: form = 9'd169;
+          default: form = 9'd170;
+        endcase
+      end
+      8'h4A: begin
+        unique case (w0[7:0])
+          8'h00, 8'h01, 8'h02, 8'h03, 8'h04, 8'h05, 8'h06, 8'h07, 8'h08, 8'h09, 8'h0A, 8'h0B,
+          8'h0C, 8'h0D, 8'h0E, 8'h0F: form = 9'd171;
+          default: form = 9'd172;
+        endcase
+      end
+      8'h4B: begin
+        unique case (w0[7:0])
+          8'h00, 8'h01, 8'h02, 8'h03, 8'h04, 8'h05, 8'h06, 8'h07, 8'h08, 8'h09, 8'h0A, 8'h0B,
+          8'h0C, 8'h0D, 8'h0E, 8'h0F: form = 9'd173;
+          default: form = 9'd174;
+        endcase
+      end
+      8'h4C: begin
+        unique case (w0[7:0])
+          8'h00: form = 9'd175;
+          8'h01: form = 9'd176;
+          8'h02: form = 9'd177;
+          8'h04: form = 9'd178;
+          8'h05: form = 9'd179;
+          8'h06: form = 9'd180;
+          8'h08: form = 9'd181;
+          8'h10, 8'h20, 8'h30, 8'h40, 8'h50, 8'h60, 8'h70, 8'h80, 8'h90, 8'hA0, 8'hB0, 8'hC0,
+          8'hD0, 8'hE0, 8'hF0: form = 9'd182;
+          8'h11, 8'h21, 8'h31, 8'h41, 8'h51, 8'h61, 8'h71, 8'h81, 8'h91, 8'hA1, 8'hB1, 8'hC1,
+          8'hD1, 8'hE1, 8'hF1: form = 9'd183;
+          8'h12, 8'h22, 8'h32, 8'h42, 8'h52, 8'h62, 8'h72, 8'h82, 8'h92, 8'hA2, 8'hB2, 8'hC2,
+          8'hD2, 8'hE2, 8'hF2: form = 9'd184;
+          8'h14, 8'h24, 8'h34, 8'h44, 8'h54, 8'h64, 8'h74, 8'h84, 8'h94, 8'hA4, 8'hB4, 8'hC4,
+          8'hD4, 8'hE4, 8'hF4: form = 9'd185;
+          8'h15, 8'h25, 8'h35, 8'h45, 8'h55, 8'h65, 8'h75, 8'h85, 8'h95, 8'hA5, 8'hB5, 8'hC5,
+          8'hD5, 8'hE5, 8'hF5: form = 9'd186;
+          8'h16, 8'h26, 8'h36, 8'h46, 8'h56, 8'h66, 8'h76, 8'h86, 8'h96, 8'hA6, 8'hB6, 8'hC6,
+          8'hD6, 8'hE6, 8'hF6: form = 9'd187;
+          8'h18, 8'h28, 8'h38, 8'h48, 8'h58, 8'h68, 8'h78, 8'h88, 8'h98, 8'hA8, 8'hB8, 8'hC8,
+          8'hD8, 8'hE8, 8'hF8: form = 9'd188;
+          default: form = 9'd0;
+        endcase
+      end
+      8'h4D: begin
+        unique case (w0[7:0])
+          8'h00: form = 9'd189;
+          8'h01: form = 9'd190;
+          8'h02: form = 9'd191;
+          8'h04: form = 9'd192;
+          8'h05: form = 9'd193;
+          8'h06: form = 9'd194;
+          8'h08: form = 9'd195;
+          8'h10, 8'h20, 8'h30, 8'h40, 8'h50, 8'h60, 8'h70, 8'h80, 8'h90, 8'hA0, 8'hB0, 8'hC0,
+          8'hD0, 8'hE0, 8'hF0: form = 9'd196;
+          8'h11, 8'h21, 8'h31, 8'h41, 8'h51, 8'h61, 8'h71, 8'h81, 8'h91, 8'hA1, 8'hB1, 8'hC1,
+          8'hD1, 8'hE1, 8'hF1: form = 9'd197;
+          8'h12, 8'h22, 8'h32, 8'h42, 8'h52, 8'h62, 8'h72, 8'h82, 8'h92, 8'hA2, 8'hB2, 8'hC2,
+          8'hD2, 8'hE2, 8'hF2: form = 9'd198;
+          8'h14, 8'h24, 8'h34, 8'h44, 8'h54, 8'h64, 8'h74, 8'h84, 8'h94, 8'hA4, 8'hB4, 8'hC4,
+          8'hD4, 8'hE4, 8'hF4: form = 9'd199;
+          8'h15, 8'h25, 8'h35, 8'h45, 8'h55, 8'h65, 8'h75, 8'h85, 8'h95, 8'hA5, 8'hB5, 8'hC5,
+          8'hD5, 8'hE5, 8'hF5: form = 9'd200;
+          8'h16, 8'h26, 8'h36, 8'h46, 8'h56, 8'h66, 8'h76, 8'h86, 8'h96, 8'hA6, 8'hB6, 8'hC6,
+          8'hD6, 8'hE6, 8'hF6: form = 9'd201;
+          8'h18, 8'h28, 8'h38, 8'h48, 8'h58, 8'h68, 8'h78, 8'h88, 8'h98, 8'hA8, 8'hB8, 8'hC8,
+          8'hD8, 8'hE8, 8'hF8: form = 9'd202;
+          default: form = 9'd0;
+        endcase
+      end
+      8'h4E: begin
+        unique case (w0[7:0])
+          8'h00, 8'h01, 8'h02, 8'h03, 8'h04, 8'h05, 8'h06, 8'h07: form = 9'd203;
+          8'h08, 8'h09, 8'h0A, 8'h0B, 8'h0C, 8'h0D, 8'h0E, 8'h0F: form = 9'd204;
+          8'h18, 8'h19, 8'h1A, 8'h1B, 8'h1C, 8'h1D, 8'h1E, 8'h1F, 8'h28, 8'h29, 8'h2A, 8'h2B,
+          8'h2C, 8'h2D, 8'h2E, 8'h2F, 8'h38, 8'h39, 8'h3A, 8'h3B, 8'h3C, 8'h3D, 8'h3E, 8'h3F,
+          8'h48, 8'h49, 8'h4A, 8'h4B, 8'h4C, 8'h4D, 8'h4E, 8'h4F, 8'h58, 8'h59, 8'h5A, 8'h5B,
+          8'h5C, 8'h5D, 8'h5E, 8'h5F, 8'h68, 8'h69, 8'h6A, 8'h6B, 8'h6C, 8'h6D, 8'h6E, 8'h6F,
+          8'h78, 8'h79, 8'h7A, 8'h7B, 8'h7C, 8'h7D, 8'h7E, 8'h7F, 8'h88, 8'h89, 8'h8A, 8'h8B,
+          8'h8C, 8'h8D, 8'h8E, 8'h8F, 8'h98, 8'h99, 8'h9A, 8'h9B, 8'h9C, 8'h9D, 8'h9E, 8'h9F,
+          8'hA8, 8'hA9, 8'hAA, 8'hAB, 8'hAC, 8'hAD, 8'hAE, 8'hAF, 8'hB8, 8'hB9, 8'hBA, 8'hBB,
+          8'hBC, 8'hBD, 8'hBE, 8'hBF, 8'hC8, 8'hC9, 8'hCA, 8'hCB, 8'hCC, 8'hCD, 8'hCE, 8'hCF,
+          8'hD8, 8'hD9, 8'hDA, 8'hDB, 8'hDC, 8'hDD, 8'hDE, 8'hDF, 8'hE8, 8'hE9, 8'hEA, 8'hEB,
+          8'hEC, 8'hED, 8'hEE, 8'hEF, 8'hF8, 8'hF9, 8'hFA, 8'hFB, 8'hFC, 8'hFD, 8'hFE, 8'hFF: form = 9'd206;
+          default: form = 9'd205;
+        endcase
+      end
+      8'h4F: begin
+        unique case (w0[7:0])
+          8'h00, 8'h01, 8'h02, 8'h03, 8'h04, 8'h05, 8'h06, 8'h07: form = 9'd203;
+          8'h08, 8'h09, 8'h0A, 8'h0B, 8'h0C, 8'h0D, 8'h0E, 8'h0F: form = 9'd204;
+          8'h18, 8'h19, 8'h1A, 8'h1B, 8'h1C, 8'h1D, 8'h1E, 8'h1F, 8'h28, 8'h29, 8'h2A, 8'h2B,
+          8'h2C, 8'h2D, 8'h2E, 8'h2F, 8'h38, 8'h39, 8'h3A, 8'h3B, 8'h3C, 8'h3D, 8'h3E, 8'h3F,
+          8'h48, 8'h49, 8'h4A, 8'h4B, 8'h4C, 8'h4D, 8'h4E, 8'h4F, 8'h58, 8'h59, 8'h5A, 8'h5B,
+          8'h5C, 8'h5D, 8'h5E, 8'h5F, 8'h68, 8'h69, 8'h6A, 8'h6B, 8'h6C, 8'h6D, 8'h6E, 8'h6F,
+          8'h78, 8'h79, 8'h7A, 8'h7B, 8'h7C, 8'h7D, 8'h7E, 8'h7F, 8'h88, 8'h89, 8'h8A, 8'h8B,
+          8'h8C, 8'h8D, 8'h8E, 8'h8F, 8'h98, 8'h99, 8'h9A, 8'h9B, 8'h9C, 8'h9D, 8'h9E, 8'h9F,
+          8'hA8, 8'hA9, 8'hAA, 8'hAB, 8'hAC, 8'hAD, 8'hAE, 8'hAF, 8'hB8, 8'hB9, 8'hBA, 8'hBB,
+          8'hBC, 8'hBD, 8'hBE, 8'hBF, 8'hC8, 8'hC9, 8'hCA, 8'hCB, 8'hCC, 8'hCD, 8'hCE, 8'hCF,
+          8'hD8, 8'hD9, 8'hDA, 8'hDB, 8'hDC, 8'hDD, 8'hDE, 8'hDF, 8'hE8, 8'hE9, 8'hEA, 8'hEB,
+          8'hEC, 8'hED, 8'hEE, 8'hEF, 8'hF8, 8'hF9, 8'hFA, 8'hFB, 8'hFC, 8'hFD, 8'hFE, 8'hFF: form = 9'd206;
+          default: form = 9'd205;
+        endcase
+      end
+      8'h50: begin
+        unique case (w0[7:0])
+          8'h00, 8'h01, 8'h02, 8'h03, 8'h04, 8'h05, 8'h06, 8'h07, 8'h08, 8'h09, 8'h0A, 8'h0B,
+          8'h0C, 8'h0D, 8'h0E, 8'h0F: form = 9'd207;
+          default: form = 9'd208;
+        endcase
+      end
+      8'h51: begin
+        unique case (w0[7:0])
+          8'h00, 8'h10, 8'h20, 8'h30, 8'h40, 8'h50, 8'h60, 8'h70, 8'h80, 8'h90, 8'hA0, 8'hB0,
+          8'hC0, 8'hD0, 8'hE0, 8'hF0: form = 9'd209;
+          default: form = 9'd210;
+        endcase
+      end
+      8'h52: begin
+        unique case (w0[7:0])
+          8'h00, 8'h01, 8'h02, 8'h03, 8'h04, 8'h05, 8'h06, 8'h07, 8'h08, 8'h09, 8'h0A, 8'h0B,
+          8'h0C, 8'h0D, 8'h0E, 8'h0F: form = 9'd211;
+          default: form = 9'd212;
+        endcase
+      end
+      8'h53: begin
+        unique case (w0[7:0])
+          8'h00, 8'h10, 8'h20, 8'h30, 8'h40, 8'h50, 8'h60, 8'h70, 8'h80, 8'h90, 8'hA0, 8'hB0,
+          8'hC0, 8'hD0, 8'hE0, 8'hF0: form = 9'd213;
+          default: form = 9'd214;
+        endcase
+      end
+      8'h54: begin
+        unique case (w0[7:0])
+          8'h00, 8'h01, 8'h02, 8'h03, 8'h04, 8'h05, 8'h06, 8'h07, 8'h08, 8'h09, 8'h0A, 8'h0B,
+          8'h0C, 8'h0D, 8'h0E, 8'h0F: form = 9'd215;
+          default: form = 9'd216;
+        endcase
+      end
+      8'h55: begin
+        unique case (w0[7:0])
+          8'h00, 8'h10, 8'h20, 8'h30, 8'h40, 8'h50, 8'h60, 8'h70, 8'h80, 8'h90, 8'hA0, 8'hB0,
+          8'hC0, 8'hD0, 8'hE0, 8'hF0: form = 9'd217;
+          default: form = 9'd218;
+        endcase
+      end
+      8'h56: begin
+        unique case (w0[7:0])
+          8'h00, 8'h01, 8'h02, 8'h03, 8'h04, 8'h05, 8'h06, 8'h07, 8'h08, 8'h09, 8'h0A, 8'h0B,
+          8'h0C, 8'h0D, 8'h0E, 8'h0F: form = 9'd219;
+          default: form = 9'd220;
+        endcase
+      end
+      8'h57: begin
+        unique case (w0[7:0])
+          8'h00, 8'h10, 8'h20, 8'h30, 8'h40, 8'h50, 8'h60, 8'h70, 8'h80, 8'h90, 8'hA0, 8'hB0,
+          8'hC0, 8'hD0, 8'hE0, 8'hF0: form = 9'd221;
+          default: form = 9'd222;
+        endcase
+      end
+      8'h58: begin
+        unique case (w0[7:0])
+          8'h00, 8'h01, 8'h02, 8'h03, 8'h04, 8'h05, 8'h06, 8'h07, 8'h08, 8'h09, 8'h0A, 8'h0B,
+          8'h0C, 8'h0D, 8'h0E, 8'h0F: form = 9'd223;
+          default: form = 9'd224;
+        endcase
+      end
+      8'h59: begin
+        unique case (w0[7:0])
+          8'h00, 8'h01, 8'h02, 8'h03, 8'h04, 8'h05, 8'h06, 8'h07, 8'h08, 8'h09, 8'h0A, 8'h0B,
+          8'h0C, 8'h0D, 8'h0E, 8'h0F: form = 9'd225;
+          default: form = 9'd226;
+        endcase
+      end
+      8'h5A: begin
+        unique case (w0[7:0])
+          8'h00, 8'h01, 8'h02, 8'h03, 8'h04, 8'h05, 8'h06, 8'h07, 8'h08, 8'h09, 8'h0A, 8'h0B,
+          8'h0C, 8'h0D, 8'h0E, 8'h0F: form = 9'd227;
+          default: form = 9'd228;
+        endcase
+      end
+      8'h5B: begin
+        unique case (w0[7:0])
+          8'h00, 8'h01, 8'h02, 8'h03, 8'h04, 8'h05, 8'h06, 8'h07, 8'h08, 8'h09, 8'h0A, 8'h0B,
+          8'h0C, 8'h0D, 8'h0E, 8'h0F: form = 9'd229;
+          default: form = 9'd230;
+        endcase
+      end
+      8'h5C: begin
+        unique case (w0[7:0])
+          8'h01: form = 9'd231;
+          8'h08: form = 9'd232;
+          8'h09: form = 9'd233;
+          8'h11, 8'h21, 8'h31, 8'h41, 8'h51, 8'h61, 8'h71, 8'h81, 8'h91, 8'hA1, 8'hB1, 8'hC1,
+          8'hD1, 8'hE1, 8'hF1: form = 9'd234;
+          8'h18, 8'h28, 8'h38, 8'h48, 8'h58, 8'h68, 8'h78, 8'h88, 8'h98, 8'hA8, 8'hB8, 8'hC8,
+          8'hD8, 8'hE8, 8'hF8: form = 9'd235;
+          8'h19, 8'h29, 8'h39, 8'h49, 8'h59, 8'h69, 8'h79, 8'h89, 8'h99, 8'hA9, 8'hB9, 8'hC9,
+          8'hD9, 8'hE9, 8'hF9: form = 9'd236;
+          default: form = 9'd0;
+        endcase
+      end
+      8'h5D: begin
+        unique case (w0[7:0])
+          8'h00, 8'h01, 8'h02, 8'h03, 8'h04, 8'h05, 8'h06, 8'h07, 8'h08, 8'h09, 8'h0A, 8'h0B,
+          8'h0C, 8'h0D, 8'h0E, 8'h0F: form = 9'd237;
+          default: form = 9'd238;
+        endcase
+      end
+      8'h5E: begin
+        unique case (w0[7:0])
+          8'h00, 8'h01, 8'h02, 8'h03, 8'h04, 8'h05, 8'h06, 8'h07, 8'h08, 8'h09, 8'h0A, 8'h0B,
+          8'h0C, 8'h0D, 8'h0E, 8'h0F: form = 9'd239;
+          default: form = 9'd240;
+        endcase
+      end
+      8'h5F: begin
+        unique case (w0[7:0])
+          8'h00, 8'h01, 8'h02, 8'h03, 8'h04, 8'h05, 8'h06, 8'h07, 8'h08, 8'h09, 8'h0A, 8'h0B,
+          8'h0C, 8'h0D, 8'h0E, 8'h0F: form = 9'd241;
+          default: form = 9'd242;
+        endcase
+      end
+      8'h60: begin
+        unique case (w0[7:0])
+          8'h00, 8'h01, 8'h02, 8'h03, 8'h04, 8'h05, 8'h06, 8'h07, 8'h08, 8'h09, 8'h0A, 8'h0B,
+          8'h0C, 8'h0D, 8'h0E, 8'h0F: form = 9'd243;
+          default: form = 9'd244;
+        endcase
+      end
+      8'h61: begin
+        unique case (w0[7:0])
+          8'h00, 8'h01, 8'h02, 8'h03, 8'h04, 8'h05, 8'h06, 8'h07, 8'h08, 8'h09, 8'h0A, 8'h0B,
+          8'h0C, 8'h0D, 8'h0E, 8'h0F: form = 9'd245;
+          default: form = 9'd246;
+        endcase
+      end
+      8'h62: begin
+        unique case (w0[7:0])
+          8'h00, 8'h01, 8'h02, 8'h03, 8'h04, 8'h05, 8'h06, 8'h07, 8'h08, 8'h09, 8'h0A, 8'h0B,
+          8'h0C, 8'h0D, 8'h0E, 8'h0F: form = 9'd247;
+          default: form = 9'd248;
+        endcase
+      end
+      8'h63: begin
+        unique case (w0[7:0])
+          8'h00, 8'h01, 8'h02, 8'h03, 8'h04, 8'h05, 8'h06, 8'h07, 8'h08, 8'h09, 8'h0A, 8'h0B,
+          8'h0C, 8'h0D, 8'h0E, 8'h0F: form = 9'd249;
+          default: form = 9'd250;
+        endcase
+      end
+      8'h64: begin
+        unique case (w0[7:0])
+          8'h00, 8'h01, 8'h02, 8'h03, 8'h04, 8'h05, 8'h06, 8'h07, 8'h08, 8'h09, 8'h0A, 8'h0B,
+          8'h0C, 8'h0D, 8'h0E, 8'h0F: form = 9'd251;
+          default: form = 9'd252;
+        endcase
+      end
+      8'h65: begin
+        unique case (w0[7:0])
+          8'h00, 8'h01, 8'h02, 8'h03, 8'h04, 8'h05, 8'h06, 8'h07, 8'h08, 8'h09, 8'h0A, 8'h0B,
+          8'h0C, 8'h0D, 8'h0E, 8'h0F: form = 9'd253;
+          default: form = 9'd254;
+        endcase
+      end
+      8'h66: begin
+        unique case (w0[7:0])
+          8'h00, 8'h01, 8'h02, 8'h03, 8'h04, 8'h05, 8'h06, 8'h07, 8'h08, 8'h09, 8'h0A, 8'h0B,
+          8'h0C, 8'h0D, 8'h0E, 8'h0F: form = 9'd255;
+          default: form = 9'd256;
+        endcase
+      end
+      8'h67: begin
+        unique case (w0[7:0])
+          8'h00, 8'h01, 8'h02, 8'h03, 8'h04, 8'h05, 8'h06, 8'h07, 8'h08, 8'h09, 8'h0A, 8'h0B,
+          8'h0C, 8'h0D, 8'h0E, 8'h0F: form = 9'd257;
+          default: form = 9'd258;
+        endcase
+      end
+      8'h68: begin
+        unique case (w0[7:0])
+          8'h00, 8'h01, 8'h02, 8'h03, 8'h04, 8'h05, 8'h06, 8'h07, 8'h08, 8'h09, 8'h0A, 8'h0B,
+          8'h0C, 8'h0D, 8'h0E, 8'h0F: form = 9'd259;
+          default: form = 9'd260;
+        endcase
+      end
+      8'h69: begin
+        unique case (w0[7:0])
+          8'h00, 8'h01, 8'h02, 8'h03, 8'h04, 8'h05, 8'h06, 8'h07, 8'h08, 8'h09, 8'h0A, 8'h0B,
+          8'h0C, 8'h0D, 8'h0E, 8'h0F: form = 9'd261;
+          default: form = 9'd262;
+        endcase
+      end
+      8'h6A: begin
+        unique case (w0[7:0])
+          8'h00, 8'h01, 8'h02, 8'h03, 8'h04, 8'h05, 8'h06, 8'h07, 8'h08, 8'h09, 8'h0A, 8'h0B,
+          8'h0C, 8'h0D, 8'h0E, 8'h0F: form = 9'd263;
+          default: form = 9'd264;
+        endcase
+      end
+      8'h6B: begin
+        unique case (w0[7:0])
+          8'h00, 8'h01, 8'h02, 8'h03, 8'h04, 8'h05, 8'h06, 8'h07, 8'h08, 8'h09, 8'h0A, 8'h0B,
+          8'h0C, 8'h0D, 8'h0E, 8'h0F: form = 9'd265;
+          default: form = 9'd266;
+        endcase
+      end
+      8'h6C: begin
+        unique case (w0[7:0])
+          8'h00, 8'h01, 8'h02, 8'h03, 8'h04, 8'h05, 8'h06, 8'h07, 8'h08, 8'h09, 8'h0A, 8'h0B,
+          8'h0C, 8'h0D, 8'h0E, 8'h0F: form = 9'd267;
+          default: form = 9'd268;
+        endcase
+      end
+      8'h6D: begin
+        unique case (w0[7:0])
+          8'h00, 8'h01, 8'h02, 8'h03, 8'h04, 8'h05, 8'h06, 8'h07, 8'h08, 8'h09, 8'h0A, 8'h0B,
+          8'h0C, 8'h0D, 8'h0E, 8'h0F: form = 9'd269;
+          default: form = 9'd270;
+        endcase
+      end
+      8'h6E: begin
+        unique case (w0[7:0])
+          8'h00, 8'h01, 8'h02, 8'h03, 8'h04, 8'h05, 8'h06, 8'h07, 8'h08, 8'h09, 8'h0A, 8'h0B,
+          8'h0C, 8'h0D, 8'h0E, 8'h0F: form = 9'd271;
+          default: form = 9'd272;
+        endcase
+      end
+      8'h6F: begin
+        unique case (w0[7:0])
+          8'h00, 8'h01, 8'h02, 8'h03, 8'h04, 8'h05, 8'h06, 8'h07, 8'h08, 8'h09, 8'h0A, 8'h0B,
+          8'h0C, 8'h0D, 8'h0E, 8'h0F: form = 9'd273;
+          default: form = 9'd274;
+        endcase
+      end
+      8'h70: form = 9'd275;
+      8'h71: form = 9'd276;
+      8'h72: form = 9'd277;
+      8'h73: form = 9'd278;
+      8'h74: form = 9'd279;
+      8'h75: form = 9'd280;
+      8'h76: begin
+        unique case (w0[7:0])
+          8'h00, 8'h01, 8'h02, 8'h03, 8'h04, 8'h05, 8'h06, 8'h07, 8'h08, 8'h09, 8'h0A, 8'h0B,
+          8'h0C, 8'h0D, 8'h0E, 8'h0F: form = 9'd281;
+          default: form = 9'd282;
+        endcase
+      end
+      8'h77: form = 9'd283;
+      8'h79: begin
+        unique case (w0[7:0])
+          8'h00, 8'h01, 8'h02, 8'h03, 8'h04, 8'h05, 8'h06, 8'h07, 8'h08, 8'h09, 8'h0A, 8'h0B,
+          8'h0C, 8'h0D, 8'h0E, 8'h0F: form = 9'd284;
+          default: form = 9'd285;
+        endcase
+      end
+      8'h7A: form = 9'd286;
+      8'h7B: begin
+        unique case (w0[7:0])
+          8'h00: form = 9'd287;
+          8'h08: form = 9'd288;
+          8'h09: form = 9'd289;
+          8'h0A: form = 9'd290;
+          8'h1D, 8'h2D, 8'h3D, 8'h4D, 8'h5D, 8'h6D, 8'h7D, 8'h8D, 8'h9D, 8'hAD, 8'hBD, 8'hCD,
+          8'hDD, 8'hED, 8'hFD: form = 9'd291;
+          default: form = 9'd0;
+        endcase
+      end
+      8'h7C: begin
+        unique case (w0[7:0])
+          8'h04, 8'h05, 8'h06, 8'h07, 8'h0C, 8'h0D, 8'h0E, 8'h0F, 8'h14, 8'h15, 8'h16, 8'h17,
+          8'h1C, 8'h1D, 8'h1E, 8'h1F, 8'h24, 8'h25, 8'h26, 8'h27, 8'h2C, 8'h2D, 8'h2E, 8'h2F,
+          8'h34, 8'h35, 8'h36, 8'h37, 8'h3C, 8'h3D, 8'h3E, 8'h3F, 8'h44, 8'h45, 8'h46, 8'h47,
+          8'h4C, 8'h4D, 8'h4E, 8'h4F, 8'h54, 8'h55, 8'h56, 8'h57, 8'h5C, 8'h5D, 8'h5E, 8'h5F,
+          8'h64, 8'h65, 8'h66, 8'h67, 8'h6C, 8'h6D, 8'h6E, 8'h6F, 8'h74, 8'h75, 8'h76, 8'h77,
+          8'h7C, 8'h7D, 8'h7E, 8'h7F, 8'h84, 8'h85, 8'h86, 8'h87, 8'h8C, 8'h8D, 8'h8E, 8'h8F,
+          8'h94, 8'h95, 8'h96, 8'h97, 8'h9C, 8'h9D, 8'h9E, 8'h9F, 8'hA4, 8'hA5, 8'hA6, 8'hA7,
+          8'hAC, 8'hAD, 8'hAE, 8'hAF, 8'hB4, 8'hB5, 8'hB6, 8'hB7, 8'hBC, 8'hBD, 8'hBE, 8'hBF,
+          8'hC4, 8'hC5, 8'hC6, 8'hC7, 8'hCC, 8'hCD, 8'hCE, 8'hCF, 8'hD4, 8'hD5, 8'hD6, 8'hD7,
+          8'hDC, 8'hDD, 8'hDE, 8'hDF, 8'hE4, 8'hE5, 8'hE6, 8'hE7, 8'hEC, 8'hED, 8'hEE, 8'hEF,
+          8'hF4, 8'hF5, 8'hF6, 8'hF7, 8'hFC, 8'hFD, 8'hFE, 8'hFF: form = 9'd293;
+          default: form = 9'd292;
+        endcase
+      end
+      8'h7D: form = 9'd294;
+      8'h7F: form = 9'd295;
+      8'h80: form = 9'd296;
+      8'h81: form = 9'd297;
+      8'h82: form = 9'd298;
+      8'h83: form = 9'd299;
+      8'h84: form = 9'd300;
+      8'h85: form = 9'd301;
+      8'h86: form = 9'd302;
+      8'h87: form = 9'd303;
+      8'h88: form = 9'd304;
+      8'h89: form = 9'd305;
+      8'h8A: form = 9'd306;
+      8'h8B: form = 9'd307;
+      8'h8C: begin
+        unique case (w0[7:0])
+          8'h00, 8'h10, 8'h20, 8'h30, 8'h40, 8'h50, 8'h60, 8'h70, 8'h80, 8'h90, 8'hA0, 8'hB0,
+          8'hC0, 8'hD0, 8'hE0, 8'hF0: form = 9'd308;
+          8'h01, 8'h11, 8'h21, 8'h31, 8'h41, 8'h51, 8'h61, 8'h71, 8'h81, 8'h91, 8'hA1, 8'hB1,
+          8'hC1, 8'hD1, 8'hE1, 8'hF1: form = 9'd309;
+          8'h02, 8'h12, 8'h22, 8'h32, 8'h42, 8'h52, 8'h62, 8'h72, 8'h82, 8'h92, 8'hA2, 8'hB2,
+          8'hC2, 8'hD2, 8'hE2, 8'hF2: form = 9'd310;
+          8'h04, 8'h14, 8'h24, 8'h34, 8'h44, 8'h54, 8'h64, 8'h74, 8'h84, 8'h94, 8'hA4, 8'hB4,
+          8'hC4, 8'hD4, 8'hE4, 8'hF4: form = 9'd311;
+          8'h06, 8'h16, 8'h26, 8'h36, 8'h46, 8'h56, 8'h66, 8'h76, 8'h86, 8'h96, 8'hA6, 8'hB6,
+          8'hC6, 8'hD6, 8'hE6, 8'hF6: form = 9'd312;
+          8'h08, 8'h18, 8'h28, 8'h38, 8'h48, 8'h58, 8'h68, 8'h78, 8'h88, 8'h98, 8'hA8, 8'hB8,
+          8'hC8, 8'hD8, 8'hE8, 8'hF8: form = 9'd313;
+          8'h09, 8'h19, 8'h29, 8'h39, 8'h49, 8'h59, 8'h69, 8'h79, 8'h89, 8'h99, 8'hA9, 8'hB9,
+          8'hC9, 8'hD9, 8'hE9, 8'hF9: form = 9'd314;
+          default: form = 9'd0;
+        endcase
+      end
+      8'h8D: begin
+        unique case (w0[7:0])
+          8'h00, 8'h10, 8'h20, 8'h30, 8'h40, 8'h50, 8'h60, 8'h70, 8'h80, 8'h90, 8'hA0, 8'hB0,
+          8'hC0, 8'hD0, 8'hE0, 8'hF0: form = 9'd315;
+          8'h01, 8'h11, 8'h21, 8'h31, 8'h41, 8'h51, 8'h61, 8'h71, 8'h81, 8'h91, 8'hA1, 8'hB1,
+          8'hC1, 8'hD1, 8'hE1, 8'hF1: form = 9'd316;
+          8'h02, 8'h12, 8'h22, 8'h32, 8'h42, 8'h52, 8'h62, 8'h72, 8'h82, 8'h92, 8'hA2, 8'hB2,
+          8'hC2, 8'hD2, 8'hE2, 8'hF2: form = 9'd317;
+          8'h03, 8'h13, 8'h23, 8'h33, 8'h43, 8'h53, 8'h63, 8'h73, 8'h83, 8'h93, 8'hA3, 8'hB3,
+          8'hC3, 8'hD3, 8'hE3, 8'hF3: form = 9'd318;
+          8'h04, 8'h14, 8'h24, 8'h34, 8'h44, 8'h54, 8'h64, 8'h74, 8'h84, 8'h94, 8'hA4, 8'hB4,
+          8'hC4, 8'hD4, 8'hE4, 8'hF4: form = 9'd319;
+          8'h05, 8'h15, 8'h25, 8'h35, 8'h45, 8'h55, 8'h65, 8'h75, 8'h85, 8'h95, 8'hA5, 8'hB5,
+          8'hC5, 8'hD5, 8'hE5, 8'hF5: form = 9'd320;
+          8'h06, 8'h16, 8'h26, 8'h36, 8'h46, 8'h56, 8'h66, 8'h76, 8'h86, 8'h96, 8'hA6, 8'hB6,
+          8'hC6, 8'hD6, 8'hE6, 8'hF6: form = 9'd321;
+          8'h07, 8'h17, 8'h27, 8'h37, 8'h47, 8'h57, 8'h67, 8'h77, 8'h87, 8'h97, 8'hA7, 8'hB7,
+          8'hC7, 8'hD7, 8'hE7, 8'hF7: form = 9'd322;
+          8'h08, 8'h18, 8'h28, 8'h38, 8'h48, 8'h58, 8'h68, 8'h78, 8'h88, 8'h98, 8'hA8, 8'hB8,
+          8'hC8, 8'hD8, 8'hE8, 8'hF8: form = 9'd323;
+          default: form = 9'd0;
+        endcase
+      end
+      8'h8E: begin
+        unique case (w0[7:0])
+          8'h04, 8'h05, 8'h06, 8'h07, 8'h0C, 8'h0D, 8'h0E, 8'h0F, 8'h14, 8'h15, 8'h16, 8'h17,
+          8'h1C, 8'h1D, 8'h1E, 8'h1F, 8'h24, 8'h25, 8'h26, 8'h27, 8'h2C, 8'h2D, 8'h2E, 8'h2F,
+          8'h34, 8'h35, 8'h36, 8'h37, 8'h3C, 8'h3D, 8'h3E, 8'h3F, 8'h44, 8'h45, 8'h46, 8'h47,
+          8'h4C, 8'h4D, 8'h4E, 8'h4F, 8'h54, 8'h55, 8'h56, 8'h57, 8'h5C, 8'h5D, 8'h5E, 8'h5F,
+          8'h64, 8'h65, 8'h66, 8'h67, 8'h6C, 8'h6D, 8'h6E, 8'h6F, 8'h74, 8'h75, 8'h76, 8'h77,
+          8'h7C, 8'h7D, 8'h7E, 8'h7F, 8'h84, 8'h85, 8'h86, 8'h87, 8'h8C, 8'h8D, 8'h8E, 8'h8F,
+          8'h94, 8'h95, 8'h96, 8'h97, 8'h9C, 8'h9D, 8'h9E, 8'h9F, 8'hA4, 8'hA5, 8'hA6, 8'hA7,
+          8'hAC, 8'hAD, 8'hAE, 8'hAF, 8'hB4, 8'hB5, 8'hB6, 8'hB7, 8'hBC, 8'hBD, 8'hBE, 8'hBF,
+          8'hC4, 8'hC5, 8'hC6, 8'hC7, 8'hCC, 8'hCD, 8'hCE, 8'hCF, 8'hD4, 8'hD5, 8'hD6, 8'hD7,
+          8'hDC, 8'hDD, 8'hDE, 8'hDF, 8'hE4, 8'hE5, 8'hE6, 8'hE7, 8'hEC, 8'hED, 8'hEE, 8'hEF,
+          8'hF4, 8'hF5, 8'hF6, 8'hF7, 8'hFC, 8'hFD, 8'hFE, 8'hFF: form = 9'd325;
+          default: form = 9'd324;
+        endcase
+      end
+      8'h8F: form = 9'd326;
+      8'h90: form = 9'd327;
+      8'h91: form = 9'd328;
+      8'h92: form = 9'd329;
+      8'h93: form = 9'd330;
+      8'h94: form = 9'd331;
+      8'h95: form = 9'd332;
+      8'h96: form = 9'd333;
+      8'h97: form = 9'd334;
+      8'h98: form = 9'd335;
+      8'h99: form = 9'd336;
+      8'h9A: form = 9'd337;
+      8'h9B: form = 9'd338;
+      8'h9C: begin
+        unique case (w0[7:0])
+          8'h08, 8'h18, 8'h28, 8'h38, 8'h48, 8'h58, 8'h68, 8'h78, 8'h88, 8'h98, 8'hA8, 8'hB8,
+          8'hC8, 8'hD8, 8'hE8, 8'hF8: form = 9'd339;
+          default: form = 9'd0;
+        endcase
+      end
+      8'h9E: form = 9'd340;
+      8'hA0: form = 9'd341;
+      8'hA1: form = 9'd342;
+      8'hA2: form = 9'd343;
+      8'hA3: form = 9'd344;
+      8'hA4: form = 9'd345;
+      8'hA5: form = 9'd346;
+      8'hA6: form = 9'd347;
+      8'hA7: form = 9'd348;
+      8'hA8: form = 9'd349;
+      8'hA9: form = 9'd350;
+      8'hAA: form = 9'd351;
+      8'hAB: form = 9'd352;
+      8'hAC: form = 9'd353;
+      8'hAD: form = 9'd354;
+      8'hAE: form = 9'd355;
+      8'hAF: form = 9'd356;
+      8'hB0: form = 9'd357;
+      8'hB1: begin
+        unique case (w0[7:0])
+          8'h00, 8'h10, 8'h20, 8'h30, 8'h40, 8'h50, 8'h60, 8'h70, 8'h80, 8'h90, 8'hA0, 8'hB0,
+          8'hC0, 8'hD0, 8'hE0, 8'hF0: form = 9'd358;
+          8'h07, 8'h17, 8'h27, 8'h37, 8'h47, 8'h57, 8'h67, 8'h77, 8'h87, 8'h97, 8'hA7, 8'hB7,
+          8'hC7, 8'hD7, 8'hE7, 8'hF7: form = 9'd359;
+          8'h0A, 8'h1A, 8'h2A, 8'h3A, 8'h4A, 8'h5A, 8'h6A, 8'h7A, 8'h8A, 8'h9A, 8'hAA, 8'hBA,
+          8'hCA, 8'hDA, 8'hEA, 8'hFA: form = 9'd360;
+          default: form = 9'd0;
+        endcase
+      end
+      8'hB2: begin
+        unique case (w0[7:0])
+          8'h00, 8'h10, 8'h20, 8'h30, 8'h40, 8'h50, 8'h60, 8'h70, 8'h80, 8'h90, 8'hA0, 8'hB0,
+          8'hC0, 8'hD0, 8'hE0, 8'hF0: form = 9'd361;
+          8'h01, 8'h11, 8'h21, 8'h31, 8'h41, 8'h51, 8'h61, 8'h71, 8'h81, 8'h91, 8'hA1, 8'hB1,
+          8'hC1, 8'hD1, 8'hE1, 8'hF1: form = 9'd362;
+          8'h02, 8'h12, 8'h22, 8'h32, 8'h42, 8'h52, 8'h62, 8'h72, 8'h82, 8'h92, 8'hA2, 8'hB2,
+          8'hC2, 8'hD2, 8'hE2, 8'hF2: form = 9'd363;
+          8'h03, 8'h13, 8'h23, 8'h33, 8'h43, 8'h53, 8'h63, 8'h73, 8'h83, 8'h93, 8'hA3, 8'hB3,
+          8'hC3, 8'hD3, 8'hE3, 8'hF3: form = 9'd364;
+          8'h04, 8'h14, 8'h24, 8'h34, 8'h44, 8'h54, 8'h64, 8'h74, 8'h84, 8'h94, 8'hA4, 8'hB4,
+          8'hC4, 8'hD4, 8'hE4, 8'hF4: form = 9'd365;
+          8'h06, 8'h16, 8'h26, 8'h36, 8'h46, 8'h56, 8'h66, 8'h76, 8'h86, 8'h96, 8'hA6, 8'hB6,
+          8'hC6, 8'hD6, 8'hE6, 8'hF6: form = 9'd366;
+          8'h08, 8'h18, 8'h28, 8'h38, 8'h48, 8'h58, 8'h68, 8'h78, 8'h88, 8'h98, 8'hA8, 8'hB8,
+          8'hC8, 8'hD8, 8'hE8, 8'hF8: form = 9'd367;
+          8'h09, 8'h19, 8'h29, 8'h39, 8'h49, 8'h59, 8'h69, 8'h79, 8'h89, 8'h99, 8'hA9, 8'hB9,
+          8'hC9, 8'hD9, 8'hE9, 8'hF9: form = 9'd368;
+          8'h0A, 8'h1A, 8'h2A, 8'h3A, 8'h4A, 8'h5A, 8'h6A, 8'h7A, 8'h8A, 8'h9A, 8'hAA, 8'hBA,
+          8'hCA, 8'hDA, 8'hEA, 8'hFA: form = 9'd369;
+          8'h0B, 8'h1B, 8'h2B, 8'h3B, 8'h4B, 8'h5B, 8'h6B, 8'h7B, 8'h8B, 8'h9B, 8'hAB, 8'hBB,
+          8'hCB, 8'hDB, 8'hEB, 8'hFB: form = 9'd370;
+          8'h0C, 8'h1C, 8'h2C, 8'h3C, 8'h4C, 8'h5C, 8'h6C, 8'h7C, 8'h8C, 8'h9C, 8'hAC, 8'hBC,
+          8'hCC, 8'hDC, 8'hEC, 8'hFC: form = 9'd371;
+          8'h0E, 8'h1E, 8'h2E, 8'h3E, 8'h4E, 8'h5E, 8'h6E, 8'h7E, 8'h8E, 8'h9E, 8'hAE, 8'hBE,
+          8'hCE, 8'hDE, 8'hEE, 8'hFE: form = 9'd372;
+          default: form = 9'd0;
+        endcase
+      end
+      8'hB3: begin
+        unique case (w0[7:0])
+          8'h01, 8'h11, 8'h21, 8'h31, 8'h41, 8'h51, 8'h61, 8'h71, 8'h81, 8'h91, 8'hA1, 8'hB1,
+          8'hC1, 8'hD1, 8'hE1, 8'hF1: form = 9'd374;
+          8'h02, 8'h12, 8'h22, 8'h32, 8'h42, 8'h52, 8'h62, 8'h72, 8'h82, 8'h92, 8'hA2, 8'hB2,
+          8'hC2, 8'hD2, 8'hE2, 8'hF2: form = 9'd375;
+          8'h03, 8'h13, 8'h23, 8'h33, 8'h43, 8'h53, 8'h63, 8'h73, 8'h83, 8'h93, 8'hA3, 8'hB3,
+          8'hC3, 8'hD3, 8'hE3, 8'hF3: form = 9'd376;
+          8'h04, 8'h14, 8'h24, 8'h34, 8'h44, 8'h54, 8'h64, 8'h74, 8'h84, 8'h94, 8'hA4, 8'hB4,
+          8'hC4, 8'hD4, 8'hE4, 8'hF4: form = 9'd377;
+          8'h05, 8'h15, 8'h25, 8'h35, 8'h45, 8'h55, 8'h65, 8'h75, 8'h85, 8'h95, 8'hA5, 8'hB5,
+          8'hC5, 8'hD5, 8'hE5, 8'hF5: form = 9'd378;
+          8'h06, 8'h16, 8'h26, 8'h36, 8'h46, 8'h56, 8'h66, 8'h76, 8'h86, 8'h96, 8'hA6, 8'hB6,
+          8'hC6, 8'hD6, 8'hE6, 8'hF6: form = 9'd379;
+          8'h07, 8'h17, 8'h27, 8'h37, 8'h47, 8'h57, 8'h67, 8'h77, 8'h87, 8'h97, 8'hA7, 8'hB7,
+          8'hC7, 8'hD7, 8'hE7, 8'hF7: form = 9'd380;
+          8'h08, 8'h18, 8'h28, 8'h38, 8'h48, 8'h58, 8'h68, 8'h78, 8'h88, 8'h98, 8'hA8, 8'hB8,
+          8'hC8, 8'hD8, 8'hE8, 8'hF8: form = 9'd381;
+          8'h09, 8'h19, 8'h29, 8'h39, 8'h49, 8'h59, 8'h69, 8'h79, 8'h89, 8'h99, 8'hA9, 8'hB9,
+          8'hC9, 8'hD9, 8'hE9, 8'hF9: form = 9'd382;
+          8'h0A, 8'h1A, 8'h2A, 8'h3A, 8'h4A, 8'h5A, 8'h6A, 8'h7A, 8'h8A, 8'h9A, 8'hAA, 8'hBA,
+          8'hCA, 8'hDA, 8'hEA, 8'hFA: form = 9'd383;
+          8'h0B, 8'h1B, 8'h2B, 8'h3B, 8'h4B, 8'h5B, 8'h6B, 8'h7B, 8'h8B, 8'h9B, 8'hAB, 8'hBB,
+          8'hCB, 8'hDB, 8'hEB, 8'hFB: form = 9'd384;
+          8'h0C, 8'h1C, 8'h2C, 8'h3C, 8'h4C, 8'h5C, 8'h6C, 8'h7C, 8'h8C, 8'h9C, 8'hAC, 8'hBC,
+          8'hCC, 8'hDC, 8'hEC, 8'hFC: form = 9'd385;
+          8'h0D, 8'h1D, 8'h2D, 8'h3D, 8'h4D, 8'h5D, 8'h6D, 8'h7D, 8'h8D, 8'h9D, 8'hAD, 8'hBD,
+          8'hCD, 8'hDD, 8'hED, 8'hFD: form = 9'd386;
+          8'h0E, 8'h1E, 8'h2E, 8'h3E, 8'h4E, 8'h5E, 8'h6E, 8'h7E, 8'h8E, 8'h9E, 8'hAE, 8'hBE,
+          8'hCE, 8'hDE, 8'hEE, 8'hFE: form = 9'd387;
+          8'h0F, 8'h1F, 8'h2F, 8'h3F, 8'h4F, 8'h5F, 8'h6F, 8'h7F, 8'h8F, 8'h9F, 8'hAF, 8'hBF,
+          8'hCF, 8'hDF, 8'hEF, 8'hFF: form = 9'd388;
+          default: form = 9'd373;
+        endcase
+      end
+      8'hB4: form = 9'd389;
+      8'hB5: form = 9'd390;
+      8'hB6: form = 9'd391;
+      8'hB7: form = 9'd392;
+      8'hB8: begin
+        unique case (w0[7:0])
+          8'h00, 8'h10, 8'h20, 8'h30, 8'h40, 8'h50, 8'h60, 8'h70, 8'h80, 8'h90, 8'hA0, 8'hB0,
+          8'hC0, 8'hD0, 8'hE0, 8'hF0: form = 9'd393;
+          8'h02, 8'h12, 8'h22, 8'h32, 8'h42, 8'h52, 8'h62, 8'h72, 8'h82, 8'h92, 8'hA2, 8'hB2,
+          8'hC2, 8'hD2, 8'hE2, 8'hF2: form = 9'd394;
+          8'h04, 8'h14, 8'h24, 8'h34, 8'h44, 8'h54, 8'h64, 8'h74, 8'h84, 8'h94, 8'hA4, 8'hB4,
+          8'hC4, 8'hD4, 8'hE4, 8'hF4: form = 9'd395;
+          8'h06, 8'h16, 8'h26, 8'h36, 8'h46, 8'h56, 8'h66, 8'h76, 8'h86, 8'h96, 8'hA6, 8'hB6,
+          8'hC6, 8'hD6, 8'hE6, 8'hF6: form = 9'd396;
+          8'h08, 8'h18, 8'h28, 8'h38, 8'h48, 8'h58, 8'h68, 8'h78, 8'h88, 8'h98, 8'hA8, 8'hB8,
+          8'hC8, 8'hD8, 8'hE8, 8'hF8: form = 9'd397;
+          8'h0A, 8'h1A, 8'h2A, 8'h3A, 8'h4A, 8'h5A, 8'h6A, 8'h7A, 8'h8A, 8'h9A, 8'hAA, 8'hBA,
+          8'hCA, 8'hDA, 8'hEA, 8'hFA: form = 9'd398;
+          8'h0C, 8'h1C, 8'h2C, 8'h3C, 8'h4C, 8'h5C, 8'h6C, 8'h7C, 8'h8C, 8'h9C, 8'hAC, 8'hBC,
+          8'hCC, 8'hDC, 8'hEC, 8'hFC: form = 9'd399;
+          8'h0E, 8'h1E, 8'h2E, 8'h3E, 8'h4E, 8'h5E, 8'h6E, 8'h7E, 8'h8E, 8'h9E, 8'hAE, 8'hBE,
+          8'hCE, 8'hDE, 8'hEE, 8'hFE: form = 9'd400;
+          default: form = 9'd0;
+        endcase
+      end
+      8'hBA: begin
+        unique case (w0[7:0])
+          8'h00, 8'h10, 8'h20, 8'h30, 8'h40, 8'h50, 8'h60, 8'h70, 8'h80, 8'h90, 8'hA0, 8'hB0,
+          8'hC0, 8'hD0, 8'hE0, 8'hF0: form = 9'd401;
+          8'h01, 8'h11, 8'h21, 8'h31, 8'h41, 8'h51, 8'h61, 8'h71, 8'h81, 8'h91, 8'hA1, 8'hB1,
+          8'hC1, 8'hD1, 8'hE1, 8'hF1:
+            unique case (w1_lo)
+              4'h0, 4'h1, 4'h2, 4'h3, 4'h4, 4'h5, 4'h6, 4'h7: form = 9'd403;
+              default: form = 9'd402;
+            endcase
+          8'h02, 8'h12, 8'h22, 8'h32, 8'h42, 8'h52, 8'h62, 8'h72, 8'h82, 8'h92, 8'hA2, 8'hB2,
+          8'hC2, 8'hD2, 8'hE2, 8'hF2: form = 9'd404;
+          8'h04, 8'h14, 8'h24, 8'h34, 8'h44, 8'h54, 8'h64, 8'h74, 8'h84, 8'h94, 8'hA4, 8'hB4,
+          8'hC4, 8'hD4, 8'hE4, 8'hF4: form = 9'd405;
+          8'h06, 8'h16, 8'h26, 8'h36, 8'h46, 8'h56, 8'h66, 8'h76, 8'h86, 8'h96, 8'hA6, 8'hB6,
+          8'hC6, 8'hD6, 8'hE6, 8'hF6: form = 9'd406;
+          8'h08, 8'h18, 8'h28, 8'h38, 8'h48, 8'h58, 8'h68, 8'h78, 8'h88, 8'h98, 8'hA8, 8'hB8,
+          8'hC8, 8'hD8, 8'hE8, 8'hF8: form = 9'd407;
+          8'h09, 8'h19, 8'h29, 8'h39, 8'h49, 8'h59, 8'h69, 8'h79, 8'h89, 8'h99, 8'hA9, 8'hB9,
+          8'hC9, 8'hD9, 8'hE9, 8'hF9:
+            unique case (w1_lo)
+              4'h0, 4'h1, 4'h2, 4'h3, 4'h4, 4'h5, 4'h6, 4'h7: form = 9'd409;
+              default: form = 9'd408;
+            endcase
+          8'h0A, 8'h1A, 8'h2A, 8'h3A, 8'h4A, 8'h5A, 8'h6A, 8'h7A, 8'h8A, 8'h9A, 8'hAA, 8'hBA,
+          8'hCA, 8'hDA, 8'hEA, 8'hFA: form = 9'd410;
+          8'h0C, 8'h1C, 8'h2C, 8'h3C, 8'h4C, 8'h5C, 8'h6C, 8'h7C, 8'h8C, 8'h9C, 8'hAC, 8'hBC,
+          8'hCC, 8'hDC, 8'hEC, 8'hFC: form = 9'd411;
+          8'h0E, 8'h1E, 8'h2E, 8'h3E, 8'h4E, 8'h5E, 8'h6E, 8'h7E, 8'h8E, 8'h9E, 8'hAE, 8'hBE,
+          8'hCE, 8'hDE, 8'hEE, 8'hFE: form = 9'd412;
+          default: form = 9'd0;
+        endcase
+      end
+      8'hBB: begin
+        unique case (w0[7:0])
+          8'h00, 8'h10, 8'h20, 8'h30, 8'h40, 8'h50, 8'h60, 8'h70, 8'h80, 8'h90, 8'hA0, 8'hB0,
+          8'hC0, 8'hD0, 8'hE0, 8'hF0: form = 9'd413;
+          8'h01, 8'h11, 8'h21, 8'h31, 8'h41, 8'h51, 8'h61, 8'h71, 8'h81, 8'h91, 8'hA1, 8'hB1,
+          8'hC1, 8'hD1, 8'hE1, 8'hF1:
+            unique case (w1_lo)
+              4'h0, 4'h1, 4'h2, 4'h3, 4'h4, 4'h5, 4'h6, 4'h7: form = 9'd415;
+              default: form = 9'd414;
+            endcase
+          8'h02, 8'h12, 8'h22, 8'h32, 8'h42, 8'h52, 8'h62, 8'h72, 8'h82, 8'h92, 8'hA2, 8'hB2,
+          8'hC2, 8'hD2, 8'hE2, 8'hF2: form = 9'd416;
+          8'h04, 8'h14, 8'h24, 8'h34, 8'h44, 8'h54, 8'h64, 8'h74, 8'h84, 8'h94, 8'hA4, 8'hB4,
+          8'hC4, 8'hD4, 8'hE4, 8'hF4: form = 9'd417;
+          8'h06, 8'h16, 8'h26, 8'h36, 8'h46, 8'h56, 8'h66, 8'h76, 8'h86, 8'h96, 8'hA6, 8'hB6,
+          8'hC6, 8'hD6, 8'hE6, 8'hF6: form = 9'd418;
+          8'h08, 8'h18, 8'h28, 8'h38, 8'h48, 8'h58, 8'h68, 8'h78, 8'h88, 8'h98, 8'hA8, 8'hB8,
+          8'hC8, 8'hD8, 8'hE8, 8'hF8: form = 9'd419;
+          8'h09, 8'h19, 8'h29, 8'h39, 8'h49, 8'h59, 8'h69, 8'h79, 8'h89, 8'h99, 8'hA9, 8'hB9,
+          8'hC9, 8'hD9, 8'hE9, 8'hF9:
+            unique case (w1_lo)
+              4'h0, 4'h1, 4'h2, 4'h3, 4'h4, 4'h5, 4'h6, 4'h7: form = 9'd421;
+              default: form = 9'd420;
+            endcase
+          8'h0A, 8'h1A, 8'h2A, 8'h3A, 8'h4A, 8'h5A, 8'h6A, 8'h7A, 8'h8A, 8'h9A, 8'hAA, 8'hBA,
+          8'hCA, 8'hDA, 8'hEA, 8'hFA: form = 9'd422;
+          8'h0C, 8'h1C, 8'h2C, 8'h3C, 8'h4C, 8'h5C, 8'h6C, 8'h7C, 8'h8C, 8'h9C, 8'hAC, 8'hBC,
+          8'hCC, 8'hDC, 8'hEC, 8'hFC: form = 9'd423;
+          8'h0E, 8'h1E, 8'h2E, 8'h3E, 8'h4E, 8'h5E, 8'h6E, 8'h7E, 8'h8E, 8'h9E, 8'hAE, 8'hBE,
+          8'hCE, 8'hDE, 8'hEE, 8'hFE: form = 9'd424;
+          default: form = 9'd0;
+        endcase
+      end
+      8'hBC: form = 9'd425;
+      8'hBD: form = 9'd426;
+      8'hBE: form = 9'd427;
+      8'hC0: form = 9'd428;
+      8'hC1: form = 9'd428;
+      8'hC2: form = 9'd428;
+      8'hC3: form = 9'd428;
+      8'hC4: form = 9'd428;
+      8'hC5: form = 9'd428;
+      8'hC6: form = 9'd428;
+      8'hC7: form = 9'd428;
+      8'hC8: form = 9'd428;
+      8'hC9: form = 9'd428;
+      8'hCA: form = 9'd428;
+      8'hCB: form = 9'd428;
+      8'hCC: form = 9'd428;
+      8'hCD: form = 9'd428;
+      8'hCE: form = 9'd428;
+      8'hCF: form = 9'd428;
+      8'hD0: form = 9'd429;
+      8'hD1: form = 9'd429;
+      8'hD2: form = 9'd429;
+      8'hD3: form = 9'd429;
+      8'hD4: form = 9'd429;
+      8'hD5: form = 9'd429;
+      8'hD6: form = 9'd429;
+      8'hD7: form = 9'd429;
+      8'hD8: form = 9'd429;
+      8'hD9: form = 9'd429;
+      8'hDA: form = 9'd429;
+      8'hDB: form = 9'd429;
+      8'hDC: form = 9'd429;
+      8'hDD: form = 9'd429;
+      8'hDE: form = 9'd429;
+      8'hDF: form = 9'd429;
+      8'hE0: form = 9'd430;
+      8'hE1: form = 9'd430;
+      8'hE2: form = 9'd430;
+      8'hE3: form = 9'd430;
+      8'hE4: form = 9'd430;
+      8'hE5: form = 9'd430;
+      8'hE6: form = 9'd430;
+      8'hE7: form = 9'd430;
+      8'hE8: form = 9'd430;
+      8'hE9: form = 9'd430;
+      8'hEA: form = 9'd430;
+      8'hEB: form = 9'd430;
+      8'hEC: form = 9'd430;
+      8'hED: form = 9'd430;
+      8'hEE: form = 9'd430;
+      8'hEF: form = 9'd430;
+      8'hF0: form = 9'd431;
+      8'hF1: form = 9'd431;
+      8'hF2: form = 9'd431;
+      8'hF3: form = 9'd431;
+      8'hF4: form = 9'd431;
+      8'hF5: form = 9'd431;
+      8'hF6: form = 9'd431;
+      8'hF7: form = 9'd431;
+      8'hF8: form = 9'd431;
+      8'hF9: form = 9'd431;
+      8'hFA: form = 9'd431;
+      8'hFB: form = 9'd431;
+      8'hFC: form = 9'd431;
+      8'hFD: form = 9'd431;
+      8'hFE: form = 9'd431;
+      8'hFF: form = 9'd431;
+      default: ;
+    endcase
+  end
+
+endmodule
+
+// z8000_mc_prog_gen: (form, column, path) -> program. A path a form does
+// not take gives its default program.
+module z8000_mc_prog_gen
+  import z8000_mc_pkg::*;
+(
+  input  logic [MC_FORM_W-1:0] form,
+  input  mc_col_e              col,
+  input  mc_path_e             path,
+  output logic [MC_PROG_W-1:0] prog
+);
+
+  always_comb begin
+    prog = MC_PROG_W'(0);
+    unique case (form)
+      9'd1: prog = 8'd1;  // ADDB R,src IM
+      9'd2: prog = 8'd2;  // ADDB R,src IR
+      9'd3: prog = 8'd1;  // ADD R,src IM
+      9'd4: prog = 8'd2;  // ADD R,src IR
+      9'd5: prog = 8'd1;  // SUBB R,src IM
+      9'd6: prog = 8'd2;  // SUBB R,src IR
+      9'd7: prog = 8'd1;  // SUB R,src IM
+      9'd8: prog = 8'd2;  // SUB R,src IR
+      9'd9: prog = 8'd1;  // ORB R,src IM
+      9'd10: prog = 8'd2;  // ORB R,src IR
+      9'd11: prog = 8'd1;  // OR R,src IM
+      9'd12: prog = 8'd2;  // OR R,src IR
+      9'd13: prog = 8'd1;  // ANDB R,src IM
+      9'd14: prog = 8'd2;  // ANDB R,src IR
+      9'd15: prog = 8'd1;  // AND R,src IM
+      9'd16: prog = 8'd2;  // AND R,src IR
+      9'd17: prog = 8'd1;  // XORB R,src IM
+      9'd18: prog = 8'd2;  // XORB R,src IR
+      9'd19: prog = 8'd1;  // XOR R,src IM
+      9'd20: prog = 8'd2;  // XOR R,src IR
+      9'd21: prog = 8'd1;  // CPB R,src IM
+      9'd22: prog = 8'd2;  // CPB R,src IR
+      9'd23: prog = 8'd1;  // CP R,src IM
+      9'd24: prog = 8'd2;  // CP R,src IR
+      9'd25: prog = 8'd3;  // COMB dst IR
+      9'd26: prog = 8'd4;  // CPB dst,IM IR
+      9'd27: prog = 8'd3;  // NEGB dst IR
+      9'd28: prog = 8'd5;  // TESTB dst IR
+      9'd29: prog = 8'd6;  // LDB dst,IM IR
+      9'd30: prog = 8'd7;  // TSETB dst IR
+      9'd31: prog = 8'd8;  // CLRB dst IR
+      9'd32: prog = 8'd3;  // COM dst IR
+      9'd33: prog = 8'd4;  // CP dst,IM IR
+      9'd34: prog = 8'd3;  // NEG dst IR
+      9'd35: prog = 8'd5;  // TEST dst IR
+      9'd36: prog = 8'd6;  // LD dst,IM IR
+      9'd37: prog = 8'd7;  // TSET dst IR
+      9'd38: prog = 8'd8;  // CLR dst IR
+      9'd39: prog = 8'd9;  // PUSH IR,src IM
+      9'd40: prog = 8'd10;  // EPU memory IR
+      9'd41: prog = 8'd11;  // EPU memory IR (to memory)
+      9'd42: prog = 8'd12;  // CPL R,src IM
+      9'd43: prog = 8'd13;  // CPL R,src IR
+      9'd44: prog = 8'd14;  // PUSHL IR,src IR
+      9'd45: prog = 8'd12;  // SUBL R,src IM
+      9'd46: prog = 8'd13;  // SUBL R,src IR
+      9'd47: prog = 8'd15;  // PUSH IR,src IR
+      9'd48: prog = 8'd16;  // LDL R,src IM
+      9'd49: prog = 8'd17;  // LDL R,src IR
+      9'd50: prog = 8'd18;  // POPL dst,IR IR
+      9'd51: prog = 8'd12;  // ADDL R,src IM
+      9'd52: prog = 8'd13;  // ADDL R,src IR
+      9'd53: prog = 8'd19;  // POP dst,IR IR
+      9'd54: begin  // MULTL R,src IM
+        unique case (col)
+          MC_COL_SS:
+            unique case (path)
+              MC_PATH_NOT_TAKEN: prog = 8'd20;
+              MC_PATH_ZERO: prog = 8'd21;
+              default: prog = 8'd20;
+            endcase
+          MC_COL_SL:
+            unique case (path)
+              MC_PATH_NOT_TAKEN: prog = 8'd20;
+              MC_PATH_ZERO: prog = 8'd21;
+              default: prog = 8'd20;
+            endcase
+          default:
+            unique case (path)
+              MC_PATH_NOT_TAKEN: prog = 8'd20;
+              MC_PATH_ZERO: prog = 8'd21;
+              default: prog = 8'd20;
+            endcase
+        endcase
+      end
+      9'd55: begin  // MULTL R,src IR
+        unique case (col)
+          MC_COL_SS:
+            unique case (path)
+              MC_PATH_NOT_TAKEN: prog = 8'd22;
+              MC_PATH_ZERO: prog = 8'd23;
+              default: prog = 8'd22;
+            endcase
+          MC_COL_SL:
+            unique case (path)
+              MC_PATH_NOT_TAKEN: prog = 8'd22;
+              MC_PATH_ZERO: prog = 8'd23;
+              default: prog = 8'd22;
+            endcase
+          default:
+            unique case (path)
+              MC_PATH_NOT_TAKEN: prog = 8'd22;
+              MC_PATH_ZERO: prog = 8'd23;
+              default: prog = 8'd22;
+            endcase
+        endcase
+      end
+      9'd56: begin  // MULT R,src IM
+        unique case (col)
+          MC_COL_SS:
+            unique case (path)
+              MC_PATH_NOT_TAKEN: prog = 8'd24;
+              MC_PATH_ZERO: prog = 8'd25;
+              default: prog = 8'd24;
+            endcase
+          MC_COL_SL:
+            unique case (path)
+              MC_PATH_NOT_TAKEN: prog = 8'd24;
+              MC_PATH_ZERO: prog = 8'd25;
+              default: prog = 8'd24;
+            endcase
+          default:
+            unique case (path)
+              MC_PATH_NOT_TAKEN: prog = 8'd24;
+              MC_PATH_ZERO: prog = 8'd25;
+              default: prog = 8'd24;
+            endcase
+        endcase
+      end
+      9'd57: begin  // MULT R,src IR
+        unique case (col)
+          MC_COL_SS:
+            unique case (path)
+              MC_PATH_NOT_TAKEN: prog = 8'd26;
+              MC_PATH_ZERO: prog = 8'd27;
+              default: prog = 8'd26;
+            endcase
+          MC_COL_SL:
+            unique case (path)
+              MC_PATH_NOT_TAKEN: prog = 8'd26;
+              MC_PATH_ZERO: prog = 8'd27;
+              default: prog = 8'd26;
+            endcase
+          default:
+            unique case (path)
+              MC_PATH_NOT_TAKEN: prog = 8'd26;
+              MC_PATH_ZERO: prog = 8'd27;
+              default: prog = 8'd26;
+            endcase
+        endcase
+      end
+      9'd58: prog = 8'd28;  // DIVL R,src IM
+      9'd59: prog = 8'd29;  // DIVL R,src IR
+      9'd60: prog = 8'd24;  // DIV R,src IM
+      9'd61: prog = 8'd26;  // DIV R,src IR
+      9'd62: prog = 8'd10;  // LDM R,src,n IR
+      9'd63: prog = 8'd30;  // TESTL dst IR
+      9'd64: prog = 8'd11;  // LDM dst,R,n IR
+      9'd65: prog = 8'd31;  // LDL dst,R IR
+      9'd66: begin  // JP cc,dst IR (taken)
+        unique case (col)
+          MC_COL_SS:
+            unique case (path)
+              MC_PATH_NOT_TAKEN: prog = 8'd33;
+              MC_PATH_ZERO: prog = 8'd34;
+              default: prog = 8'd34;
+            endcase
+          MC_COL_SL:
+            unique case (path)
+              MC_PATH_NOT_TAKEN: prog = 8'd33;
+              MC_PATH_ZERO: prog = 8'd34;
+              default: prog = 8'd34;
+            endcase
+          default:
+            unique case (path)
+              MC_PATH_NOT_TAKEN: prog = 8'd33;
+              MC_PATH_ZERO: prog = 8'd32;
+              default: prog = 8'd32;
+            endcase
+        endcase
+      end
+      9'd67: begin  // CALL dst IR
+        unique case (col)
+          MC_COL_SS: prog = 8'd36;
+          MC_COL_SL: prog = 8'd36;
+          default: prog = 8'd35;
+        endcase
+      end
+      9'd68: prog = 8'd1;  // LDB R,src IM
+      9'd69: prog = 8'd2;  // LDB R,src IR
+      9'd70: prog = 8'd1;  // LD R,src IM
+      9'd71: prog = 8'd2;  // LD R,src IR
+      9'd72: prog = 8'd37;  // RESB dst,R R
+      9'd73: prog = 8'd38;  // RESB dst,b IR
+      9'd74: prog = 8'd37;  // RES dst,R R
+      9'd75: prog = 8'd38;  // RES dst,b IR
+      9'd76: prog = 8'd37;  // SETB dst,R R
+      9'd77: prog = 8'd38;  // SETB dst,b IR
+      9'd78: prog = 8'd37;  // SET dst,R R
+      9'd79: prog = 8'd38;  // SET dst,b IR
+      9'd80: prog = 8'd37;  // BITB dst,R R
+      9'd81: prog = 8'd5;  // BITB dst,b IR
+      9'd82: prog = 8'd37;  // BIT dst,R R
+      9'd83: prog = 8'd5;  // BIT dst,b IR
+      9'd84: prog = 8'd38;  // INCB dst,n IR
+      9'd85: prog = 8'd38;  // INC dst,n IR
+      9'd86: prog = 8'd38;  // DECB dst,n IR
+      9'd87: prog = 8'd38;  // DEC dst,n IR
+      9'd88: prog = 8'd19;  // EXB R,src IR
+      9'd89: prog = 8'd19;  // EX R,src IR
+      9'd90: prog = 8'd8;  // LDB dst,R IR
+      9'd91: prog = 8'd8;  // LD dst,R IR
+      9'd92: prog = 8'd39;  // LDB R,src RA
+      9'd93: prog = 8'd39;  // LDB R,src BA
+      9'd94: prog = 8'd39;  // LD R,src RA
+      9'd95: prog = 8'd39;  // LD R,src BA
+      9'd96: prog = 8'd40;  // LDB dst,R RA
+      9'd97: prog = 8'd40;  // LDB dst,R BA
+      9'd98: prog = 8'd40;  // LD dst,R RA
+      9'd99: prog = 8'd40;  // LD dst,R BA
+      9'd100: prog = 8'd41;  // LDAR R,src RA
+      9'd101: prog = 8'd41;  // LDA R,src BA
+      9'd102: prog = 8'd42;  // LDL R,src RA
+      9'd103: prog = 8'd42;  // LDL R,src BA
+      9'd104: prog = 8'd43;  // LDL dst,R RA
+      9'd105: prog = 8'd43;  // LDL dst,R BA
+      9'd106: begin  // LDPS src IR
+        unique case (col)
+          MC_COL_SS: prog = 8'd45;
+          MC_COL_SL: prog = 8'd45;
+          default: prog = 8'd44;
+        endcase
+      end
+      9'd107: prog = 8'd46;  // INIB IR
+      9'd108: prog = 8'd47;  // INIRB IR
+      9'd109: prog = 8'd46;  // SINIB IR
+      9'd110: prog = 8'd47;  // SINIRB IR
+      9'd111: prog = 8'd48;  // OUTIB IR
+      9'd112: prog = 8'd49;  // OTIRB IR
+      9'd113: prog = 8'd48;  // SOUTIB IR
+      9'd114: prog = 8'd49;  // SOTIRB IR
+      9'd115: prog = 8'd50;  // INB DA
+      9'd116: prog = 8'd50;  // SINB DA
+      9'd117: prog = 8'd50;  // OUTB DA
+      9'd118: prog = 8'd50;  // SOUTB DA
+      9'd119: prog = 8'd46;  // INDB IR
+      9'd120: prog = 8'd47;  // INDRB IR
+      9'd121: prog = 8'd46;  // SINDB IR
+      9'd122: prog = 8'd47;  // SINDRB IR
+      9'd123: prog = 8'd48;  // OUTDB IR
+      9'd124: prog = 8'd49;  // OTDRB IR
+      9'd125: prog = 8'd48;  // SOUTDB IR
+      9'd126: prog = 8'd49;  // SOTDRB IR
+      9'd127: prog = 8'd46;  // INI IR
+      9'd128: prog = 8'd47;  // INIR IR
+      9'd129: prog = 8'd46;  // SINI IR
+      9'd130: prog = 8'd47;  // SINIR IR
+      9'd131: prog = 8'd48;  // OUTI IR
+      9'd132: prog = 8'd49;  // OTIR IR
+      9'd133: prog = 8'd48;  // SOUTI IR
+      9'd134: prog = 8'd49;  // SOTIR IR
+      9'd135: prog = 8'd50;  // IN DA
+      9'd136: prog = 8'd50;  // SIN DA
+      9'd137: prog = 8'd50;  // OUT DA
+      9'd138: prog = 8'd50;  // SOUT DA
+      9'd139: prog = 8'd46;  // IND IR
+      9'd140: prog = 8'd47;  // INDR IR
+      9'd141: prog = 8'd46;  // SIND IR
+      9'd142: prog = 8'd47;  // SINDR IR
+      9'd143: prog = 8'd48;  // OUTD IR
+      9'd144: prog = 8'd49;  // OTDR IR
+      9'd145: prog = 8'd48;  // SOUTD IR
+      9'd146: prog = 8'd49;  // SOTDR IR
+      9'd147: prog = 8'd51;  // INB IR
+      9'd148: prog = 8'd51;  // IN IR
+      9'd149: prog = 8'd51;  // OUTB IR
+      9'd150: prog = 8'd51;  // OUT IR
+      9'd151: begin  // ADDB R,src DA
+        unique case (col)
+          MC_COL_SS: prog = 8'd53;
+          MC_COL_SL: prog = 8'd54;
+          default: prog = 8'd52;
+        endcase
+      end
+      9'd152: begin  // ADDB R,src X
+        unique case (col)
+          MC_COL_SS: prog = 8'd53;
+          MC_COL_SL: prog = 8'd55;
+          default: prog = 8'd53;
+        endcase
+      end
+      9'd153: begin  // ADD R,src DA
+        unique case (col)
+          MC_COL_SS: prog = 8'd53;
+          MC_COL_SL: prog = 8'd54;
+          default: prog = 8'd52;
+        endcase
+      end
+      9'd154: begin  // ADD R,src X
+        unique case (col)
+          MC_COL_SS: prog = 8'd53;
+          MC_COL_SL: prog = 8'd55;
+          default: prog = 8'd53;
+        endcase
+      end
+      9'd155: begin  // SUBB R,src DA
+        unique case (col)
+          MC_COL_SS: prog = 8'd53;
+          MC_COL_SL: prog = 8'd54;
+          default: prog = 8'd52;
+        endcase
+      end
+      9'd156: begin  // SUBB R,src X
+        unique case (col)
+          MC_COL_SS: prog = 8'd53;
+          MC_COL_SL: prog = 8'd55;
+          default: prog = 8'd53;
+        endcase
+      end
+      9'd157: begin  // SUB R,src DA
+        unique case (col)
+          MC_COL_SS: prog = 8'd53;
+          MC_COL_SL: prog = 8'd54;
+          default: prog = 8'd52;
+        endcase
+      end
+      9'd158: begin  // SUB R,src X
+        unique case (col)
+          MC_COL_SS: prog = 8'd53;
+          MC_COL_SL: prog = 8'd55;
+          default: prog = 8'd53;
+        endcase
+      end
+      9'd159: begin  // ORB R,src DA
+        unique case (col)
+          MC_COL_SS: prog = 8'd53;
+          MC_COL_SL: prog = 8'd54;
+          default: prog = 8'd52;
+        endcase
+      end
+      9'd160: begin  // ORB R,src X
+        unique case (col)
+          MC_COL_SS: prog = 8'd53;
+          MC_COL_SL: prog = 8'd55;
+          default: prog = 8'd53;
+        endcase
+      end
+      9'd161: begin  // OR R,src DA
+        unique case (col)
+          MC_COL_SS: prog = 8'd53;
+          MC_COL_SL: prog = 8'd54;
+          default: prog = 8'd52;
+        endcase
+      end
+      9'd162: begin  // OR R,src X
+        unique case (col)
+          MC_COL_SS: prog = 8'd53;
+          MC_COL_SL: prog = 8'd55;
+          default: prog = 8'd53;
+        endcase
+      end
+      9'd163: begin  // ANDB R,src DA
+        unique case (col)
+          MC_COL_SS: prog = 8'd53;
+          MC_COL_SL: prog = 8'd54;
+          default: prog = 8'd52;
+        endcase
+      end
+      9'd164: begin  // ANDB R,src X
+        unique case (col)
+          MC_COL_SS: prog = 8'd53;
+          MC_COL_SL: prog = 8'd55;
+          default: prog = 8'd53;
+        endcase
+      end
+      9'd165: begin  // AND R,src DA
+        unique case (col)
+          MC_COL_SS: prog = 8'd53;
+          MC_COL_SL: prog = 8'd54;
+          default: prog = 8'd52;
+        endcase
+      end
+      9'd166: begin  // AND R,src X
+        unique case (col)
+          MC_COL_SS: prog = 8'd53;
+          MC_COL_SL: prog = 8'd55;
+          default: prog = 8'd53;
+        endcase
+      end
+      9'd167: begin  // XORB R,src DA
+        unique case (col)
+          MC_COL_SS: prog = 8'd53;
+          MC_COL_SL: prog = 8'd54;
+          default: prog = 8'd52;
+        endcase
+      end
+      9'd168: begin  // XORB R,src X
+        unique case (col)
+          MC_COL_SS: prog = 8'd53;
+          MC_COL_SL: prog = 8'd55;
+          default: prog = 8'd53;
+        endcase
+      end
+      9'd169: begin  // XOR R,src DA
+        unique case (col)
+          MC_COL_SS: prog = 8'd53;
+          MC_COL_SL: prog = 8'd54;
+          default: prog = 8'd52;
+        endcase
+      end
+      9'd170: begin  // XOR R,src X
+        unique case (col)
+          MC_COL_SS: prog = 8'd53;
+          MC_COL_SL: prog = 8'd55;
+          default: prog = 8'd53;
+        endcase
+      end
+      9'd171: begin  // CPB R,src DA
+        unique case (col)
+          MC_COL_SS: prog = 8'd53;
+          MC_COL_SL: prog = 8'd54;
+          default: prog = 8'd52;
+        endcase
+      end
+      9'd172: begin  // CPB R,src X
+        unique case (col)
+          MC_COL_SS: prog = 8'd53;
+          MC_COL_SL: prog = 8'd55;
+          default: prog = 8'd53;
+        endcase
+      end
+      9'd173: begin  // CP R,src DA
+        unique case (col)
+          MC_COL_SS: prog = 8'd53;
+          MC_COL_SL: prog = 8'd54;
+          default: prog = 8'd52;
+        endcase
+      end
+      9'd174: begin  // CP R,src X
+        unique case (col)
+          MC_COL_SS: prog = 8'd53;
+          MC_COL_SL: prog = 8'd55;
+          default: prog = 8'd53;
+        endcase
+      end
+      9'd175: begin  // COMB dst DA
+        unique case (col)
+          MC_COL_SS: prog = 8'd57;
+          MC_COL_SL: prog = 8'd58;
+          default: prog = 8'd56;
+        endcase
+      end
+      9'd176: begin  // CPB dst,IM DA
+        unique case (col)
+          MC_COL_SS: prog = 8'd60;
+          MC_COL_SL: prog = 8'd61;
+          default: prog = 8'd59;
+        endcase
+      end
+      9'd177: begin  // NEGB dst DA
+        unique case (col)
+          MC_COL_SS: prog = 8'd57;
+          MC_COL_SL: prog = 8'd58;
+          default: prog = 8'd56;
+        endcase
+      end
+      9'd178: begin  // TESTB dst DA
+        unique case (col)
+          MC_COL_SS: prog = 8'd63;
+          MC_COL_SL: prog = 8'd64;
+          default: prog = 8'd62;
+        endcase
+      end
+      9'd179: begin  // LDB dst,IM DA
+        unique case (col)
+          MC_COL_SS: prog = 8'd66;
+          MC_COL_SL: prog = 8'd67;
+          default: prog = 8'd65;
+        endcase
+      end
+      9'd180: begin  // TSETB dst DA
+        unique case (col)
+          MC_COL_SS: prog = 8'd69;
+          MC_COL_SL: prog = 8'd70;
+          default: prog = 8'd68;
+        endcase
+      end
+      9'd181: begin  // CLRB dst DA
+        unique case (col)
+          MC_COL_SS: prog = 8'd72;
+          MC_COL_SL: prog = 8'd73;
+          default: prog = 8'd71;
+        endcase
+      end
+      9'd182: begin  // COMB dst X
+        unique case (col)
+          MC_COL_SS: prog = 8'd57;
+          MC_COL_SL: prog = 8'd74;
+          default: prog = 8'd57;
+        endcase
+      end
+      9'd183: begin  // CPB dst,IM X
+        unique case (col)
+          MC_COL_SS: prog = 8'd60;
+          MC_COL_SL: prog = 8'd75;
+          default: prog = 8'd60;
+        endcase
+      end
+      9'd184: begin  // NEGB dst X
+        unique case (col)
+          MC_COL_SS: prog = 8'd57;
+          MC_COL_SL: prog = 8'd74;
+          default: prog = 8'd57;
+        endcase
+      end
+      9'd185: begin  // TESTB dst X
+        unique case (col)
+          MC_COL_SS: prog = 8'd63;
+          MC_COL_SL: prog = 8'd76;
+          default: prog = 8'd63;
+        endcase
+      end
+      9'd186: begin  // LDB dst,IM X
+        unique case (col)
+          MC_COL_SS: prog = 8'd66;
+          MC_COL_SL: prog = 8'd77;
+          default: prog = 8'd66;
+        endcase
+      end
+      9'd187: begin  // TSETB dst X
+        unique case (col)
+          MC_COL_SS: prog = 8'd69;
+          MC_COL_SL: prog = 8'd78;
+          default: prog = 8'd69;
+        endcase
+      end
+      9'd188: begin  // CLRB dst X
+        unique case (col)
+          MC_COL_SS: prog = 8'd72;
+          MC_COL_SL: prog = 8'd79;
+          default: prog = 8'd72;
+        endcase
+      end
+      9'd189: begin  // COM dst DA
+        unique case (col)
+          MC_COL_SS: prog = 8'd57;
+          MC_COL_SL: prog = 8'd58;
+          default: prog = 8'd56;
+        endcase
+      end
+      9'd190: begin  // CP dst,IM DA
+        unique case (col)
+          MC_COL_SS: prog = 8'd60;
+          MC_COL_SL: prog = 8'd61;
+          default: prog = 8'd59;
+        endcase
+      end
+      9'd191: begin  // NEG dst DA
+        unique case (col)
+          MC_COL_SS: prog = 8'd57;
+          MC_COL_SL: prog = 8'd58;
+          default: prog = 8'd56;
+        endcase
+      end
+      9'd192: begin  // TEST dst DA
+        unique case (col)
+          MC_COL_SS: prog = 8'd63;
+          MC_COL_SL: prog = 8'd64;
+          default: prog = 8'd62;
+        endcase
+      end
+      9'd193: begin  // LD dst,IM DA
+        unique case (col)
+          MC_COL_SS: prog = 8'd66;
+          MC_COL_SL: prog = 8'd67;
+          default: prog = 8'd65;
+        endcase
+      end
+      9'd194: begin  // TSET dst DA
+        unique case (col)
+          MC_COL_SS: prog = 8'd69;
+          MC_COL_SL: prog = 8'd70;
+          default: prog = 8'd68;
+        endcase
+      end
+      9'd195: begin  // CLR dst DA
+        unique case (col)
+          MC_COL_SS: prog = 8'd72;
+          MC_COL_SL: prog = 8'd73;
+          default: prog = 8'd71;
+        endcase
+      end
+      9'd196: begin  // COM dst X
+        unique case (col)
+          MC_COL_SS: prog = 8'd57;
+          MC_COL_SL: prog = 8'd74;
+          default: prog = 8'd57;
+        endcase
+      end
+      9'd197: begin  // CP dst,IM X
+        unique case (col)
+          MC_COL_SS: prog = 8'd60;
+          MC_COL_SL: prog = 8'd75;
+          default: prog = 8'd60;
+        endcase
+      end
+      9'd198: begin  // NEG dst X
+        unique case (col)
+          MC_COL_SS: prog = 8'd57;
+          MC_COL_SL: prog = 8'd74;
+          default: prog = 8'd57;
+        endcase
+      end
+      9'd199: begin  // TEST dst X
+        unique case (col)
+          MC_COL_SS: prog = 8'd63;
+          MC_COL_SL: prog = 8'd76;
+          default: prog = 8'd63;
+        endcase
+      end
+      9'd200: begin  // LD dst,IM X
+        unique case (col)
+          MC_COL_SS: prog = 8'd66;
+          MC_COL_SL: prog = 8'd77;
+          default: prog = 8'd66;
+        endcase
+      end
+      9'd201: begin  // TSET dst X
+        unique case (col)
+          MC_COL_SS: prog = 8'd69;
+          MC_COL_SL: prog = 8'd78;
+          default: prog = 8'd69;
+        endcase
+      end
+      9'd202: begin  // CLR dst X
+        unique case (col)
+          MC_COL_SS: prog = 8'd72;
+          MC_COL_SL: prog = 8'd79;
+          default: prog = 8'd72;
+        endcase
+      end
+      9'd203: begin  // EPU memory DA
+        unique case (col)
+          MC_COL_SS: prog = 8'd81;
+          MC_COL_SL: prog = 8'd82;
+          default: prog = 8'd80;
+        endcase
+      end
+      9'd204: begin  // EPU memory DA (to memory)
+        unique case (col)
+          MC_COL_SS: prog = 8'd84;
+          MC_COL_SL: prog = 8'd85;
+          default: prog = 8'd83;
+        endcase
+      end
+      9'd205: begin  // EPU memory X
+        unique case (col)
+          MC_COL_SS: prog = 8'd81;
+          MC_COL_SL: prog = 8'd86;
+          default: prog = 8'd81;
+        endcase
+      end
+      9'd206: begin  // EPU memory X (to memory)
+        unique case (col)
+          MC_COL_SS: prog = 8'd84;
+          MC_COL_SL: prog = 8'd87;
+          default: prog = 8'd84;
+        endcase
+      end
+      9'd207: begin  // CPL R,src DA
+        unique case (col)
+          MC_COL_SS: prog = 8'd89;
+          MC_COL_SL: prog = 8'd90;
+          default: prog = 8'd88;
+        endcase
+      end
+      9'd208: begin  // CPL R,src X
+        unique case (col)
+          MC_COL_SS: prog = 8'd89;
+          MC_COL_SL: prog = 8'd91;
+          default: prog = 8'd89;
+        endcase
+      end
+      9'd209: begin  // PUSHL IR,src DA
+        unique case (col)
+          MC_COL_SS: prog = 8'd92;
+          MC_COL_SL: prog = 8'd93;
+          default: prog = 8'd92;
+        endcase
+      end
+      9'd210: begin  // PUSHL IR,src X
+        unique case (col)
+          MC_COL_SS: prog = 8'd92;
+          MC_COL_SL: prog = 8'd94;
+          default: prog = 8'd92;
+        endcase
+      end
+      9'd211: begin  // SUBL R,src DA
+        unique case (col)
+          MC_COL_SS: prog = 8'd89;
+          MC_COL_SL: prog = 8'd90;
+          default: prog = 8'd88;
+        endcase
+      end
+      9'd212: begin  // SUBL R,src X
+        unique case (col)
+          MC_COL_SS: prog = 8'd89;
+          MC_COL_SL: prog = 8'd91;
+          default: prog = 8'd89;
+        endcase
+      end
+      9'd213: begin  // PUSH IR,src DA
+        unique case (col)
+          MC_COL_SS: prog = 8'd95;
+          MC_COL_SL: prog = 8'd96;
+          default: prog = 8'd95;
+        endcase
+      end
+      9'd214: begin  // PUSH IR,src X
+        unique case (col)
+          MC_COL_SS: prog = 8'd95;
+          MC_COL_SL: prog = 8'd97;
+          default: prog = 8'd95;
+        endcase
+      end
+      9'd215: begin  // LDL R,src DA
+        unique case (col)
+          MC_COL_SS: prog = 8'd99;
+          MC_COL_SL: prog = 8'd100;
+          default: prog = 8'd98;
+        endcase
+      end
+      9'd216: begin  // LDL R,src X
+        unique case (col)
+          MC_COL_SS: prog = 8'd99;
+          MC_COL_SL: prog = 8'd101;
+          default: prog = 8'd99;
+        endcase
+      end
+      9'd217: begin  // POPL dst,IR DA
+        unique case (col)
+          MC_COL_SS: prog = 8'd102;
+          MC_COL_SL: prog = 8'd103;
+          default: prog = 8'd102;
+        endcase
+      end
+      9'd218: begin  // POPL dst,IR X
+        unique case (col)
+          MC_COL_SS: prog = 8'd102;
+          MC_COL_SL: prog = 8'd104;
+          default: prog = 8'd102;
+        endcase
+      end
+      9'd219: begin  // ADDL R,src DA
+        unique case (col)
+          MC_COL_SS: prog = 8'd89;
+          MC_COL_SL: prog = 8'd90;
+          default: prog = 8'd88;
+        endcase
+      end
+      9'd220: begin  // ADDL R,src X
+        unique case (col)
+          MC_COL_SS: prog = 8'd89;
+          MC_COL_SL: prog = 8'd91;
+          default: prog = 8'd89;
+        endcase
+      end
+      9'd221: begin  // POP dst,IR DA
+        unique case (col)
+          MC_COL_SS: prog = 8'd105;
+          MC_COL_SL: prog = 8'd106;
+          default: prog = 8'd105;
+        endcase
+      end
+      9'd222: begin  // POP dst,IR X
+        unique case (col)
+          MC_COL_SS: prog = 8'd105;
+          MC_COL_SL: prog = 8'd107;
+          default: prog = 8'd105;
+        endcase
+      end
+      9'd223: begin  // MULTL R,src DA
+        unique case (col)
+          MC_COL_SS:
+            unique case (path)
+              MC_PATH_NOT_TAKEN: prog = 8'd110;
+              MC_PATH_ZERO: prog = 8'd111;
+              default: prog = 8'd110;
+            endcase
+          MC_COL_SL:
+            unique case (path)
+              MC_PATH_NOT_TAKEN: prog = 8'd112;
+              MC_PATH_ZERO: prog = 8'd113;
+              default: prog = 8'd112;
+            endcase
+          default:
+            unique case (path)
+              MC_PATH_NOT_TAKEN: prog = 8'd108;
+              MC_PATH_ZERO: prog = 8'd109;
+              default: prog = 8'd108;
+            endcase
+        endcase
+      end
+      9'd224: begin  // MULTL R,src X
+        unique case (col)
+          MC_COL_SS:
+            unique case (path)
+              MC_PATH_NOT_TAKEN: prog = 8'd110;
+              MC_PATH_ZERO: prog = 8'd111;
+              default: prog = 8'd110;
+            endcase
+          MC_COL_SL:
+            unique case (path)
+              MC_PATH_NOT_TAKEN: prog = 8'd114;
+              MC_PATH_ZERO: prog = 8'd115;
+              default: prog = 8'd114;
+            endcase
+          default:
+            unique case (path)
+              MC_PATH_NOT_TAKEN: prog = 8'd110;
+              MC_PATH_ZERO: prog = 8'd111;
+              default: prog = 8'd110;
+            endcase
+        endcase
+      end
+      9'd225: begin  // MULT R,src DA
+        unique case (col)
+          MC_COL_SS:
+            unique case (path)
+              MC_PATH_NOT_TAKEN: prog = 8'd118;
+              MC_PATH_ZERO: prog = 8'd119;
+              default: prog = 8'd118;
+            endcase
+          MC_COL_SL:
+            unique case (path)
+              MC_PATH_NOT_TAKEN: prog = 8'd120;
+              MC_PATH_ZERO: prog = 8'd121;
+              default: prog = 8'd120;
+            endcase
+          default:
+            unique case (path)
+              MC_PATH_NOT_TAKEN: prog = 8'd116;
+              MC_PATH_ZERO: prog = 8'd117;
+              default: prog = 8'd116;
+            endcase
+        endcase
+      end
+      9'd226: begin  // MULT R,src X
+        unique case (col)
+          MC_COL_SS:
+            unique case (path)
+              MC_PATH_NOT_TAKEN: prog = 8'd118;
+              MC_PATH_ZERO: prog = 8'd119;
+              default: prog = 8'd118;
+            endcase
+          MC_COL_SL:
+            unique case (path)
+              MC_PATH_NOT_TAKEN: prog = 8'd122;
+              MC_PATH_ZERO: prog = 8'd123;
+              default: prog = 8'd122;
+            endcase
+          default:
+            unique case (path)
+              MC_PATH_NOT_TAKEN: prog = 8'd118;
+              MC_PATH_ZERO: prog = 8'd119;
+              default: prog = 8'd118;
+            endcase
+        endcase
+      end
+      9'd227: begin  // DIVL R,src DA
+        unique case (col)
+          MC_COL_SS: prog = 8'd125;
+          MC_COL_SL: prog = 8'd126;
+          default: prog = 8'd124;
+        endcase
+      end
+      9'd228: begin  // DIVL R,src X
+        unique case (col)
+          MC_COL_SS: prog = 8'd125;
+          MC_COL_SL: prog = 8'd127;
+          default: prog = 8'd125;
+        endcase
+      end
+      9'd229: begin  // DIV R,src DA
+        unique case (col)
+          MC_COL_SS: prog = 8'd129;
+          MC_COL_SL: prog = 8'd130;
+          default: prog = 8'd128;
+        endcase
+      end
+      9'd230: begin  // DIV R,src X
+        unique case (col)
+          MC_COL_SS: prog = 8'd129;
+          MC_COL_SL: prog = 8'd131;
+          default: prog = 8'd129;
+        endcase
+      end
+      9'd231: begin  // LDM R,src,n DA
+        unique case (col)
+          MC_COL_SS: prog = 8'd81;
+          MC_COL_SL: prog = 8'd82;
+          default: prog = 8'd80;
+        endcase
+      end
+      9'd232: begin  // TESTL dst DA
+        unique case (col)
+          MC_COL_SS: prog = 8'd132;
+          MC_COL_SL: prog = 8'd91;
+          default: prog = 8'd89;
+        endcase
+      end
+      9'd233: begin  // LDM dst,R,n DA
+        unique case (col)
+          MC_COL_SS: prog = 8'd84;
+          MC_COL_SL: prog = 8'd85;
+          default: prog = 8'd83;
+        endcase
+      end
+      9'd234: begin  // LDM R,src,n X
+        unique case (col)
+          MC_COL_SS: prog = 8'd81;
+          MC_COL_SL: prog = 8'd86;
+          default: prog = 8'd81;
+        endcase
+      end
+      9'd235: begin  // TESTL dst X
+        unique case (col)
+          MC_COL_SS: prog = 8'd132;
+          MC_COL_SL: prog = 8'd133;
+          default: prog = 8'd132;
+        endcase
+      end
+      9'd236: begin  // LDM dst,R,n X
+        unique case (col)
+          MC_COL_SS: prog = 8'd84;
+          MC_COL_SL: prog = 8'd87;
+          default: prog = 8'd84;
+        endcase
+      end
+      9'd237: begin  // LDL dst,R DA
+        unique case (col)
+          MC_COL_SS: prog = 8'd135;
+          MC_COL_SL: prog = 8'd136;
+          default: prog = 8'd134;
+        endcase
+      end
+      9'd238: begin  // LDL dst,R X
+        unique case (col)
+          MC_COL_SS: prog = 8'd135;
+          MC_COL_SL: prog = 8'd137;
+          default: prog = 8'd135;
+        endcase
+      end
+      9'd239: begin  // JP cc,dst DA
+        unique case (col)
+          MC_COL_SS: prog = 8'd139;
+          MC_COL_SL: prog = 8'd140;
+          default: prog = 8'd138;
+        endcase
+      end
+      9'd240: begin  // JP cc,dst X
+        unique case (col)
+          MC_COL_SS: prog = 8'd139;
+          MC_COL_SL: prog = 8'd141;
+          default: prog = 8'd139;
+        endcase
+      end
+      9'd241: begin  // CALL dst DA
+        unique case (col)
+          MC_COL_SS: prog = 8'd142;
+          MC_COL_SL: prog = 8'd143;
+          default: prog = 8'd72;
+        endcase
+      end
+      9'd242: begin  // CALL dst X
+        unique case (col)
+          MC_COL_SS: prog = 8'd142;
+          MC_COL_SL: prog = 8'd145;
+          default: prog = 8'd144;
+        endcase
+      end
+      9'd243: begin  // LDB R,src DA
+        unique case (col)
+          MC_COL_SS: prog = 8'd53;
+          MC_COL_SL: prog = 8'd54;
+          default: prog = 8'd52;
+        endcase
+      end
+      9'd244: begin  // LDB R,src X
+        unique case (col)
+          MC_COL_SS: prog = 8'd53;
+          MC_COL_SL: prog = 8'd55;
+          default: prog = 8'd53;
+        endcase
+      end
+      9'd245: begin  // LD R,src DA
+        unique case (col)
+          MC_COL_SS: prog = 8'd53;
+          MC_COL_SL: prog = 8'd54;
+          default: prog = 8'd52;
+        endcase
+      end
+      9'd246: begin  // LD R,src X
+        unique case (col)
+          MC_COL_SS: prog = 8'd53;
+          MC_COL_SL: prog = 8'd55;
+          default: prog = 8'd53;
+        endcase
+      end
+      9'd247: begin  // RESB dst,b DA
+        unique case (col)
+          MC_COL_SS: prog = 8'd147;
+          MC_COL_SL: prog = 8'd148;
+          default: prog = 8'd146;
+        endcase
+      end
+      9'd248: begin  // RESB dst,b X
+        unique case (col)
+          MC_COL_SS: prog = 8'd147;
+          MC_COL_SL: prog = 8'd149;
+          default: prog = 8'd147;
+        endcase
+      end
+      9'd249: begin  // RES dst,b DA
+        unique case (col)
+          MC_COL_SS: prog = 8'd147;
+          MC_COL_SL: prog = 8'd148;
+          default: prog = 8'd146;
+        endcase
+      end
+      9'd250: begin  // RES dst,b X
+        unique case (col)
+          MC_COL_SS: prog = 8'd147;
+          MC_COL_SL: prog = 8'd149;
+          default: prog = 8'd147;
+        endcase
+      end
+      9'd251: begin  // SETB dst,b DA
+        unique case (col)
+          MC_COL_SS: prog = 8'd147;
+          MC_COL_SL: prog = 8'd148;
+          default: prog = 8'd146;
+        endcase
+      end
+      9'd252: begin  // SETB dst,b X
+        unique case (col)
+          MC_COL_SS: prog = 8'd147;
+          MC_COL_SL: prog = 8'd149;
+          default: prog = 8'd147;
+        endcase
+      end
+      9'd253: begin  // SET dst,b DA
+        unique case (col)
+          MC_COL_SS: prog = 8'd147;
+          MC_COL_SL: prog = 8'd148;
+          default: prog = 8'd146;
+        endcase
+      end
+      9'd254: begin  // SET dst,b X
+        unique case (col)
+          MC_COL_SS: prog = 8'd147;
+          MC_COL_SL: prog = 8'd149;
+          default: prog = 8'd147;
+        endcase
+      end
+      9'd255: begin  // BITB dst,b DA
+        unique case (col)
+          MC_COL_SS: prog = 8'd62;
+          MC_COL_SL: prog = 8'd151;
+          default: prog = 8'd150;
+        endcase
+      end
+      9'd256: begin  // BITB dst,b X
+        unique case (col)
+          MC_COL_SS: prog = 8'd62;
+          MC_COL_SL: prog = 8'd64;
+          default: prog = 8'd62;
+        endcase
+      end
+      9'd257: begin  // BIT dst,b DA
+        unique case (col)
+          MC_COL_SS: prog = 8'd62;
+          MC_COL_SL: prog = 8'd151;
+          default: prog = 8'd150;
+        endcase
+      end
+      9'd258: begin  // BIT dst,b X
+        unique case (col)
+          MC_COL_SS: prog = 8'd62;
+          MC_COL_SL: prog = 8'd64;
+          default: prog = 8'd62;
+        endcase
+      end
+      9'd259: begin  // INCB dst,n DA
+        unique case (col)
+          MC_COL_SS: prog = 8'd147;
+          MC_COL_SL: prog = 8'd148;
+          default: prog = 8'd146;
+        endcase
+      end
+      9'd260: begin  // INCB dst,n X
+        unique case (col)
+          MC_COL_SS: prog = 8'd147;
+          MC_COL_SL: prog = 8'd149;
+          default: prog = 8'd147;
+        endcase
+      end
+      9'd261: begin  // INC dst,n DA
+        unique case (col)
+          MC_COL_SS: prog = 8'd147;
+          MC_COL_SL: prog = 8'd148;
+          default: prog = 8'd146;
+        endcase
+      end
+      9'd262: begin  // INC dst,n X
+        unique case (col)
+          MC_COL_SS: prog = 8'd147;
+          MC_COL_SL: prog = 8'd149;
+          default: prog = 8'd147;
+        endcase
+      end
+      9'd263: begin  // DECB dst,n DA
+        unique case (col)
+          MC_COL_SS: prog = 8'd147;
+          MC_COL_SL: prog = 8'd148;
+          default: prog = 8'd146;
+        endcase
+      end
+      9'd264: begin  // DECB dst,n X
+        unique case (col)
+          MC_COL_SS: prog = 8'd147;
+          MC_COL_SL: prog = 8'd149;
+          default: prog = 8'd147;
+        endcase
+      end
+      9'd265: begin  // DEC dst,n DA
+        unique case (col)
+          MC_COL_SS: prog = 8'd147;
+          MC_COL_SL: prog = 8'd148;
+          default: prog = 8'd146;
+        endcase
+      end
+      9'd266: begin  // DEC dst,n X
+        unique case (col)
+          MC_COL_SS: prog = 8'd147;
+          MC_COL_SL: prog = 8'd149;
+          default: prog = 8'd147;
+        endcase
+      end
+      9'd267: begin  // EXB R,src DA
+        unique case (col)
+          MC_COL_SS: prog = 8'd153;
+          MC_COL_SL: prog = 8'd154;
+          default: prog = 8'd152;
+        endcase
+      end
+      9'd268: begin  // EXB R,src X
+        unique case (col)
+          MC_COL_SS: prog = 8'd153;
+          MC_COL_SL: prog = 8'd155;
+          default: prog = 8'd153;
+        endcase
+      end
+      9'd269: begin  // EX R,src DA
+        unique case (col)
+          MC_COL_SS: prog = 8'd153;
+          MC_COL_SL: prog = 8'd154;
+          default: prog = 8'd152;
+        endcase
+      end
+      9'd270: begin  // EX R,src X
+        unique case (col)
+          MC_COL_SS: prog = 8'd153;
+          MC_COL_SL: prog = 8'd155;
+          default: prog = 8'd153;
+        endcase
+      end
+      9'd271: begin  // LDB dst,R DA
+        unique case (col)
+          MC_COL_SS: prog = 8'd72;
+          MC_COL_SL: prog = 8'd73;
+          default: prog = 8'd71;
+        endcase
+      end
+      9'd272: begin  // LDB dst,R X
+        unique case (col)
+          MC_COL_SS: prog = 8'd72;
+          MC_COL_SL: prog = 8'd79;
+          default: prog = 8'd72;
+        endcase
+      end
+      9'd273: begin  // LD dst,R DA
+        unique case (col)
+          MC_COL_SS: prog = 8'd72;
+          MC_COL_SL: prog = 8'd73;
+          default: prog = 8'd71;
+        endcase
+      end
+      9'd274: begin  // LD dst,R X
+        unique case (col)
+          MC_COL_SS: prog = 8'd72;
+          MC_COL_SL: prog = 8'd79;
+          default: prog = 8'd72;
+        endcase
+      end
+      9'd275: prog = 8'd39;  // LDB R,src BX
+      9'd276: prog = 8'd39;  // LD R,src BX
+      9'd277: prog = 8'd40;  // LDB dst,R BX
+      9'd278: prog = 8'd40;  // LD dst,R BX
+      9'd279: prog = 8'd41;  // LDA R,src BX
+      9'd280: prog = 8'd42;  // LDL R,src BX
+      9'd281: begin  // LDA R,src DA
+        unique case (col)
+          MC_COL_SS: prog = 8'd157;
+          MC_COL_SL: prog = 8'd158;
+          default: prog = 8'd156;
+        endcase
+      end
+      9'd282: begin  // LDA R,src X
+        unique case (col)
+          MC_COL_SS: prog = 8'd157;
+          MC_COL_SL: prog = 8'd159;
+          default: prog = 8'd157;
+        endcase
+      end
+      9'd283: prog = 8'd43;  // LDL dst,R BX
+      9'd284: begin  // LDPS src DA
+        unique case (col)
+          MC_COL_SS: prog = 8'd161;
+          MC_COL_SL: prog = 8'd162;
+          default: prog = 8'd160;
+        endcase
+      end
+      9'd285: begin  // LDPS src X
+        unique case (col)
+          MC_COL_SS: prog = 8'd161;
+          MC_COL_SL: prog = 8'd164;
+          default: prog = 8'd163;
+        endcase
+      end
+      9'd286: prog = 8'd165;  // HALT -
+      9'd287: begin  // IRET -
+        unique case (col)
+          MC_COL_SS: prog = 8'd167;
+          MC_COL_SL: prog = 8'd167;
+          default: prog = 8'd166;
+        endcase
+      end
+      9'd288: prog = 8'd168;  // MSET -
+      9'd289: prog = 8'd168;  // MRES -
+      9'd290: prog = 8'd33;  // MBIT -
+      9'd291: prog = 8'd169;  // MREQ dst R
+      9'd292: prog = 8'd33;  // DI -
+      9'd293: prog = 8'd33;  // EI -
+      9'd294: prog = 8'd33;  // LDCTL R
+      9'd295: prog = 8'd168;  // SC src IM
+      9'd296: prog = 8'd170;  // ADDB R,src R
+      9'd297: prog = 8'd170;  // ADD R,src R
+      9'd298: prog = 8'd170;  // SUBB R,src R
+      9'd299: prog = 8'd170;  // SUB R,src R
+      9'd300: prog = 8'd170;  // ORB R,src R
+      9'd301: prog = 8'd170;  // OR R,src R
+      9'd302: prog = 8'd170;  // ANDB R,src R
+      9'd303: prog = 8'd170;  // AND R,src R
+      9'd304: prog = 8'd170;  // XORB R,src R
+      9'd305: prog = 8'd170;  // XOR R,src R
+      9'd306: prog = 8'd170;  // CPB R,src R
+      9'd307: prog = 8'd170;  // CP R,src R
+      9'd308: prog = 8'd33;  // COMB dst R
+      9'd309: prog = 8'd33;  // LDCTLB Rb,FLAGS R
+      9'd310: prog = 8'd33;  // NEGB dst R
+      9'd311: prog = 8'd33;  // TESTB dst R
+      9'd312: prog = 8'd33;  // TSETB dst R
+      9'd313: prog = 8'd33;  // CLRB dst R
+      9'd314: prog = 8'd33;  // LDCTLB FLAGS,Rb R
+      9'd315: prog = 8'd33;  // COM dst R
+      9'd316: prog = 8'd33;  // SETFLG -
+      9'd317: prog = 8'd33;  // NEG dst R
+      9'd318: prog = 8'd33;  // RESFLG -
+      9'd319: prog = 8'd33;  // TEST dst R
+      9'd320: prog = 8'd33;  // COMFLG -
+      9'd321: prog = 8'd33;  // TSET dst R
+      9'd322: prog = 8'd33;  // NOP -
+      9'd323: prog = 8'd33;  // CLR dst R
+      9'd324: prog = 8'd171;  // EPU flags -
+      9'd325: prog = 8'd172;  // EPU flags - (internal)
+      9'd326: prog = 8'd173;  // EPU registers R
+      9'd327: prog = 8'd174;  // CPL R,src R
+      9'd328: prog = 8'd175;  // PUSHL IR,src R
+      9'd329: prog = 8'd174;  // SUBL R,src R
+      9'd330: prog = 8'd176;  // PUSH IR,src R
+      9'd331: prog = 8'd168;  // LDL R,src R
+      9'd332: prog = 8'd177;  // POPL dst,IR R
+      9'd333: prog = 8'd174;  // ADDL R,src R
+      9'd334: prog = 8'd178;  // POP dst,IR R
+      9'd335: begin  // MULTL R,src R
+        unique case (col)
+          MC_COL_SS:
+            unique case (path)
+              MC_PATH_NOT_TAKEN: prog = 8'd179;
+              MC_PATH_ZERO: prog = 8'd180;
+              default: prog = 8'd179;
+            endcase
+          MC_COL_SL:
+            unique case (path)
+              MC_PATH_NOT_TAKEN: prog = 8'd179;
+              MC_PATH_ZERO: prog = 8'd180;
+              default: prog = 8'd179;
+            endcase
+          default:
+            unique case (path)
+              MC_PATH_NOT_TAKEN: prog = 8'd179;
+              MC_PATH_ZERO: prog = 8'd180;
+              default: prog = 8'd179;
+            endcase
+        endcase
+      end
+      9'd336: begin  // MULT R,src R
+        unique case (col)
+          MC_COL_SS:
+            unique case (path)
+              MC_PATH_NOT_TAKEN: prog = 8'd181;
+              MC_PATH_ZERO: prog = 8'd182;
+              default: prog = 8'd181;
+            endcase
+          MC_COL_SL:
+            unique case (path)
+              MC_PATH_NOT_TAKEN: prog = 8'd181;
+              MC_PATH_ZERO: prog = 8'd182;
+              default: prog = 8'd181;
+            endcase
+          default:
+            unique case (path)
+              MC_PATH_NOT_TAKEN: prog = 8'd181;
+              MC_PATH_ZERO: prog = 8'd182;
+              default: prog = 8'd181;
+            endcase
+        endcase
+      end
+      9'd337: prog = 8'd183;  // DIVL R,src R
+      9'd338: prog = 8'd183;  // DIV R,src R
+      9'd339: prog = 8'd184;  // TESTL dst R
+      9'd340: begin  // RET cc - (taken)
+        unique case (col)
+          MC_COL_SS:
+            unique case (path)
+              MC_PATH_NOT_TAKEN: prog = 8'd33;
+              MC_PATH_ZERO: prog = 8'd186;
+              default: prog = 8'd186;
+            endcase
+          MC_COL_SL:
+            unique case (path)
+              MC_PATH_NOT_TAKEN: prog = 8'd33;
+              MC_PATH_ZERO: prog = 8'd186;
+              default: prog = 8'd186;
+            endcase
+          default:
+            unique case (path)
+              MC_PATH_NOT_TAKEN: prog = 8'd33;
+              MC_PATH_ZERO: prog = 8'd185;
+              default: prog = 8'd185;
+            endcase
+        endcase
+      end
+      9'd343: prog = 8'd170;  // RESB dst,b R
+      9'd344: prog = 8'd170;  // RES dst,b R
+      9'd345: prog = 8'd170;  // SETB dst,b R
+      9'd346: prog = 8'd170;  // SET dst,b R
+      9'd347: prog = 8'd170;  // BITB dst,b R
+      9'd348: prog = 8'd170;  // BIT dst,b R
+      9'd349: prog = 8'd170;  // INCB dst,n R
+      9'd350: prog = 8'd170;  // INC dst,n R
+      9'd351: prog = 8'd170;  // DECB dst,n R
+      9'd352: prog = 8'd170;  // DEC dst,n R
+      9'd353: prog = 8'd187;  // EXB R,src R
+      9'd354: prog = 8'd187;  // EX R,src R
+      9'd355: prog = 8'd168;  // TCCB cc,dst R
+      9'd356: prog = 8'd168;  // TCC cc,dst R
+      9'd357: prog = 8'd168;  // DAB dst R
+      9'd358: prog = 8'd188;  // EXTSB dst R
+      9'd359: prog = 8'd188;  // EXTSL dst R
+      9'd360: prog = 8'd188;  // EXTS dst R
+      9'd361: prog = 8'd187;  // RLB dst,n R (n=1)
+      9'd362: prog = 8'd189;  // SLLB dst,n R
+      9'd363: prog = 8'd33;  // RLB dst,n R (n=2)
+      9'd364: prog = 8'd190;  // SDLB dst,R R
+      9'd365: prog = 8'd187;  // RRB dst,n R (n=1)
+      9'd366: prog = 8'd33;  // RRB dst,n R (n=2)
+      9'd367: prog = 8'd187;  // RLCB dst,n R (n=1)
+      9'd368: prog = 8'd189;  // SLAB dst,n R
+      9'd369: prog = 8'd33;  // RLCB dst,n R (n=2)
+      9'd370: prog = 8'd190;  // SDAB dst,R R
+      9'd371: prog = 8'd187;  // RRCB dst,n R (n=1)
+      9'd372: prog = 8'd33;  // RRCB dst,n R (n=2)
+      9'd373: prog = 8'd187;  // RL dst,n R (n=1)
+      9'd374: prog = 8'd189;  // SLL dst,n R
+      9'd375: prog = 8'd33;  // RL dst,n R (n=2)
+      9'd376: prog = 8'd190;  // SDL dst,R R
+      9'd377: prog = 8'd187;  // RR dst,n R (n=1)
+      9'd378: prog = 8'd189;  // SLLL dst,n R
+      9'd379: prog = 8'd33;  // RR dst,n R (n=2)
+      9'd380: prog = 8'd190;  // SDLL dst,R R
+      9'd381: prog = 8'd187;  // RLC dst,n R (n=1)
+      9'd382: prog = 8'd189;  // SLA dst,n R
+      9'd383: prog = 8'd33;  // RLC dst,n R (n=2)
+      9'd384: prog = 8'd190;  // SDA dst,R R
+      9'd385: prog = 8'd187;  // RRC dst,n R (n=1)
+      9'd386: prog = 8'd189;  // SLAL dst,n R
+      9'd387: prog = 8'd33;  // RRC dst,n R (n=2)
+      9'd388: prog = 8'd190;  // SDAL dst,R R
+      9'd389: prog = 8'd168;  // ADCB R,src R
+      9'd390: prog = 8'd168;  // ADC R,src R
+      9'd391: prog = 8'd168;  // SBCB R,src R
+      9'd392: prog = 8'd168;  // SBC R,src R
+      9'd393: prog = 8'd191;  // TRIB IR
+      9'd394: prog = 8'd192;  // TRTIB IR
+      9'd395: prog = 8'd193;  // TRIRB IR
+      9'd396: prog = 8'd194;  // TRTIRB IR
+      9'd397: prog = 8'd191;  // TRDB IR
+      9'd398: prog = 8'd192;  // TRTDB IR
+      9'd399: prog = 8'd193;  // TRDRB IR
+      9'd400: prog = 8'd194;  // TRTDRB IR
+      9'd401: prog = 8'd195;  // CPIB IR
+      9'd402: prog = 8'd196;  // LDIB IR
+      9'd403: prog = 8'd197;  // LDIRB IR
+      9'd404: prog = 8'd198;  // CPSIB IR
+      9'd405: prog = 8'd199;  // CPIRB IR
+      9'd406: prog = 8'd200;  // CPSIRB IR
+      9'd407: prog = 8'd195;  // CPDB IR
+      9'd408: prog = 8'd196;  // LDDB IR
+      9'd409: prog = 8'd197;  // LDDRB IR
+      9'd410: prog = 8'd198;  // CPSDB IR
+      9'd411: prog = 8'd199;  // CPDRB IR
+      9'd412: prog = 8'd200;  // CPSDRB IR
+      9'd413: prog = 8'd195;  // CPI IR
+      9'd414: prog = 8'd196;  // LDI IR
+      9'd415: prog = 8'd197;  // LDIR IR
+      9'd416: prog = 8'd198;  // CPSI IR
+      9'd417: prog = 8'd199;  // CPIR IR
+      9'd418: prog = 8'd200;  // CPSIR IR
+      9'd419: prog = 8'd195;  // CPD IR
+      9'd420: prog = 8'd196;  // LDD IR
+      9'd421: prog = 8'd197;  // LDDR IR
+      9'd422: prog = 8'd198;  // CPSD IR
+      9'd423: prog = 8'd199;  // CPDR IR
+      9'd424: prog = 8'd200;  // CPSDR IR
+      9'd425: prog = 8'd201;  // RRDB R,src R
+      9'd426: prog = 8'd168;  // LDK R,src IM
+      9'd427: prog = 8'd201;  // RLDB R,src R
+      9'd428: prog = 8'd168;  // LDB R,src IM (imm8)
+      9'd429: begin  // CALR dst RA
+        unique case (col)
+          MC_COL_SS: prog = 8'd36;
+          MC_COL_SL: prog = 8'd36;
+          default: prog = 8'd35;
+        endcase
+      end
+      9'd430: prog = 8'd187;  // JR cc,dst RA
+      9'd431: prog = 8'd188;  // DJNZ R,dst RA
+      9'd432: begin  // (trap entry)
+        unique case (col)
+          MC_COL_SS: prog = 8'd203;
+          MC_COL_SL: prog = 8'd203;
+          default: prog = 8'd202;
+        endcase
+      end
+      9'd433: begin  // (interrupt entry)
+        unique case (col)
+          MC_COL_SS: prog = 8'd205;
+          MC_COL_SL: prog = 8'd205;
+          default: prog = 8'd204;
+        endcase
+      end
+      default: ;
+    endcase
+  end
+
+endmodule
+
+// z8000_mc_cycle_gen: (program, position) -> cycle.
+module z8000_mc_cycle_gen
+  import z8000_mc_pkg::*;
+(
+  input  logic [MC_PROG_W-1:0] prog,
+  input  logic [MC_POS_W-1:0]  pos,
+  output mc_cycle_t            cyc
+);
+
+  always_comb begin
+    cyc = mc_cycle_t'(0);
+    unique case (prog)
+      8'd0: begin  // F1 / F1{B1}
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd0};
+          default: ;
+        endcase
+      end
+      8'd1: begin  // F1+1{D3} · Fn
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd1};
+          4'd1: cyc = '{kind: MC_FN, clocks: 4'd0};
+          default: ;
+        endcase
+      end
+      8'd2: begin  // F1+1{P1} · R
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd1};
+          4'd1: cyc = '{kind: MC_R, clocks: 4'd0};
+          default: ;
+        endcase
+      end
+      8'd3: begin  // F1+2{P1+O2} · R+1{P3} · W
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd2};
+          4'd1: cyc = '{kind: MC_R, clocks: 4'd1};
+          4'd2: cyc = '{kind: MC_W, clocks: 4'd0};
+          default: ;
+        endcase
+      end
+      8'd4: begin  // F1+1{P1} · Fn · R+1{P3}
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd1};
+          4'd1: cyc = '{kind: MC_FN, clocks: 4'd0};
+          4'd2: cyc = '{kind: MC_R, clocks: 4'd1};
+          default: ;
+        endcase
+      end
+      8'd5: begin  // F1+1{P1} · R+1{P3}
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd1};
+          4'd1: cyc = '{kind: MC_R, clocks: 4'd1};
+          default: ;
+        endcase
+      end
+      8'd6: begin  // F1+1{P1} · Fn+1{O2} · W
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd1};
+          4'd1: cyc = '{kind: MC_FN, clocks: 4'd1};
+          4'd2: cyc = '{kind: MC_W, clocks: 4'd0};
+          default: ;
+        endcase
+      end
+      8'd7: begin  // F1+2{P1+O2} · R · W
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd2};
+          4'd1: cyc = '{kind: MC_R, clocks: 4'd0};
+          4'd2: cyc = '{kind: MC_W, clocks: 4'd0};
+          default: ;
+        endcase
+      end
+      8'd8: begin  // F1+2{P1+O2} · W
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd2};
+          4'd1: cyc = '{kind: MC_W, clocks: 4'd0};
+          default: ;
+        endcase
+      end
+      8'd9: begin  // F1+3{P1} · Fn · W
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd3};
+          4'd1: cyc = '{kind: MC_FN, clocks: 4'd0};
+          4'd2: cyc = '{kind: MC_W, clocks: 4'd0};
+          default: ;
+        endcase
+      end
+      8'd10: begin  // F1+4{D3} · Fn+1{P1} | n x (R)
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd4};
+          4'd1: cyc = '{kind: MC_FN, clocks: 4'd1};
+          4'd2: cyc = '{kind: MC_R, clocks: 4'd0};
+          default: ;
+        endcase
+      end
+      8'd11: begin  // F1+4{D3} · Fn+1{P1} | n x (W)
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd4};
+          4'd1: cyc = '{kind: MC_FN, clocks: 4'd1};
+          4'd2: cyc = '{kind: MC_W, clocks: 4'd0};
+          default: ;
+        endcase
+      end
+      8'd12: begin  // F1+1{D3} · Fn · Fn+4{P3}
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd1};
+          4'd1: cyc = '{kind: MC_FN, clocks: 4'd0};
+          4'd2: cyc = '{kind: MC_FN, clocks: 4'd4};
+          default: ;
+        endcase
+      end
+      8'd13: begin  // F1+1{P1} · R · R+4{P3}
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd1};
+          4'd1: cyc = '{kind: MC_R, clocks: 4'd0};
+          4'd2: cyc = '{kind: MC_R, clocks: 4'd4};
+          default: ;
+        endcase
+      end
+      8'd14: begin  // F1+3{P1} · R · R+1{P3} · W+1{P4} · W
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd3};
+          4'd1: cyc = '{kind: MC_R, clocks: 4'd0};
+          4'd2: cyc = '{kind: MC_R, clocks: 4'd1};
+          4'd3: cyc = '{kind: MC_W, clocks: 4'd1};
+          4'd4: cyc = '{kind: MC_W, clocks: 4'd0};
+          default: ;
+        endcase
+      end
+      8'd15: begin  // F1+3{P1} · R+1{P3} · W
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd3};
+          4'd1: cyc = '{kind: MC_R, clocks: 4'd1};
+          4'd2: cyc = '{kind: MC_W, clocks: 4'd0};
+          default: ;
+        endcase
+      end
+      8'd16: begin  // F1+1{D3} · Fn · Fn+1{P3}
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd1};
+          4'd1: cyc = '{kind: MC_FN, clocks: 4'd0};
+          4'd2: cyc = '{kind: MC_FN, clocks: 4'd1};
+          default: ;
+        endcase
+      end
+      8'd17: begin  // F1+1{P1} · R · R+1{P3}
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd1};
+          4'd1: cyc = '{kind: MC_R, clocks: 4'd0};
+          4'd2: cyc = '{kind: MC_R, clocks: 4'd1};
+          default: ;
+        endcase
+      end
+      8'd18: begin  // F1+1{P1} · R · R+2{P3} · W+1{P4} · W
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd1};
+          4'd1: cyc = '{kind: MC_R, clocks: 4'd0};
+          4'd2: cyc = '{kind: MC_R, clocks: 4'd2};
+          4'd3: cyc = '{kind: MC_W, clocks: 4'd1};
+          4'd4: cyc = '{kind: MC_W, clocks: 4'd0};
+          default: ;
+        endcase
+      end
+      8'd19: begin  // F1+1{P1} · R+2{P3} · W
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd1};
+          4'd1: cyc = '{kind: MC_R, clocks: 4'd2};
+          4'd2: cyc = '{kind: MC_W, clocks: 4'd0};
+          default: ;
+        endcase
+      end
+      8'd20: begin  // F1 · Fn · Fn{MD+MO} · I6{D2+MO} · I8x31{D2} with n x I7{D4} inline · I8x2{D2} · I3{D2}
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd0};
+          4'd1: cyc = '{kind: MC_FN, clocks: 4'd0};
+          4'd2: cyc = '{kind: MC_FN, clocks: 4'd0};
+          4'd3: cyc = '{kind: MC_IU, clocks: 4'd0};
+          4'd4: cyc = '{kind: MC_I, clocks: 4'd8};
+          4'd5: cyc = '{kind: MC_I, clocks: 4'd3};
+          default: ;
+        endcase
+      end
+      8'd21: begin  // F1 · Fn · Fn{MD+MO} · I6{D2+MO} · I8{D2} · I7{D2}
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd0};
+          4'd1: cyc = '{kind: MC_FN, clocks: 4'd0};
+          4'd2: cyc = '{kind: MC_FN, clocks: 4'd0};
+          4'd3: cyc = '{kind: MC_I, clocks: 4'd6};
+          4'd4: cyc = '{kind: MC_I, clocks: 4'd8};
+          4'd5: cyc = '{kind: MC_I, clocks: 4'd7};
+          default: ;
+        endcase
+      end
+      8'd22: begin  // F1+1{P1+MD} · R · R{MD+MO} · I5{D2+MO} · I8x31{D2} with n x I7{D4} inline · I8x2{D2} · I3{D2}
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd1};
+          4'd1: cyc = '{kind: MC_R, clocks: 4'd0};
+          4'd2: cyc = '{kind: MC_R, clocks: 4'd0};
+          4'd3: cyc = '{kind: MC_IU, clocks: 4'd0};
+          4'd4: cyc = '{kind: MC_I, clocks: 4'd8};
+          4'd5: cyc = '{kind: MC_I, clocks: 4'd3};
+          default: ;
+        endcase
+      end
+      8'd23: begin  // F1+1{P1+MD} · R · R{MD+MO} · I5{D2+MO} · I8{D2} · I7{D2}
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd1};
+          4'd1: cyc = '{kind: MC_R, clocks: 4'd0};
+          4'd2: cyc = '{kind: MC_R, clocks: 4'd0};
+          4'd3: cyc = '{kind: MC_I, clocks: 4'd5};
+          4'd4: cyc = '{kind: MC_I, clocks: 4'd8};
+          4'd5: cyc = '{kind: MC_I, clocks: 4'd7};
+          default: ;
+        endcase
+      end
+      8'd24: begin  // F1 · Fn{MD} · I4x16{D2} / F1 · Fn{MD+MO} · I5{B6+D2+MO} · I6x16{B6+D2} / F1 · Fn{MD+MO} · I7{D2+MO}
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd0};
+          4'd1: cyc = '{kind: MC_FN, clocks: 4'd0};
+          4'd2: cyc = '{kind: MC_IU, clocks: 4'd0};
+          default: ;
+        endcase
+      end
+      8'd25: begin  // F1 · Fn{MD} · I8{D2} · I4{D2}
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd0};
+          4'd1: cyc = '{kind: MC_FN, clocks: 4'd0};
+          4'd2: cyc = '{kind: MC_I, clocks: 4'd8};
+          4'd3: cyc = '{kind: MC_I, clocks: 4'd4};
+          default: ;
+        endcase
+      end
+      8'd26: begin  // F1+1{P1+MD} · R{MD+MO} · I3{D2+MO} · I4x15{D2} / F1+1{P1+MD} · R{MD+MO} · I4{B6+D2+MO} · I6x16{B6+D2} / F1+1{P1+MD} · R{MD+MO} · I6{D2+MO}
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd1};
+          4'd1: cyc = '{kind: MC_R, clocks: 4'd0};
+          4'd2: cyc = '{kind: MC_IU, clocks: 4'd0};
+          default: ;
+        endcase
+      end
+      8'd27: begin  // F1+1{P1+MD} · R{MD+MO} · I7{D2+MO} · I4{D2}
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd1};
+          4'd1: cyc = '{kind: MC_R, clocks: 4'd0};
+          4'd2: cyc = '{kind: MC_I, clocks: 4'd7};
+          4'd3: cyc = '{kind: MC_I, clocks: 4'd4};
+          default: ;
+        endcase
+      end
+      8'd28: begin  // F1 · Fn · Fn{MD+MO} · I7x105{D5}
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd0};
+          4'd1: cyc = '{kind: MC_FN, clocks: 4'd0};
+          4'd2: cyc = '{kind: MC_FN, clocks: 4'd0};
+          4'd3: cyc = '{kind: MC_IU, clocks: 4'd0};
+          default: ;
+        endcase
+      end
+      8'd29: begin  // F1+1{P1+MD} · R · R{MD+MO} · I6{D5+MO} · I7x104{D5}
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd1};
+          4'd1: cyc = '{kind: MC_R, clocks: 4'd0};
+          4'd2: cyc = '{kind: MC_R, clocks: 4'd0};
+          4'd3: cyc = '{kind: MC_IU, clocks: 4'd0};
+          default: ;
+        endcase
+      end
+      8'd30: begin  // F1+1{P1} · R · R+3{P3}
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd1};
+          4'd1: cyc = '{kind: MC_R, clocks: 4'd0};
+          4'd2: cyc = '{kind: MC_R, clocks: 4'd3};
+          default: ;
+        endcase
+      end
+      8'd31: begin  // F1+2{P1+O2} · W · W
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd2};
+          4'd1: cyc = '{kind: MC_W, clocks: 4'd0};
+          4'd2: cyc = '{kind: MC_W, clocks: 4'd0};
+          default: ;
+        endcase
+      end
+      8'd32: begin  // F1+2{D2} · I5{D2}
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd2};
+          4'd1: cyc = '{kind: MC_I, clocks: 4'd5};
+          default: ;
+        endcase
+      end
+      8'd33: begin  // F1+4{P1}
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd4};
+          default: ;
+        endcase
+      end
+      8'd34: begin  // F1+2{D2} · I5x2{D2}
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd2};
+          4'd1: cyc = '{kind: MC_I, clocks: 4'd5};
+          default: ;
+        endcase
+      end
+      8'd35: begin  // F1+4{P1} · W
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd4};
+          4'd1: cyc = '{kind: MC_W, clocks: 4'd0};
+          default: ;
+        endcase
+      end
+      8'd36: begin  // F1+4{P1} · W+2{C1} · W
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd4};
+          4'd1: cyc = '{kind: MC_W, clocks: 4'd2};
+          4'd2: cyc = '{kind: MC_W, clocks: 4'd0};
+          default: ;
+        endcase
+      end
+      8'd37: begin  // F1+1{P1} · Fn+3{P1}
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd1};
+          4'd1: cyc = '{kind: MC_FN, clocks: 4'd3};
+          default: ;
+        endcase
+      end
+      8'd38: begin  // F1+1{P1} · R+1{P3} · W
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd1};
+          4'd1: cyc = '{kind: MC_R, clocks: 4'd1};
+          4'd2: cyc = '{kind: MC_W, clocks: 4'd0};
+          default: ;
+        endcase
+      end
+      8'd39: begin  // F1+1{P1} · Fn+4{P2} · R
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd1};
+          4'd1: cyc = '{kind: MC_FN, clocks: 4'd4};
+          4'd2: cyc = '{kind: MC_R, clocks: 4'd0};
+          default: ;
+        endcase
+      end
+      8'd40: begin  // F1+1{P1} · Fn+4{P2} · W
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd1};
+          4'd1: cyc = '{kind: MC_FN, clocks: 4'd4};
+          4'd2: cyc = '{kind: MC_W, clocks: 4'd0};
+          default: ;
+        endcase
+      end
+      8'd41: begin  // F1+4{D3} · Fn+2{P2} · I3{D2}
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd4};
+          4'd1: cyc = '{kind: MC_FN, clocks: 4'd2};
+          4'd2: cyc = '{kind: MC_I, clocks: 4'd3};
+          default: ;
+        endcase
+      end
+      8'd42: begin  // F1+1{P1} · Fn+4{P2} · R · R
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd1};
+          4'd1: cyc = '{kind: MC_FN, clocks: 4'd4};
+          4'd2: cyc = '{kind: MC_R, clocks: 4'd0};
+          4'd3: cyc = '{kind: MC_R, clocks: 4'd0};
+          default: ;
+        endcase
+      end
+      8'd43: begin  // F1+1{P1} · Fn+4{P2} · W · W
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd1};
+          4'd1: cyc = '{kind: MC_FN, clocks: 4'd4};
+          4'd2: cyc = '{kind: MC_W, clocks: 4'd0};
+          4'd3: cyc = '{kind: MC_W, clocks: 4'd0};
+          default: ;
+        endcase
+      end
+      8'd44: begin  // F1+1{P1} · R · R+2{P3}
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd1};
+          4'd1: cyc = '{kind: MC_R, clocks: 4'd0};
+          4'd2: cyc = '{kind: MC_R, clocks: 4'd2};
+          default: ;
+        endcase
+      end
+      8'd45: begin  // F1+2{P1+U} · R · R{C2} · R+2{P3}
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd2};
+          4'd1: cyc = '{kind: MC_R, clocks: 4'd0};
+          4'd2: cyc = '{kind: MC_R, clocks: 4'd0};
+          4'd3: cyc = '{kind: MC_R, clocks: 4'd2};
+          default: ;
+        endcase
+      end
+      8'd46: begin  // F1 · Fn+1{P1+BR} · IO+3{P3} · W · I4{BR+U}
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd0};
+          4'd1: cyc = '{kind: MC_FN, clocks: 4'd1};
+          4'd2: cyc = '{kind: MC_IO, clocks: 4'd3};
+          4'd3: cyc = '{kind: MC_W, clocks: 4'd0};
+          4'd4: cyc = '{kind: MC_I, clocks: 4'd4};
+          default: ;
+        endcase
+      end
+      8'd47: begin  // F1 · Fn+1{P1+BR} | n x (IO+3{P3} · W) · I4{BR+U}
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd0};
+          4'd1: cyc = '{kind: MC_FN, clocks: 4'd1};
+          4'd2: cyc = '{kind: MC_IO, clocks: 4'd3};
+          4'd3: cyc = '{kind: MC_W, clocks: 4'd0};
+          4'd4: cyc = '{kind: MC_I, clocks: 4'd4};
+          default: ;
+        endcase
+      end
+      8'd48: begin  // F1 · Fn+1{P1+BR} · R+3{P3} · IO · I4{BR+U}
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd0};
+          4'd1: cyc = '{kind: MC_FN, clocks: 4'd1};
+          4'd2: cyc = '{kind: MC_R, clocks: 4'd3};
+          4'd3: cyc = '{kind: MC_IO, clocks: 4'd0};
+          4'd4: cyc = '{kind: MC_I, clocks: 4'd4};
+          default: ;
+        endcase
+      end
+      8'd49: begin  // F1 · Fn+1{P1+BR} | n x (R+3{P3} · IO) · I4{BR+U}
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd0};
+          4'd1: cyc = '{kind: MC_FN, clocks: 4'd1};
+          4'd2: cyc = '{kind: MC_R, clocks: 4'd3};
+          4'd3: cyc = '{kind: MC_IO, clocks: 4'd0};
+          4'd4: cyc = '{kind: MC_I, clocks: 4'd4};
+          default: ;
+        endcase
+      end
+      8'd50: begin  // F1+2{B3} · Fn{B3} · IO{B3}
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd2};
+          4'd1: cyc = '{kind: MC_FN, clocks: 4'd0};
+          4'd2: cyc = '{kind: MC_IO, clocks: 4'd0};
+          default: ;
+        endcase
+      end
+      8'd51: begin  // F1+3{P1} · IO
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd3};
+          4'd1: cyc = '{kind: MC_IO, clocks: 4'd0};
+          default: ;
+        endcase
+      end
+      8'd52: begin  // F1 · Fa · R
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd0};
+          4'd1: cyc = '{kind: MC_FA, clocks: 4'd0};
+          4'd2: cyc = '{kind: MC_R, clocks: 4'd0};
+          default: ;
+        endcase
+      end
+      8'd53: begin  // F1 · Fa+1{S1} · R / F1 · Fa+1{P2} · R
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd0};
+          4'd1: cyc = '{kind: MC_FA, clocks: 4'd1};
+          4'd2: cyc = '{kind: MC_R, clocks: 4'd0};
+          default: ;
+        endcase
+      end
+      8'd54: begin  // F1 · Fn{S3} · Fa · R
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd0};
+          4'd1: cyc = '{kind: MC_FN, clocks: 4'd0};
+          4'd2: cyc = '{kind: MC_FA, clocks: 4'd0};
+          4'd3: cyc = '{kind: MC_R, clocks: 4'd0};
+          default: ;
+        endcase
+      end
+      8'd55: begin  // F1 · Fn{S3} · Fa+1{P2} · R
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd0};
+          4'd1: cyc = '{kind: MC_FN, clocks: 4'd0};
+          4'd2: cyc = '{kind: MC_FA, clocks: 4'd1};
+          4'd3: cyc = '{kind: MC_R, clocks: 4'd0};
+          default: ;
+        endcase
+      end
+      8'd56: begin  // F1 · Fa+2{O2} · R+1{P3} · W
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd0};
+          4'd1: cyc = '{kind: MC_FA, clocks: 4'd2};
+          4'd2: cyc = '{kind: MC_R, clocks: 4'd1};
+          4'd3: cyc = '{kind: MC_W, clocks: 4'd0};
+          default: ;
+        endcase
+      end
+      8'd57: begin  // F1 · Fa+3{O2+S1} · R+1{P3} · W / F1 · Fa+3{P2+O2} · R+1{P3} · W
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd0};
+          4'd1: cyc = '{kind: MC_FA, clocks: 4'd3};
+          4'd2: cyc = '{kind: MC_R, clocks: 4'd1};
+          4'd3: cyc = '{kind: MC_W, clocks: 4'd0};
+          default: ;
+        endcase
+      end
+      8'd58: begin  // F1 · Fn{S3} · Fa+2{O2} · R+1{P3} · W
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd0};
+          4'd1: cyc = '{kind: MC_FN, clocks: 4'd0};
+          4'd2: cyc = '{kind: MC_FA, clocks: 4'd2};
+          4'd3: cyc = '{kind: MC_R, clocks: 4'd1};
+          4'd4: cyc = '{kind: MC_W, clocks: 4'd0};
+          default: ;
+        endcase
+      end
+      8'd59: begin  // F1 · Fa+1{O2} · Fn · R+1{P3}
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd0};
+          4'd1: cyc = '{kind: MC_FA, clocks: 4'd1};
+          4'd2: cyc = '{kind: MC_FN, clocks: 4'd0};
+          4'd3: cyc = '{kind: MC_R, clocks: 4'd1};
+          default: ;
+        endcase
+      end
+      8'd60: begin  // F1 · Fa+2{O2+S1} · Fn · R+1{P3} / F1 · Fa+2{P2+O2} · Fn · R+1{P3}
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd0};
+          4'd1: cyc = '{kind: MC_FA, clocks: 4'd2};
+          4'd2: cyc = '{kind: MC_FN, clocks: 4'd0};
+          4'd3: cyc = '{kind: MC_R, clocks: 4'd1};
+          default: ;
+        endcase
+      end
+      8'd61: begin  // F1 · Fn{S3} · Fa+1{O2} · Fn · R+1{P3}
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd0};
+          4'd1: cyc = '{kind: MC_FN, clocks: 4'd0};
+          4'd2: cyc = '{kind: MC_FA, clocks: 4'd1};
+          4'd3: cyc = '{kind: MC_FN, clocks: 4'd0};
+          4'd4: cyc = '{kind: MC_R, clocks: 4'd1};
+          default: ;
+        endcase
+      end
+      8'd62: begin  // F1 · Fa+1{O2} · R+1{P3} / F1 · Fa+1{S1} · R+1{P3} / F1 · Fa+1{P2} · R+1{P3}
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd0};
+          4'd1: cyc = '{kind: MC_FA, clocks: 4'd1};
+          4'd2: cyc = '{kind: MC_R, clocks: 4'd1};
+          default: ;
+        endcase
+      end
+      8'd63: begin  // F1 · Fa+2{O2+S1} · R+1{P3} / F1 · Fa+2{P2+O2} · R+1{P3}
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd0};
+          4'd1: cyc = '{kind: MC_FA, clocks: 4'd2};
+          4'd2: cyc = '{kind: MC_R, clocks: 4'd1};
+          default: ;
+        endcase
+      end
+      8'd64: begin  // F1 · Fn{S3} · Fa+1{O2} · R+1{P3} / F1 · Fn{S3} · Fa+1{P2} · R+1{P3}
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd0};
+          4'd1: cyc = '{kind: MC_FN, clocks: 4'd0};
+          4'd2: cyc = '{kind: MC_FA, clocks: 4'd1};
+          4'd3: cyc = '{kind: MC_R, clocks: 4'd1};
+          default: ;
+        endcase
+      end
+      8'd65: begin  // F1 · Fa+1{O2} · Fn+1{O2} · W
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd0};
+          4'd1: cyc = '{kind: MC_FA, clocks: 4'd1};
+          4'd2: cyc = '{kind: MC_FN, clocks: 4'd1};
+          4'd3: cyc = '{kind: MC_W, clocks: 4'd0};
+          default: ;
+        endcase
+      end
+      8'd66: begin  // F1 · Fa+2{O2+S1} · Fn+1{O2} · W / F1 · Fa+2{P2+O2} · Fn+1{O2} · W
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd0};
+          4'd1: cyc = '{kind: MC_FA, clocks: 4'd2};
+          4'd2: cyc = '{kind: MC_FN, clocks: 4'd1};
+          4'd3: cyc = '{kind: MC_W, clocks: 4'd0};
+          default: ;
+        endcase
+      end
+      8'd67: begin  // F1 · Fn{S3} · Fa+1{O2} · Fn+1{O2} · W
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd0};
+          4'd1: cyc = '{kind: MC_FN, clocks: 4'd0};
+          4'd2: cyc = '{kind: MC_FA, clocks: 4'd1};
+          4'd3: cyc = '{kind: MC_FN, clocks: 4'd1};
+          4'd4: cyc = '{kind: MC_W, clocks: 4'd0};
+          default: ;
+        endcase
+      end
+      8'd68: begin  // F1 · Fa+2{O2} · R · W
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd0};
+          4'd1: cyc = '{kind: MC_FA, clocks: 4'd2};
+          4'd2: cyc = '{kind: MC_R, clocks: 4'd0};
+          4'd3: cyc = '{kind: MC_W, clocks: 4'd0};
+          default: ;
+        endcase
+      end
+      8'd69: begin  // F1 · Fa+3{O2+S1} · R · W / F1 · Fa+3{P2+O2} · R · W
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd0};
+          4'd1: cyc = '{kind: MC_FA, clocks: 4'd3};
+          4'd2: cyc = '{kind: MC_R, clocks: 4'd0};
+          4'd3: cyc = '{kind: MC_W, clocks: 4'd0};
+          default: ;
+        endcase
+      end
+      8'd70: begin  // F1 · Fn{S3} · Fa+2{O2} · R · W
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd0};
+          4'd1: cyc = '{kind: MC_FN, clocks: 4'd0};
+          4'd2: cyc = '{kind: MC_FA, clocks: 4'd2};
+          4'd3: cyc = '{kind: MC_R, clocks: 4'd0};
+          4'd4: cyc = '{kind: MC_W, clocks: 4'd0};
+          default: ;
+        endcase
+      end
+      8'd71: begin  // F1 · Fa+2{O2} · W
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd0};
+          4'd1: cyc = '{kind: MC_FA, clocks: 4'd2};
+          4'd2: cyc = '{kind: MC_W, clocks: 4'd0};
+          default: ;
+        endcase
+      end
+      8'd72: begin  // F1 · Fa+3{O2+S1} · W / F1 · Fa+3{P2+O2} · W / F1 · Fa+3{P2} · W
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd0};
+          4'd1: cyc = '{kind: MC_FA, clocks: 4'd3};
+          4'd2: cyc = '{kind: MC_W, clocks: 4'd0};
+          default: ;
+        endcase
+      end
+      8'd73: begin  // F1 · Fn{S3} · Fa+2{O2} · W
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd0};
+          4'd1: cyc = '{kind: MC_FN, clocks: 4'd0};
+          4'd2: cyc = '{kind: MC_FA, clocks: 4'd2};
+          4'd3: cyc = '{kind: MC_W, clocks: 4'd0};
+          default: ;
+        endcase
+      end
+      8'd74: begin  // F1 · Fn{S3} · Fa+3{P2+O2} · R+1{P3} · W
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd0};
+          4'd1: cyc = '{kind: MC_FN, clocks: 4'd0};
+          4'd2: cyc = '{kind: MC_FA, clocks: 4'd3};
+          4'd3: cyc = '{kind: MC_R, clocks: 4'd1};
+          4'd4: cyc = '{kind: MC_W, clocks: 4'd0};
+          default: ;
+        endcase
+      end
+      8'd75: begin  // F1 · Fn{S3} · Fa+2{P2+O2} · Fn · R+1{P3}
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd0};
+          4'd1: cyc = '{kind: MC_FN, clocks: 4'd0};
+          4'd2: cyc = '{kind: MC_FA, clocks: 4'd2};
+          4'd3: cyc = '{kind: MC_FN, clocks: 4'd0};
+          4'd4: cyc = '{kind: MC_R, clocks: 4'd1};
+          default: ;
+        endcase
+      end
+      8'd76: begin  // F1 · Fn{S3} · Fa+2{P2+O2} · R+1{P3}
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd0};
+          4'd1: cyc = '{kind: MC_FN, clocks: 4'd0};
+          4'd2: cyc = '{kind: MC_FA, clocks: 4'd2};
+          4'd3: cyc = '{kind: MC_R, clocks: 4'd1};
+          default: ;
+        endcase
+      end
+      8'd77: begin  // F1 · Fn{S3} · Fa+2{P2+O2} · Fn+1{O2} · W
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd0};
+          4'd1: cyc = '{kind: MC_FN, clocks: 4'd0};
+          4'd2: cyc = '{kind: MC_FA, clocks: 4'd2};
+          4'd3: cyc = '{kind: MC_FN, clocks: 4'd1};
+          4'd4: cyc = '{kind: MC_W, clocks: 4'd0};
+          default: ;
+        endcase
+      end
+      8'd78: begin  // F1 · Fn{S3} · Fa+3{P2+O2} · R · W
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd0};
+          4'd1: cyc = '{kind: MC_FN, clocks: 4'd0};
+          4'd2: cyc = '{kind: MC_FA, clocks: 4'd3};
+          4'd3: cyc = '{kind: MC_R, clocks: 4'd0};
+          4'd4: cyc = '{kind: MC_W, clocks: 4'd0};
+          default: ;
+        endcase
+      end
+      8'd79: begin  // F1 · Fn{S3} · Fa+3{P2+O2} · W
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd0};
+          4'd1: cyc = '{kind: MC_FN, clocks: 4'd0};
+          4'd2: cyc = '{kind: MC_FA, clocks: 4'd3};
+          4'd3: cyc = '{kind: MC_W, clocks: 4'd0};
+          default: ;
+        endcase
+      end
+      8'd80: begin  // F1+4{D3} · Fn+1{P1} · Fa | n x (R)
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd4};
+          4'd1: cyc = '{kind: MC_FN, clocks: 4'd1};
+          4'd2: cyc = '{kind: MC_FA, clocks: 4'd0};
+          4'd3: cyc = '{kind: MC_R, clocks: 4'd0};
+          default: ;
+        endcase
+      end
+      8'd81: begin  // F1+4{D3} · Fn+1{P1} · Fa+1{S1} | n x (R) / F1+4{D3} · Fn+1{P1} · Fa+1{P2} | n x (R)
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd4};
+          4'd1: cyc = '{kind: MC_FN, clocks: 4'd1};
+          4'd2: cyc = '{kind: MC_FA, clocks: 4'd1};
+          4'd3: cyc = '{kind: MC_R, clocks: 4'd0};
+          default: ;
+        endcase
+      end
+      8'd82: begin  // F1+4{D3} · Fn+1{P1} · Fn{S3} · Fa | n x (R)
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd4};
+          4'd1: cyc = '{kind: MC_FN, clocks: 4'd1};
+          4'd2: cyc = '{kind: MC_FN, clocks: 4'd0};
+          4'd3: cyc = '{kind: MC_FA, clocks: 4'd0};
+          4'd4: cyc = '{kind: MC_R, clocks: 4'd0};
+          default: ;
+        endcase
+      end
+      8'd83: begin  // F1+4{D3} · Fn+1{P1} · Fa | n x (W)
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd4};
+          4'd1: cyc = '{kind: MC_FN, clocks: 4'd1};
+          4'd2: cyc = '{kind: MC_FA, clocks: 4'd0};
+          4'd3: cyc = '{kind: MC_W, clocks: 4'd0};
+          default: ;
+        endcase
+      end
+      8'd84: begin  // F1+4{D3} · Fn+1{P1} · Fa+1{S1} | n x (W) / F1+4{D3} · Fn+1{P1} · Fa+1{P2} | n x (W)
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd4};
+          4'd1: cyc = '{kind: MC_FN, clocks: 4'd1};
+          4'd2: cyc = '{kind: MC_FA, clocks: 4'd1};
+          4'd3: cyc = '{kind: MC_W, clocks: 4'd0};
+          default: ;
+        endcase
+      end
+      8'd85: begin  // F1+4{D3} · Fn+1{P1} · Fn{S3} · Fa | n x (W)
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd4};
+          4'd1: cyc = '{kind: MC_FN, clocks: 4'd1};
+          4'd2: cyc = '{kind: MC_FN, clocks: 4'd0};
+          4'd3: cyc = '{kind: MC_FA, clocks: 4'd0};
+          4'd4: cyc = '{kind: MC_W, clocks: 4'd0};
+          default: ;
+        endcase
+      end
+      8'd86: begin  // F1+4{D3} · Fn+1{P1} · Fn{S3} · Fa+1{P2} | n x (R)
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd4};
+          4'd1: cyc = '{kind: MC_FN, clocks: 4'd1};
+          4'd2: cyc = '{kind: MC_FN, clocks: 4'd0};
+          4'd3: cyc = '{kind: MC_FA, clocks: 4'd1};
+          4'd4: cyc = '{kind: MC_R, clocks: 4'd0};
+          default: ;
+        endcase
+      end
+      8'd87: begin  // F1+4{D3} · Fn+1{P1} · Fn{S3} · Fa+1{P2} | n x (W)
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd4};
+          4'd1: cyc = '{kind: MC_FN, clocks: 4'd1};
+          4'd2: cyc = '{kind: MC_FN, clocks: 4'd0};
+          4'd3: cyc = '{kind: MC_FA, clocks: 4'd1};
+          4'd4: cyc = '{kind: MC_W, clocks: 4'd0};
+          default: ;
+        endcase
+      end
+      8'd88: begin  // F1 · Fa · R · R+3{P3}
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd0};
+          4'd1: cyc = '{kind: MC_FA, clocks: 4'd0};
+          4'd2: cyc = '{kind: MC_R, clocks: 4'd0};
+          4'd3: cyc = '{kind: MC_R, clocks: 4'd3};
+          default: ;
+        endcase
+      end
+      8'd89: begin  // F1 · Fa+1{S1} · R · R+3{P3} / F1 · Fa+1{P2} · R · R+3{P3} / F1 · Fa+1{O2} · R · R+3{P3}
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd0};
+          4'd1: cyc = '{kind: MC_FA, clocks: 4'd1};
+          4'd2: cyc = '{kind: MC_R, clocks: 4'd0};
+          4'd3: cyc = '{kind: MC_R, clocks: 4'd3};
+          default: ;
+        endcase
+      end
+      8'd90: begin  // F1 · Fn{S3} · Fa · R · R+3{P3}
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd0};
+          4'd1: cyc = '{kind: MC_FN, clocks: 4'd0};
+          4'd2: cyc = '{kind: MC_FA, clocks: 4'd0};
+          4'd3: cyc = '{kind: MC_R, clocks: 4'd0};
+          4'd4: cyc = '{kind: MC_R, clocks: 4'd3};
+          default: ;
+        endcase
+      end
+      8'd91: begin  // F1 · Fn{S3} · Fa+1{P2} · R · R+3{P3} / F1 · Fn{S3} · Fa+1{O2} · R · R+3{P3}
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd0};
+          4'd1: cyc = '{kind: MC_FN, clocks: 4'd0};
+          4'd2: cyc = '{kind: MC_FA, clocks: 4'd1};
+          4'd3: cyc = '{kind: MC_R, clocks: 4'd0};
+          4'd4: cyc = '{kind: MC_R, clocks: 4'd3};
+          default: ;
+        endcase
+      end
+      8'd92: begin  // F1+1{P1} · Fa+1{O2} · R · R · W+1{P4} · W / F1+1{P1} · Fa+1{S4} · R · R · W+1{P4} · W / F1+1{P1} · Fa+1{P2} · R · R · W+1{P4} · W
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd1};
+          4'd1: cyc = '{kind: MC_FA, clocks: 4'd1};
+          4'd2: cyc = '{kind: MC_R, clocks: 4'd0};
+          4'd3: cyc = '{kind: MC_R, clocks: 4'd0};
+          4'd4: cyc = '{kind: MC_W, clocks: 4'd1};
+          4'd5: cyc = '{kind: MC_W, clocks: 4'd0};
+          default: ;
+        endcase
+      end
+      8'd93: begin  // F1+1{P1} · Fn{S3} · Fa · R · R · W+1{P4} · W
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd1};
+          4'd1: cyc = '{kind: MC_FN, clocks: 4'd0};
+          4'd2: cyc = '{kind: MC_FA, clocks: 4'd0};
+          4'd3: cyc = '{kind: MC_R, clocks: 4'd0};
+          4'd4: cyc = '{kind: MC_R, clocks: 4'd0};
+          4'd5: cyc = '{kind: MC_W, clocks: 4'd1};
+          4'd6: cyc = '{kind: MC_W, clocks: 4'd0};
+          default: ;
+        endcase
+      end
+      8'd94: begin  // F1+1{P1} · Fn{S3} · Fa+1{P2} · R · R · W+1{P4} · W
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd1};
+          4'd1: cyc = '{kind: MC_FN, clocks: 4'd0};
+          4'd2: cyc = '{kind: MC_FA, clocks: 4'd1};
+          4'd3: cyc = '{kind: MC_R, clocks: 4'd0};
+          4'd4: cyc = '{kind: MC_R, clocks: 4'd0};
+          4'd5: cyc = '{kind: MC_W, clocks: 4'd1};
+          4'd6: cyc = '{kind: MC_W, clocks: 4'd0};
+          default: ;
+        endcase
+      end
+      8'd95: begin  // F1+1{P1} · Fa+1{O2} · R · W / F1+1{P1} · Fa+1{S4} · R · W / F1+1{P1} · Fa+1{P2} · R · W
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd1};
+          4'd1: cyc = '{kind: MC_FA, clocks: 4'd1};
+          4'd2: cyc = '{kind: MC_R, clocks: 4'd0};
+          4'd3: cyc = '{kind: MC_W, clocks: 4'd0};
+          default: ;
+        endcase
+      end
+      8'd96: begin  // F1+1{P1} · Fn{S3} · Fa · R · W
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd1};
+          4'd1: cyc = '{kind: MC_FN, clocks: 4'd0};
+          4'd2: cyc = '{kind: MC_FA, clocks: 4'd0};
+          4'd3: cyc = '{kind: MC_R, clocks: 4'd0};
+          4'd4: cyc = '{kind: MC_W, clocks: 4'd0};
+          default: ;
+        endcase
+      end
+      8'd97: begin  // F1+1{P1} · Fn{S3} · Fa+1{P2} · R · W
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd1};
+          4'd1: cyc = '{kind: MC_FN, clocks: 4'd0};
+          4'd2: cyc = '{kind: MC_FA, clocks: 4'd1};
+          4'd3: cyc = '{kind: MC_R, clocks: 4'd0};
+          4'd4: cyc = '{kind: MC_W, clocks: 4'd0};
+          default: ;
+        endcase
+      end
+      8'd98: begin  // F1 · Fa · R · R
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd0};
+          4'd1: cyc = '{kind: MC_FA, clocks: 4'd0};
+          4'd2: cyc = '{kind: MC_R, clocks: 4'd0};
+          4'd3: cyc = '{kind: MC_R, clocks: 4'd0};
+          default: ;
+        endcase
+      end
+      8'd99: begin  // F1 · Fa+1{S1} · R · R / F1 · Fa+1{P2} · R · R
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd0};
+          4'd1: cyc = '{kind: MC_FA, clocks: 4'd1};
+          4'd2: cyc = '{kind: MC_R, clocks: 4'd0};
+          4'd3: cyc = '{kind: MC_R, clocks: 4'd0};
+          default: ;
+        endcase
+      end
+      8'd100: begin  // F1 · Fn{S3} · Fa · R · R
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd0};
+          4'd1: cyc = '{kind: MC_FN, clocks: 4'd0};
+          4'd2: cyc = '{kind: MC_FA, clocks: 4'd0};
+          4'd3: cyc = '{kind: MC_R, clocks: 4'd0};
+          4'd4: cyc = '{kind: MC_R, clocks: 4'd0};
+          default: ;
+        endcase
+      end
+      8'd101: begin  // F1 · Fn{S3} · Fa+1{P2} · R · R
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd0};
+          4'd1: cyc = '{kind: MC_FN, clocks: 4'd0};
+          4'd2: cyc = '{kind: MC_FA, clocks: 4'd1};
+          4'd3: cyc = '{kind: MC_R, clocks: 4'd0};
+          4'd4: cyc = '{kind: MC_R, clocks: 4'd0};
+          default: ;
+        endcase
+      end
+      8'd102: begin  // F1+1{P1} · Fa+1{O2} · R · R+2{P3} · W+1{P4} · W / F1+1{P1} · Fa+1{S4} · R · R+2{P3} · W+1{P4} · W / F1+1{P1} · Fa+1{P2} · R · R+2{P3} · W+1{P4} · W
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd1};
+          4'd1: cyc = '{kind: MC_FA, clocks: 4'd1};
+          4'd2: cyc = '{kind: MC_R, clocks: 4'd0};
+          4'd3: cyc = '{kind: MC_R, clocks: 4'd2};
+          4'd4: cyc = '{kind: MC_W, clocks: 4'd1};
+          4'd5: cyc = '{kind: MC_W, clocks: 4'd0};
+          default: ;
+        endcase
+      end
+      8'd103: begin  // F1+1{P1} · Fn{S3} · Fa · R · R+2{P3} · W+1{P4} · W
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd1};
+          4'd1: cyc = '{kind: MC_FN, clocks: 4'd0};
+          4'd2: cyc = '{kind: MC_FA, clocks: 4'd0};
+          4'd3: cyc = '{kind: MC_R, clocks: 4'd0};
+          4'd4: cyc = '{kind: MC_R, clocks: 4'd2};
+          4'd5: cyc = '{kind: MC_W, clocks: 4'd1};
+          4'd6: cyc = '{kind: MC_W, clocks: 4'd0};
+          default: ;
+        endcase
+      end
+      8'd104: begin  // F1+1{P1} · Fn{S3} · Fa+1{P2} · R · R+2{P3} · W+1{P4} · W
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd1};
+          4'd1: cyc = '{kind: MC_FN, clocks: 4'd0};
+          4'd2: cyc = '{kind: MC_FA, clocks: 4'd1};
+          4'd3: cyc = '{kind: MC_R, clocks: 4'd0};
+          4'd4: cyc = '{kind: MC_R, clocks: 4'd2};
+          4'd5: cyc = '{kind: MC_W, clocks: 4'd1};
+          4'd6: cyc = '{kind: MC_W, clocks: 4'd0};
+          default: ;
+        endcase
+      end
+      8'd105: begin  // F1+1{P1} · Fa+1{O2} · R+2{P3} · W / F1+1{P1} · Fa+1{S4} · R+2{P3} · W / F1+1{P1} · Fa+1{P2} · R+2{P3} · W
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd1};
+          4'd1: cyc = '{kind: MC_FA, clocks: 4'd1};
+          4'd2: cyc = '{kind: MC_R, clocks: 4'd2};
+          4'd3: cyc = '{kind: MC_W, clocks: 4'd0};
+          default: ;
+        endcase
+      end
+      8'd106: begin  // F1+1{P1} · Fn{S3} · Fa · R+2{P3} · W
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd1};
+          4'd1: cyc = '{kind: MC_FN, clocks: 4'd0};
+          4'd2: cyc = '{kind: MC_FA, clocks: 4'd0};
+          4'd3: cyc = '{kind: MC_R, clocks: 4'd2};
+          4'd4: cyc = '{kind: MC_W, clocks: 4'd0};
+          default: ;
+        endcase
+      end
+      8'd107: begin  // F1+1{P1} · Fn{S3} · Fa+1{P2} · R+2{P3} · W
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd1};
+          4'd1: cyc = '{kind: MC_FN, clocks: 4'd0};
+          4'd2: cyc = '{kind: MC_FA, clocks: 4'd1};
+          4'd3: cyc = '{kind: MC_R, clocks: 4'd2};
+          4'd4: cyc = '{kind: MC_W, clocks: 4'd0};
+          default: ;
+        endcase
+      end
+      8'd108: begin  // F1 · Fa · R · R{MD+MO} · I4{D2+MO} · I8x31{D2} with n x I7{D4} inline · I8x2{D2} · I3{D2}
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd0};
+          4'd1: cyc = '{kind: MC_FA, clocks: 4'd0};
+          4'd2: cyc = '{kind: MC_R, clocks: 4'd0};
+          4'd3: cyc = '{kind: MC_R, clocks: 4'd0};
+          4'd4: cyc = '{kind: MC_IU, clocks: 4'd0};
+          4'd5: cyc = '{kind: MC_I, clocks: 4'd8};
+          4'd6: cyc = '{kind: MC_I, clocks: 4'd3};
+          default: ;
+        endcase
+      end
+      8'd109: begin  // F1 · Fa · R · R{MD+MO} · I4{D2+MO} · I8{D2} · I7{D2}
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd0};
+          4'd1: cyc = '{kind: MC_FA, clocks: 4'd0};
+          4'd2: cyc = '{kind: MC_R, clocks: 4'd0};
+          4'd3: cyc = '{kind: MC_R, clocks: 4'd0};
+          4'd4: cyc = '{kind: MC_I, clocks: 4'd4};
+          4'd5: cyc = '{kind: MC_I, clocks: 4'd8};
+          4'd6: cyc = '{kind: MC_I, clocks: 4'd7};
+          default: ;
+        endcase
+      end
+      8'd110: begin  // F1 · Fa+1{S1} · R · R{MD+MO} · I4{D2+MO} · I8x31{D2} with n x I7{D4} inline · I8x2{D2} · I3{D2} / F1 · Fa+1{P2} · R · R{MD+MO} · I4{D2+MO} · I8x31{D2} with n x I7{D4} inline · I8x2{D2} · I3{D2}
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd0};
+          4'd1: cyc = '{kind: MC_FA, clocks: 4'd1};
+          4'd2: cyc = '{kind: MC_R, clocks: 4'd0};
+          4'd3: cyc = '{kind: MC_R, clocks: 4'd0};
+          4'd4: cyc = '{kind: MC_IU, clocks: 4'd0};
+          4'd5: cyc = '{kind: MC_I, clocks: 4'd8};
+          4'd6: cyc = '{kind: MC_I, clocks: 4'd3};
+          default: ;
+        endcase
+      end
+      8'd111: begin  // F1 · Fa+1{S1} · R · R{MD+MO} · I4{D2+MO} · I8{D2} · I7{D2} / F1 · Fa+1{P2} · R · R{MD+MO} · I4{D2+MO} · I8{D2} · I7{D2}
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd0};
+          4'd1: cyc = '{kind: MC_FA, clocks: 4'd1};
+          4'd2: cyc = '{kind: MC_R, clocks: 4'd0};
+          4'd3: cyc = '{kind: MC_R, clocks: 4'd0};
+          4'd4: cyc = '{kind: MC_I, clocks: 4'd4};
+          4'd5: cyc = '{kind: MC_I, clocks: 4'd8};
+          4'd6: cyc = '{kind: MC_I, clocks: 4'd7};
+          default: ;
+        endcase
+      end
+      8'd112: begin  // F1 · Fn{S3} · Fa · R · R{MD+MO} · I4{D2+MO} · I8x31{D2} with n x I7{D4} inline · I8x2{D2} · I3{D2}
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd0};
+          4'd1: cyc = '{kind: MC_FN, clocks: 4'd0};
+          4'd2: cyc = '{kind: MC_FA, clocks: 4'd0};
+          4'd3: cyc = '{kind: MC_R, clocks: 4'd0};
+          4'd4: cyc = '{kind: MC_R, clocks: 4'd0};
+          4'd5: cyc = '{kind: MC_IU, clocks: 4'd0};
+          4'd6: cyc = '{kind: MC_I, clocks: 4'd8};
+          4'd7: cyc = '{kind: MC_I, clocks: 4'd3};
+          default: ;
+        endcase
+      end
+      8'd113: begin  // F1 · Fn{S3} · Fa · R · R{MD+MO} · I4{D2+MO} · I8{D2} · I7{D2}
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd0};
+          4'd1: cyc = '{kind: MC_FN, clocks: 4'd0};
+          4'd2: cyc = '{kind: MC_FA, clocks: 4'd0};
+          4'd3: cyc = '{kind: MC_R, clocks: 4'd0};
+          4'd4: cyc = '{kind: MC_R, clocks: 4'd0};
+          4'd5: cyc = '{kind: MC_I, clocks: 4'd4};
+          4'd6: cyc = '{kind: MC_I, clocks: 4'd8};
+          4'd7: cyc = '{kind: MC_I, clocks: 4'd7};
+          default: ;
+        endcase
+      end
+      8'd114: begin  // F1 · Fn{S3} · Fa+1{P2} · R · R{MD+MO} · I4{D2+MO} · I8x31{D2} with n x I7{D4} inline · I8x2{D2} · I3{D2}
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd0};
+          4'd1: cyc = '{kind: MC_FN, clocks: 4'd0};
+          4'd2: cyc = '{kind: MC_FA, clocks: 4'd1};
+          4'd3: cyc = '{kind: MC_R, clocks: 4'd0};
+          4'd4: cyc = '{kind: MC_R, clocks: 4'd0};
+          4'd5: cyc = '{kind: MC_IU, clocks: 4'd0};
+          4'd6: cyc = '{kind: MC_I, clocks: 4'd8};
+          4'd7: cyc = '{kind: MC_I, clocks: 4'd3};
+          default: ;
+        endcase
+      end
+      8'd115: begin  // F1 · Fn{S3} · Fa+1{P2} · R · R{MD+MO} · I4{D2+MO} · I8{D2} · I7{D2}
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd0};
+          4'd1: cyc = '{kind: MC_FN, clocks: 4'd0};
+          4'd2: cyc = '{kind: MC_FA, clocks: 4'd1};
+          4'd3: cyc = '{kind: MC_R, clocks: 4'd0};
+          4'd4: cyc = '{kind: MC_R, clocks: 4'd0};
+          4'd5: cyc = '{kind: MC_I, clocks: 4'd4};
+          4'd6: cyc = '{kind: MC_I, clocks: 4'd8};
+          4'd7: cyc = '{kind: MC_I, clocks: 4'd7};
+          default: ;
+        endcase
+      end
+      8'd116: begin  // F1 · Fa · R+2{MD+MO} · I4x15{D2}
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd0};
+          4'd1: cyc = '{kind: MC_FA, clocks: 4'd0};
+          4'd2: cyc = '{kind: MC_R, clocks: 4'd2};
+          4'd3: cyc = '{kind: MC_IU, clocks: 4'd0};
+          default: ;
+        endcase
+      end
+      8'd117: begin  // F1 · Fa · R{MD+MO} · I6{D2+MO} · I4{D2}
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd0};
+          4'd1: cyc = '{kind: MC_FA, clocks: 4'd0};
+          4'd2: cyc = '{kind: MC_R, clocks: 4'd0};
+          4'd3: cyc = '{kind: MC_I, clocks: 4'd6};
+          4'd4: cyc = '{kind: MC_I, clocks: 4'd4};
+          default: ;
+        endcase
+      end
+      8'd118: begin  // F1 · Fa+1{S1} · R+2{MD+MO} · I4x15{D2} / F1 · Fa+1{P2} · R+2{MD+MO} · I4x15{D2}
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd0};
+          4'd1: cyc = '{kind: MC_FA, clocks: 4'd1};
+          4'd2: cyc = '{kind: MC_R, clocks: 4'd2};
+          4'd3: cyc = '{kind: MC_IU, clocks: 4'd0};
+          default: ;
+        endcase
+      end
+      8'd119: begin  // F1 · Fa+1{S1} · R{MD+MO} · I6{D2+MO} · I4{D2} / F1 · Fa+1{P2} · R{MD+MO} · I6{D2+MO} · I4{D2}
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd0};
+          4'd1: cyc = '{kind: MC_FA, clocks: 4'd1};
+          4'd2: cyc = '{kind: MC_R, clocks: 4'd0};
+          4'd3: cyc = '{kind: MC_I, clocks: 4'd6};
+          4'd4: cyc = '{kind: MC_I, clocks: 4'd4};
+          default: ;
+        endcase
+      end
+      8'd120: begin  // F1 · Fn{S3} · Fa · R+2{MD+MO} · I4x15{D2}
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd0};
+          4'd1: cyc = '{kind: MC_FN, clocks: 4'd0};
+          4'd2: cyc = '{kind: MC_FA, clocks: 4'd0};
+          4'd3: cyc = '{kind: MC_R, clocks: 4'd2};
+          4'd4: cyc = '{kind: MC_IU, clocks: 4'd0};
+          default: ;
+        endcase
+      end
+      8'd121: begin  // F1 · Fn{S3} · Fa · R{MD+MO} · I6{D2+MO} · I4{D2}
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd0};
+          4'd1: cyc = '{kind: MC_FN, clocks: 4'd0};
+          4'd2: cyc = '{kind: MC_FA, clocks: 4'd0};
+          4'd3: cyc = '{kind: MC_R, clocks: 4'd0};
+          4'd4: cyc = '{kind: MC_I, clocks: 4'd6};
+          4'd5: cyc = '{kind: MC_I, clocks: 4'd4};
+          default: ;
+        endcase
+      end
+      8'd122: begin  // F1 · Fn{S3} · Fa+1{P2} · R+2{MD+MO} · I4x15{D2}
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd0};
+          4'd1: cyc = '{kind: MC_FN, clocks: 4'd0};
+          4'd2: cyc = '{kind: MC_FA, clocks: 4'd1};
+          4'd3: cyc = '{kind: MC_R, clocks: 4'd2};
+          4'd4: cyc = '{kind: MC_IU, clocks: 4'd0};
+          default: ;
+        endcase
+      end
+      8'd123: begin  // F1 · Fn{S3} · Fa+1{P2} · R{MD+MO} · I6{D2+MO} · I4{D2}
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd0};
+          4'd1: cyc = '{kind: MC_FN, clocks: 4'd0};
+          4'd2: cyc = '{kind: MC_FA, clocks: 4'd1};
+          4'd3: cyc = '{kind: MC_R, clocks: 4'd0};
+          4'd4: cyc = '{kind: MC_I, clocks: 4'd6};
+          4'd5: cyc = '{kind: MC_I, clocks: 4'd4};
+          default: ;
+        endcase
+      end
+      8'd124: begin  // F1 · Fa · R · R{MD+MO} · I5{D5+MO} · I7x104{D5}
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd0};
+          4'd1: cyc = '{kind: MC_FA, clocks: 4'd0};
+          4'd2: cyc = '{kind: MC_R, clocks: 4'd0};
+          4'd3: cyc = '{kind: MC_R, clocks: 4'd0};
+          4'd4: cyc = '{kind: MC_IU, clocks: 4'd0};
+          default: ;
+        endcase
+      end
+      8'd125: begin  // F1 · Fa+1{S1} · R · R{MD+MO} · I5{D5+MO} · I7x104{D5} / F1 · Fa+1{P2} · R · R{MD+MO} · I5{D5+MO} · I7x104{D5}
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd0};
+          4'd1: cyc = '{kind: MC_FA, clocks: 4'd1};
+          4'd2: cyc = '{kind: MC_R, clocks: 4'd0};
+          4'd3: cyc = '{kind: MC_R, clocks: 4'd0};
+          4'd4: cyc = '{kind: MC_IU, clocks: 4'd0};
+          default: ;
+        endcase
+      end
+      8'd126: begin  // F1 · Fn{S3} · Fa · R · R{MD+MO} · I5{D5+MO} · I7x104{D5}
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd0};
+          4'd1: cyc = '{kind: MC_FN, clocks: 4'd0};
+          4'd2: cyc = '{kind: MC_FA, clocks: 4'd0};
+          4'd3: cyc = '{kind: MC_R, clocks: 4'd0};
+          4'd4: cyc = '{kind: MC_R, clocks: 4'd0};
+          4'd5: cyc = '{kind: MC_IU, clocks: 4'd0};
+          default: ;
+        endcase
+      end
+      8'd127: begin  // F1 · Fn{S3} · Fa+1{P2} · R · R{MD+MO} · I5{D5+MO} · I7x104{D5}
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd0};
+          4'd1: cyc = '{kind: MC_FN, clocks: 4'd0};
+          4'd2: cyc = '{kind: MC_FA, clocks: 4'd1};
+          4'd3: cyc = '{kind: MC_R, clocks: 4'd0};
+          4'd4: cyc = '{kind: MC_R, clocks: 4'd0};
+          4'd5: cyc = '{kind: MC_IU, clocks: 4'd0};
+          default: ;
+        endcase
+      end
+      8'd128: begin  // F1 · Fa · R{MD+MO} · I3{B6+D2+MO} · I6x16{B6+D2} / F1 · Fa · R{MD+MO} · I5{D2+MO}
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd0};
+          4'd1: cyc = '{kind: MC_FA, clocks: 4'd0};
+          4'd2: cyc = '{kind: MC_R, clocks: 4'd0};
+          4'd3: cyc = '{kind: MC_IU, clocks: 4'd0};
+          default: ;
+        endcase
+      end
+      8'd129: begin  // F1 · Fa+1{S1} · R{MD+MO} · I3{B6+D2+MO} · I6x16{B6+D2} / F1 · Fa+1{S1} · R{MD+MO} · I5{D2+MO} / F1 · Fa+1{P2} · R{MD+MO} · I3{B6+D2+MO} · I6x16{B6+D2} / F1 · Fa+1{P2} · R{MD+MO} · I5{D2+MO}
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd0};
+          4'd1: cyc = '{kind: MC_FA, clocks: 4'd1};
+          4'd2: cyc = '{kind: MC_R, clocks: 4'd0};
+          4'd3: cyc = '{kind: MC_IU, clocks: 4'd0};
+          default: ;
+        endcase
+      end
+      8'd130: begin  // F1 · Fn{S3} · Fa · R{MD+MO} · I3{B6+D2+MO} · I6x16{B6+D2} / F1 · Fn{S3} · Fa · R{MD+MO} · I5{D2+MO}
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd0};
+          4'd1: cyc = '{kind: MC_FN, clocks: 4'd0};
+          4'd2: cyc = '{kind: MC_FA, clocks: 4'd0};
+          4'd3: cyc = '{kind: MC_R, clocks: 4'd0};
+          4'd4: cyc = '{kind: MC_IU, clocks: 4'd0};
+          default: ;
+        endcase
+      end
+      8'd131: begin  // F1 · Fn{S3} · Fa+1{P2} · R{MD+MO} · I3{B6+D2+MO} · I6x16{B6+D2} / F1 · Fn{S3} · Fa+1{P2} · R{MD+MO} · I5{D2+MO}
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd0};
+          4'd1: cyc = '{kind: MC_FN, clocks: 4'd0};
+          4'd2: cyc = '{kind: MC_FA, clocks: 4'd1};
+          4'd3: cyc = '{kind: MC_R, clocks: 4'd0};
+          4'd4: cyc = '{kind: MC_IU, clocks: 4'd0};
+          default: ;
+        endcase
+      end
+      8'd132: begin  // F1 · Fa+2{O2+S1} · R · R+3{P3} / F1 · Fa+2{P2+O2} · R · R+3{P3}
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd0};
+          4'd1: cyc = '{kind: MC_FA, clocks: 4'd2};
+          4'd2: cyc = '{kind: MC_R, clocks: 4'd0};
+          4'd3: cyc = '{kind: MC_R, clocks: 4'd3};
+          default: ;
+        endcase
+      end
+      8'd133: begin  // F1 · Fn{S3} · Fa+2{P2+O2} · R · R+3{P3}
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd0};
+          4'd1: cyc = '{kind: MC_FN, clocks: 4'd0};
+          4'd2: cyc = '{kind: MC_FA, clocks: 4'd2};
+          4'd3: cyc = '{kind: MC_R, clocks: 4'd0};
+          4'd4: cyc = '{kind: MC_R, clocks: 4'd3};
+          default: ;
+        endcase
+      end
+      8'd134: begin  // F1 · Fa+2{O2} · W · W
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd0};
+          4'd1: cyc = '{kind: MC_FA, clocks: 4'd2};
+          4'd2: cyc = '{kind: MC_W, clocks: 4'd0};
+          4'd3: cyc = '{kind: MC_W, clocks: 4'd0};
+          default: ;
+        endcase
+      end
+      8'd135: begin  // F1 · Fa+3{O2+S1} · W · W / F1 · Fa+3{P2+O2} · W · W
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd0};
+          4'd1: cyc = '{kind: MC_FA, clocks: 4'd3};
+          4'd2: cyc = '{kind: MC_W, clocks: 4'd0};
+          4'd3: cyc = '{kind: MC_W, clocks: 4'd0};
+          default: ;
+        endcase
+      end
+      8'd136: begin  // F1 · Fn{S3} · Fa+2{O2} · W · W
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd0};
+          4'd1: cyc = '{kind: MC_FN, clocks: 4'd0};
+          4'd2: cyc = '{kind: MC_FA, clocks: 4'd2};
+          4'd3: cyc = '{kind: MC_W, clocks: 4'd0};
+          4'd4: cyc = '{kind: MC_W, clocks: 4'd0};
+          default: ;
+        endcase
+      end
+      8'd137: begin  // F1 · Fn{S3} · Fa+3{P2+O2} · W · W
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd0};
+          4'd1: cyc = '{kind: MC_FN, clocks: 4'd0};
+          4'd2: cyc = '{kind: MC_FA, clocks: 4'd3};
+          4'd3: cyc = '{kind: MC_W, clocks: 4'd0};
+          4'd4: cyc = '{kind: MC_W, clocks: 4'd0};
+          default: ;
+        endcase
+      end
+      8'd138: begin  // F1 · Fa+1{P2}
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd0};
+          4'd1: cyc = '{kind: MC_FA, clocks: 4'd1};
+          default: ;
+        endcase
+      end
+      8'd139: begin  // F1 · Fa+2{P2+S1} / F1 · Fa+2{P2}
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd0};
+          4'd1: cyc = '{kind: MC_FA, clocks: 4'd2};
+          default: ;
+        endcase
+      end
+      8'd140: begin  // F1 · Fn{S3} · Fa+1{P2}
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd0};
+          4'd1: cyc = '{kind: MC_FN, clocks: 4'd0};
+          4'd2: cyc = '{kind: MC_FA, clocks: 4'd1};
+          default: ;
+        endcase
+      end
+      8'd141: begin  // F1 · Fn{S3} · Fa+2{P2}
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd0};
+          4'd1: cyc = '{kind: MC_FN, clocks: 4'd0};
+          4'd2: cyc = '{kind: MC_FA, clocks: 4'd2};
+          default: ;
+        endcase
+      end
+      8'd142: begin  // F1 · Fa+4{P2+S1} · W+2{C1} · W / F1 · Fa+4{P2} · W+2{C1} · W
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd0};
+          4'd1: cyc = '{kind: MC_FA, clocks: 4'd4};
+          4'd2: cyc = '{kind: MC_W, clocks: 4'd2};
+          4'd3: cyc = '{kind: MC_W, clocks: 4'd0};
+          default: ;
+        endcase
+      end
+      8'd143: begin  // F1 · Fn{S3} · Fa+3{P2} · W+2{C1} · W
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd0};
+          4'd1: cyc = '{kind: MC_FN, clocks: 4'd0};
+          4'd2: cyc = '{kind: MC_FA, clocks: 4'd3};
+          4'd3: cyc = '{kind: MC_W, clocks: 4'd2};
+          4'd4: cyc = '{kind: MC_W, clocks: 4'd0};
+          default: ;
+        endcase
+      end
+      8'd144: begin  // F1 · Fa+4{P2} · W
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd0};
+          4'd1: cyc = '{kind: MC_FA, clocks: 4'd4};
+          4'd2: cyc = '{kind: MC_W, clocks: 4'd0};
+          default: ;
+        endcase
+      end
+      8'd145: begin  // F1 · Fn{S3} · Fa+4{P2} · W+2{C1} · W
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd0};
+          4'd1: cyc = '{kind: MC_FN, clocks: 4'd0};
+          4'd2: cyc = '{kind: MC_FA, clocks: 4'd4};
+          4'd3: cyc = '{kind: MC_W, clocks: 4'd2};
+          4'd4: cyc = '{kind: MC_W, clocks: 4'd0};
+          default: ;
+        endcase
+      end
+      8'd146: begin  // F1 · Fa · R+1{P3} · W
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd0};
+          4'd1: cyc = '{kind: MC_FA, clocks: 4'd0};
+          4'd2: cyc = '{kind: MC_R, clocks: 4'd1};
+          4'd3: cyc = '{kind: MC_W, clocks: 4'd0};
+          default: ;
+        endcase
+      end
+      8'd147: begin  // F1 · Fa+1{S1} · R+1{P3} · W / F1 · Fa+1{P2} · R+1{P3} · W
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd0};
+          4'd1: cyc = '{kind: MC_FA, clocks: 4'd1};
+          4'd2: cyc = '{kind: MC_R, clocks: 4'd1};
+          4'd3: cyc = '{kind: MC_W, clocks: 4'd0};
+          default: ;
+        endcase
+      end
+      8'd148: begin  // F1 · Fn{S3} · Fa · R+1{P3} · W
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd0};
+          4'd1: cyc = '{kind: MC_FN, clocks: 4'd0};
+          4'd2: cyc = '{kind: MC_FA, clocks: 4'd0};
+          4'd3: cyc = '{kind: MC_R, clocks: 4'd1};
+          4'd4: cyc = '{kind: MC_W, clocks: 4'd0};
+          default: ;
+        endcase
+      end
+      8'd149: begin  // F1 · Fn{S3} · Fa+1{P2} · R+1{P3} · W
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd0};
+          4'd1: cyc = '{kind: MC_FN, clocks: 4'd0};
+          4'd2: cyc = '{kind: MC_FA, clocks: 4'd1};
+          4'd3: cyc = '{kind: MC_R, clocks: 4'd1};
+          4'd4: cyc = '{kind: MC_W, clocks: 4'd0};
+          default: ;
+        endcase
+      end
+      8'd150: begin  // F1 · Fa · R+1{P3}
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd0};
+          4'd1: cyc = '{kind: MC_FA, clocks: 4'd0};
+          4'd2: cyc = '{kind: MC_R, clocks: 4'd1};
+          default: ;
+        endcase
+      end
+      8'd151: begin  // F1 · Fn{S3} · Fa · R+1{P3}
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd0};
+          4'd1: cyc = '{kind: MC_FN, clocks: 4'd0};
+          4'd2: cyc = '{kind: MC_FA, clocks: 4'd0};
+          4'd3: cyc = '{kind: MC_R, clocks: 4'd1};
+          default: ;
+        endcase
+      end
+      8'd152: begin  // F1 · Fa+1{O2} · R+2{P3} · W
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd0};
+          4'd1: cyc = '{kind: MC_FA, clocks: 4'd1};
+          4'd2: cyc = '{kind: MC_R, clocks: 4'd2};
+          4'd3: cyc = '{kind: MC_W, clocks: 4'd0};
+          default: ;
+        endcase
+      end
+      8'd153: begin  // F1 · Fa+2{O2+S1} · R+2{P3} · W / F1 · Fa+2{P2+O2} · R+2{P3} · W
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd0};
+          4'd1: cyc = '{kind: MC_FA, clocks: 4'd2};
+          4'd2: cyc = '{kind: MC_R, clocks: 4'd2};
+          4'd3: cyc = '{kind: MC_W, clocks: 4'd0};
+          default: ;
+        endcase
+      end
+      8'd154: begin  // F1 · Fn{S3} · Fa+1{O2} · R+2{P3} · W
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd0};
+          4'd1: cyc = '{kind: MC_FN, clocks: 4'd0};
+          4'd2: cyc = '{kind: MC_FA, clocks: 4'd1};
+          4'd3: cyc = '{kind: MC_R, clocks: 4'd2};
+          4'd4: cyc = '{kind: MC_W, clocks: 4'd0};
+          default: ;
+        endcase
+      end
+      8'd155: begin  // F1 · Fn{S3} · Fa+2{P2+O2} · R+2{P3} · W
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd0};
+          4'd1: cyc = '{kind: MC_FN, clocks: 4'd0};
+          4'd2: cyc = '{kind: MC_FA, clocks: 4'd2};
+          4'd3: cyc = '{kind: MC_R, clocks: 4'd2};
+          4'd4: cyc = '{kind: MC_W, clocks: 4'd0};
+          default: ;
+        endcase
+      end
+      8'd156: begin  // F1+4{D3} · Fa+2{P2}
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd4};
+          4'd1: cyc = '{kind: MC_FA, clocks: 4'd2};
+          default: ;
+        endcase
+      end
+      8'd157: begin  // F1+4{D3} · Fa+3{P2+S1} / F1+4{D3} · Fa+3{P2}
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd4};
+          4'd1: cyc = '{kind: MC_FA, clocks: 4'd3};
+          default: ;
+        endcase
+      end
+      8'd158: begin  // F1+4{D3} · Fn{S3} · Fa+2{P2}
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd4};
+          4'd1: cyc = '{kind: MC_FN, clocks: 4'd0};
+          4'd2: cyc = '{kind: MC_FA, clocks: 4'd2};
+          default: ;
+        endcase
+      end
+      8'd159: begin  // F1+4{D3} · Fn{S3} · Fa+3{P2}
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd4};
+          4'd1: cyc = '{kind: MC_FN, clocks: 4'd0};
+          4'd2: cyc = '{kind: MC_FA, clocks: 4'd3};
+          default: ;
+        endcase
+      end
+      8'd160: begin  // F1+2{U} · Fa · R · R+2{P3}
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd2};
+          4'd1: cyc = '{kind: MC_FA, clocks: 4'd0};
+          4'd2: cyc = '{kind: MC_R, clocks: 4'd0};
+          4'd3: cyc = '{kind: MC_R, clocks: 4'd2};
+          default: ;
+        endcase
+      end
+      8'd161: begin  // F1+2{U} · Fa+1{S1} · R · R{C2} · R+2{P3} / F1+2{U} · Fa+1{P2} · R · R{C2} · R+2{P3}
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd2};
+          4'd1: cyc = '{kind: MC_FA, clocks: 4'd1};
+          4'd2: cyc = '{kind: MC_R, clocks: 4'd0};
+          4'd3: cyc = '{kind: MC_R, clocks: 4'd0};
+          4'd4: cyc = '{kind: MC_R, clocks: 4'd2};
+          default: ;
+        endcase
+      end
+      8'd162: begin  // F1+2{U} · Fn{S3} · Fa · R · R{C2} · R+2{P3}
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd2};
+          4'd1: cyc = '{kind: MC_FN, clocks: 4'd0};
+          4'd2: cyc = '{kind: MC_FA, clocks: 4'd0};
+          4'd3: cyc = '{kind: MC_R, clocks: 4'd0};
+          4'd4: cyc = '{kind: MC_R, clocks: 4'd0};
+          4'd5: cyc = '{kind: MC_R, clocks: 4'd2};
+          default: ;
+        endcase
+      end
+      8'd163: begin  // F1+2{U} · Fa+1{P2} · R · R+2{P3}
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd2};
+          4'd1: cyc = '{kind: MC_FA, clocks: 4'd1};
+          4'd2: cyc = '{kind: MC_R, clocks: 4'd0};
+          4'd3: cyc = '{kind: MC_R, clocks: 4'd2};
+          default: ;
+        endcase
+      end
+      8'd164: begin  // F1+2{U} · Fn{S3} · Fa+1{P2} · R · R{C2} · R+2{P3}
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd2};
+          4'd1: cyc = '{kind: MC_FN, clocks: 4'd0};
+          4'd2: cyc = '{kind: MC_FA, clocks: 4'd1};
+          4'd3: cyc = '{kind: MC_R, clocks: 4'd0};
+          4'd4: cyc = '{kind: MC_R, clocks: 4'd0};
+          4'd5: cyc = '{kind: MC_R, clocks: 4'd2};
+          default: ;
+        endcase
+      end
+      8'd165: begin  // F1+2{B4} · I3{B4} | n x (I3{B4})
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd2};
+          4'd1: cyc = '{kind: MC_I, clocks: 4'd3};
+          4'd2: cyc = '{kind: MC_I, clocks: 4'd3};
+          default: ;
+        endcase
+      end
+      8'd166: begin  // F1+1{P1} · R · R · R
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd1};
+          4'd1: cyc = '{kind: MC_R, clocks: 4'd0};
+          4'd2: cyc = '{kind: MC_R, clocks: 4'd0};
+          4'd3: cyc = '{kind: MC_R, clocks: 4'd0};
+          default: ;
+        endcase
+      end
+      8'd167: begin  // F1+1{P1} · R · R · R · R{C2}
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd1};
+          4'd1: cyc = '{kind: MC_R, clocks: 4'd0};
+          4'd2: cyc = '{kind: MC_R, clocks: 4'd0};
+          4'd3: cyc = '{kind: MC_R, clocks: 4'd0};
+          4'd4: cyc = '{kind: MC_R, clocks: 4'd0};
+          default: ;
+        endcase
+      end
+      8'd168: begin  // F1+2{P1}
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd2};
+          default: ;
+        endcase
+      end
+      8'd169: begin  // F1+2{D2} | n x (I7{D2}) · I7{D2}
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd2};
+          4'd1: cyc = '{kind: MC_I, clocks: 4'd7};
+          4'd2: cyc = '{kind: MC_I, clocks: 4'd7};
+          default: ;
+        endcase
+      end
+      8'd170: begin  // F1+1{B2}
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd1};
+          default: ;
+        endcase
+      end
+      8'd171: begin  // F1+4{D3} · Fn+1{P1} · EPU
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd4};
+          4'd1: cyc = '{kind: MC_FN, clocks: 4'd1};
+          4'd2: cyc = '{kind: MC_EPU, clocks: 4'd0};
+          default: ;
+        endcase
+      end
+      8'd172: begin  // F1+4{D3} · Fn+1{U} · I4{U}
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd4};
+          4'd1: cyc = '{kind: MC_FN, clocks: 4'd1};
+          4'd2: cyc = '{kind: MC_I, clocks: 4'd4};
+          default: ;
+        endcase
+      end
+      8'd173: begin  // F1+4{D3} · Fn+1{P1} | n x (EPU)
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd4};
+          4'd1: cyc = '{kind: MC_FN, clocks: 4'd1};
+          4'd2: cyc = '{kind: MC_EPU, clocks: 4'd0};
+          default: ;
+        endcase
+      end
+      8'd174: begin  // F1+2{D2} · I3{D2}
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd2};
+          4'd1: cyc = '{kind: MC_I, clocks: 4'd3};
+          default: ;
+        endcase
+      end
+      8'd175: begin  // F1+3{P1} · W · W
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd3};
+          4'd1: cyc = '{kind: MC_W, clocks: 4'd0};
+          4'd2: cyc = '{kind: MC_W, clocks: 4'd0};
+          default: ;
+        endcase
+      end
+      8'd176: begin  // F1+3{P1} · W
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd3};
+          4'd1: cyc = '{kind: MC_W, clocks: 4'd0};
+          default: ;
+        endcase
+      end
+      8'd177: begin  // F1+2{P1} · R · R+1{P3}
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd2};
+          4'd1: cyc = '{kind: MC_R, clocks: 4'd0};
+          4'd2: cyc = '{kind: MC_R, clocks: 4'd1};
+          default: ;
+        endcase
+      end
+      8'd178: begin  // F1+2{P1} · R
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd2};
+          4'd1: cyc = '{kind: MC_R, clocks: 4'd0};
+          default: ;
+        endcase
+      end
+      8'd179: begin  // F1+4{D2} · I8x32{D2} with n x I7{D4} inline · I8x2{D2} · I3{D2}
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd4};
+          4'd1: cyc = '{kind: MC_IU, clocks: 4'd0};
+          4'd2: cyc = '{kind: MC_I, clocks: 4'd8};
+          4'd3: cyc = '{kind: MC_I, clocks: 4'd3};
+          default: ;
+        endcase
+      end
+      8'd180: begin  // F1+4{D2} · I8x2{D2} · I7{D2}
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd4};
+          4'd1: cyc = '{kind: MC_I, clocks: 4'd8};
+          4'd2: cyc = '{kind: MC_I, clocks: 4'd7};
+          default: ;
+        endcase
+      end
+      8'd181: begin  // F1+3{D2} · I4x16{D2}
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd3};
+          4'd1: cyc = '{kind: MC_IU, clocks: 4'd0};
+          default: ;
+        endcase
+      end
+      8'd182: begin  // F1+3{D2} · I8{D2} · I4{D2}
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd3};
+          4'd1: cyc = '{kind: MC_I, clocks: 4'd8};
+          4'd2: cyc = '{kind: MC_I, clocks: 4'd4};
+          default: ;
+        endcase
+      end
+      8'd183: begin  // F1+2{D2} · I4{D5} · I7x105{D5} / F1+2{D2} · I6x17{B6+D2} / F1+2{D2} · I8{D2}
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd2};
+          4'd1: cyc = '{kind: MC_IU, clocks: 4'd0};
+          default: ;
+        endcase
+      end
+      8'd184: begin  // F1+2{D2} · I8{D2}
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd2};
+          4'd1: cyc = '{kind: MC_I, clocks: 4'd8};
+          default: ;
+        endcase
+      end
+      8'd185: begin  // F1+4{D3} · R
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd4};
+          4'd1: cyc = '{kind: MC_R, clocks: 4'd0};
+          default: ;
+        endcase
+      end
+      8'd186: begin  // F1+4{D3} · R · R{C2}
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd4};
+          4'd1: cyc = '{kind: MC_R, clocks: 4'd0};
+          4'd2: cyc = '{kind: MC_R, clocks: 4'd0};
+          default: ;
+        endcase
+      end
+      8'd187: begin  // F1+3{P1}
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd3};
+          default: ;
+        endcase
+      end
+      8'd188: begin  // F1+2{D2} · I6{D2}
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd2};
+          4'd1: cyc = '{kind: MC_I, clocks: 4'd6};
+          default: ;
+        endcase
+      end
+      8'd189: begin  // F1+4{D3} · Fn+3{P1} | n x (I3{D2})
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd4};
+          4'd1: cyc = '{kind: MC_FN, clocks: 4'd3};
+          4'd2: cyc = '{kind: MC_IU, clocks: 4'd0};
+          default: ;
+        endcase
+      end
+      8'd190: begin  // F1+4{D3} · Fn+2{P1} · I3{D2} | n x (I3{D2})
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd4};
+          4'd1: cyc = '{kind: MC_FN, clocks: 4'd2};
+          4'd2: cyc = '{kind: MC_I, clocks: 4'd3};
+          4'd3: cyc = '{kind: MC_IU, clocks: 4'd0};
+          default: ;
+        endcase
+      end
+      8'd191: begin  // F1 · Fn+1{P1+BR} · R+2{P2} · R+3{P3} · W · I4{BR+U}
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd0};
+          4'd1: cyc = '{kind: MC_FN, clocks: 4'd1};
+          4'd2: cyc = '{kind: MC_R, clocks: 4'd2};
+          4'd3: cyc = '{kind: MC_R, clocks: 4'd3};
+          4'd4: cyc = '{kind: MC_W, clocks: 4'd0};
+          4'd5: cyc = '{kind: MC_I, clocks: 4'd4};
+          default: ;
+        endcase
+      end
+      8'd192: begin  // F1 · Fn+1{P1+BR} · R+2{P2} · R+3{P3} · I3{D2} · I4{BR+U}
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd0};
+          4'd1: cyc = '{kind: MC_FN, clocks: 4'd1};
+          4'd2: cyc = '{kind: MC_R, clocks: 4'd2};
+          4'd3: cyc = '{kind: MC_R, clocks: 4'd3};
+          4'd4: cyc = '{kind: MC_I, clocks: 4'd3};
+          4'd5: cyc = '{kind: MC_I, clocks: 4'd4};
+          default: ;
+        endcase
+      end
+      8'd193: begin  // F1 · Fn+1{P1+BR} | n x (R+2{P2} · R+3{P3} · W) · I4{BR+U}
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd0};
+          4'd1: cyc = '{kind: MC_FN, clocks: 4'd1};
+          4'd2: cyc = '{kind: MC_R, clocks: 4'd2};
+          4'd3: cyc = '{kind: MC_R, clocks: 4'd3};
+          4'd4: cyc = '{kind: MC_W, clocks: 4'd0};
+          4'd5: cyc = '{kind: MC_I, clocks: 4'd4};
+          default: ;
+        endcase
+      end
+      8'd194: begin  // F1 · Fn+1{P1+BR} | n x (R+2{P2} · R+3{P3} · I3{D2}) · I4{BR+U}
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd0};
+          4'd1: cyc = '{kind: MC_FN, clocks: 4'd1};
+          4'd2: cyc = '{kind: MC_R, clocks: 4'd2};
+          4'd3: cyc = '{kind: MC_R, clocks: 4'd3};
+          4'd4: cyc = '{kind: MC_I, clocks: 4'd3};
+          4'd5: cyc = '{kind: MC_I, clocks: 4'd4};
+          default: ;
+        endcase
+      end
+      8'd195: begin  // F1 · Fn+1{P1+BR} · R+3{P3} · I3{D2} · I4{BR+U}
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd0};
+          4'd1: cyc = '{kind: MC_FN, clocks: 4'd1};
+          4'd2: cyc = '{kind: MC_R, clocks: 4'd3};
+          4'd3: cyc = '{kind: MC_I, clocks: 4'd3};
+          4'd4: cyc = '{kind: MC_I, clocks: 4'd4};
+          default: ;
+        endcase
+      end
+      8'd196: begin  // F1 · Fn+1{P1+BR} · R+3{P3} · W · I4{BR+U}
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd0};
+          4'd1: cyc = '{kind: MC_FN, clocks: 4'd1};
+          4'd2: cyc = '{kind: MC_R, clocks: 4'd3};
+          4'd3: cyc = '{kind: MC_W, clocks: 4'd0};
+          4'd4: cyc = '{kind: MC_I, clocks: 4'd4};
+          default: ;
+        endcase
+      end
+      8'd197: begin  // F1 · Fn+1{P1+BR} | n x (R+3{P3} · W) · I4{BR+U}
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd0};
+          4'd1: cyc = '{kind: MC_FN, clocks: 4'd1};
+          4'd2: cyc = '{kind: MC_R, clocks: 4'd3};
+          4'd3: cyc = '{kind: MC_W, clocks: 4'd0};
+          4'd4: cyc = '{kind: MC_I, clocks: 4'd4};
+          default: ;
+        endcase
+      end
+      8'd198: begin  // F1 · Fn+1{P1+BR} · R · R+4{P3} · I4{D2} · I4{BR+U}
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd0};
+          4'd1: cyc = '{kind: MC_FN, clocks: 4'd1};
+          4'd2: cyc = '{kind: MC_R, clocks: 4'd0};
+          4'd3: cyc = '{kind: MC_R, clocks: 4'd4};
+          4'd4: cyc = '{kind: MC_I, clocks: 4'd4};
+          default: ;
+        endcase
+      end
+      8'd199: begin  // F1 · Fn+1{P1+BR} | n x (R+3{P3} · I3{D2}) · I4{BR+U}
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd0};
+          4'd1: cyc = '{kind: MC_FN, clocks: 4'd1};
+          4'd2: cyc = '{kind: MC_R, clocks: 4'd3};
+          4'd3: cyc = '{kind: MC_I, clocks: 4'd3};
+          4'd4: cyc = '{kind: MC_I, clocks: 4'd4};
+          default: ;
+        endcase
+      end
+      8'd200: begin  // F1 · Fn+1{P1+BR} | n x (R · R+4{P3} · I4{D2}) · I4{BR+U}
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd0};
+          4'd1: cyc = '{kind: MC_FN, clocks: 4'd1};
+          4'd2: cyc = '{kind: MC_R, clocks: 4'd0};
+          4'd3: cyc = '{kind: MC_R, clocks: 4'd4};
+          4'd4: cyc = '{kind: MC_I, clocks: 4'd4};
+          4'd5: cyc = '{kind: MC_I, clocks: 4'd4};
+          default: ;
+        endcase
+      end
+      8'd201: begin  // F1+2{D2} · I4{D2}
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_F1, clocks: 4'd2};
+          4'd1: cyc = '{kind: MC_I, clocks: 4'd4};
+          default: ;
+        endcase
+      end
+      8'd202: begin  // AF+4{B5t} · W+1{B5} · W+1{B5} · W+4{B5} · R · R
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_AF, clocks: 4'd4};
+          4'd1: cyc = '{kind: MC_W, clocks: 4'd1};
+          4'd2: cyc = '{kind: MC_W, clocks: 4'd1};
+          4'd3: cyc = '{kind: MC_W, clocks: 4'd4};
+          4'd4: cyc = '{kind: MC_R, clocks: 4'd0};
+          4'd5: cyc = '{kind: MC_R, clocks: 4'd0};
+          default: ;
+        endcase
+      end
+      8'd203: begin  // AF+4{B5t} · W+1{B5} · W{B5} · W+1{B5} · W+4{B5} · R · R · R{B5}
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_AF, clocks: 4'd4};
+          4'd1: cyc = '{kind: MC_W, clocks: 4'd1};
+          4'd2: cyc = '{kind: MC_W, clocks: 4'd0};
+          4'd3: cyc = '{kind: MC_W, clocks: 4'd1};
+          4'd4: cyc = '{kind: MC_W, clocks: 4'd4};
+          4'd5: cyc = '{kind: MC_R, clocks: 4'd0};
+          4'd6: cyc = '{kind: MC_R, clocks: 4'd0};
+          4'd7: cyc = '{kind: MC_R, clocks: 4'd0};
+          default: ;
+        endcase
+      end
+      8'd204: begin  // AF+4{B5t} · IA{B5} · W+1{B5} · W+1{B5} · W+4{B5} · R · R
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_AF, clocks: 4'd4};
+          4'd1: cyc = '{kind: MC_IA, clocks: 4'd0};
+          4'd2: cyc = '{kind: MC_W, clocks: 4'd1};
+          4'd3: cyc = '{kind: MC_W, clocks: 4'd1};
+          4'd4: cyc = '{kind: MC_W, clocks: 4'd4};
+          4'd5: cyc = '{kind: MC_R, clocks: 4'd0};
+          4'd6: cyc = '{kind: MC_R, clocks: 4'd0};
+          default: ;
+        endcase
+      end
+      8'd205: begin  // AF+4{B5t} · IA{B5} · W+1{B5} · W{B5} · W+1{B5} · W+4{B5} · R · R · R{B5}
+        unique case (pos)
+          4'd0: cyc = '{kind: MC_AF, clocks: 4'd4};
+          4'd1: cyc = '{kind: MC_IA, clocks: 4'd0};
+          4'd2: cyc = '{kind: MC_W, clocks: 4'd1};
+          4'd3: cyc = '{kind: MC_W, clocks: 4'd0};
+          4'd4: cyc = '{kind: MC_W, clocks: 4'd1};
+          4'd5: cyc = '{kind: MC_W, clocks: 4'd4};
+          4'd6: cyc = '{kind: MC_R, clocks: 4'd0};
+          4'd7: cyc = '{kind: MC_R, clocks: 4'd0};
+          4'd8: cyc = '{kind: MC_R, clocks: 4'd0};
+          default: ;
+        endcase
+      end
+      default: ;
+    endcase
+  end
+
+endmodule
+
+// z8000_mc_link_gen: (program, position) -> how the program goes on.
+module z8000_mc_link_gen
+  import z8000_mc_pkg::*;
+(
+  input  logic [MC_PROG_W-1:0] prog,
+  input  logic [MC_POS_W-1:0]  pos,
+  output mc_link_t             link
+);
+
+  always_comb begin
+    link = mc_link_t'(0);
+    unique case (prog)
+      8'd0: begin  // F1 / F1{B1}
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd1: begin  // F1+1{D3} · Fn
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd2: begin  // F1+1{P1} · R
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd3: begin  // F1+2{P1+O2} · R+1{P3} · W
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd4: begin  // F1+1{P1} · Fn · R+1{P3}
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd5: begin  // F1+1{P1} · R+1{P3}
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd6: begin  // F1+1{P1} · Fn+1{O2} · W
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd7: begin  // F1+2{P1+O2} · R · W
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd8: begin  // F1+2{P1+O2} · W
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd9: begin  // F1+3{P1} · Fn · W
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd10: begin  // F1+4{D3} · Fn+1{P1} | n x (R)
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd0, fin_more: 1'b0, fin_done: 1'b1};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd0, fin_more: 1'b0, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd11: begin  // F1+4{D3} · Fn+1{P1} | n x (W)
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd0, fin_more: 1'b0, fin_done: 1'b1};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd0, fin_more: 1'b0, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd12: begin  // F1+1{D3} · Fn · Fn+4{P3}
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd13: begin  // F1+1{P1} · R · R+4{P3}
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd14: begin  // F1+3{P1} · R · R+1{P3} · W+1{P4} · W
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd4, next_done: 4'd4, fin_more: 1'b0, fin_done: 1'b0};
+          4'd4: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd15: begin  // F1+3{P1} · R+1{P3} · W
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd16: begin  // F1+1{D3} · Fn · Fn+1{P3}
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd17: begin  // F1+1{P1} · R · R+1{P3}
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd18: begin  // F1+1{P1} · R · R+2{P3} · W+1{P4} · W
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd4, next_done: 4'd4, fin_more: 1'b0, fin_done: 1'b0};
+          4'd4: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd19: begin  // F1+1{P1} · R+2{P3} · W
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd20: begin  // F1 · Fn · Fn{MD+MO} · I6{D2+MO} · I8x31{D2} with n x I7{D4} inline · I8x2{D2} · I3{D2}
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd4, fin_more: 1'b0, fin_done: 1'b0};
+          4'd4: link = '{reps: 2'd2, next_more: 4'd5, next_done: 4'd5, fin_more: 1'b0, fin_done: 1'b0};
+          4'd5: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd21: begin  // F1 · Fn · Fn{MD+MO} · I6{D2+MO} · I8{D2} · I7{D2}
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd4, next_done: 4'd4, fin_more: 1'b0, fin_done: 1'b0};
+          4'd4: link = '{reps: 2'd1, next_more: 4'd5, next_done: 4'd5, fin_more: 1'b0, fin_done: 1'b0};
+          4'd5: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd22: begin  // F1+1{P1+MD} · R · R{MD+MO} · I5{D2+MO} · I8x31{D2} with n x I7{D4} inline · I8x2{D2} · I3{D2}
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd4, fin_more: 1'b0, fin_done: 1'b0};
+          4'd4: link = '{reps: 2'd2, next_more: 4'd5, next_done: 4'd5, fin_more: 1'b0, fin_done: 1'b0};
+          4'd5: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd23: begin  // F1+1{P1+MD} · R · R{MD+MO} · I5{D2+MO} · I8{D2} · I7{D2}
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd4, next_done: 4'd4, fin_more: 1'b0, fin_done: 1'b0};
+          4'd4: link = '{reps: 2'd1, next_more: 4'd5, next_done: 4'd5, fin_more: 1'b0, fin_done: 1'b0};
+          4'd5: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd24: begin  // F1 · Fn{MD} · I4x16{D2} / F1 · Fn{MD+MO} · I5{B6+D2+MO} · I6x16{B6+D2} / F1 · Fn{MD+MO} · I7{D2+MO}
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          default: ;
+        endcase
+      end
+      8'd25: begin  // F1 · Fn{MD} · I8{D2} · I4{D2}
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd26: begin  // F1+1{P1+MD} · R{MD+MO} · I3{D2+MO} · I4x15{D2} / F1+1{P1+MD} · R{MD+MO} · I4{B6+D2+MO} · I6x16{B6+D2} / F1+1{P1+MD} · R{MD+MO} · I6{D2+MO}
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          default: ;
+        endcase
+      end
+      8'd27: begin  // F1+1{P1+MD} · R{MD+MO} · I7{D2+MO} · I4{D2}
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd28: begin  // F1 · Fn · Fn{MD+MO} · I7x105{D5}
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          default: ;
+        endcase
+      end
+      8'd29: begin  // F1+1{P1+MD} · R · R{MD+MO} · I6{D5+MO} · I7x104{D5}
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          default: ;
+        endcase
+      end
+      8'd30: begin  // F1+1{P1} · R · R+3{P3}
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd31: begin  // F1+2{P1+O2} · W · W
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd32: begin  // F1+2{D2} · I5{D2}
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd33: begin  // F1+4{P1}
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd34: begin  // F1+2{D2} · I5x2{D2}
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd2, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd35: begin  // F1+4{P1} · W
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd36: begin  // F1+4{P1} · W+2{C1} · W
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd37: begin  // F1+1{P1} · Fn+3{P1}
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd38: begin  // F1+1{P1} · R+1{P3} · W
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd39: begin  // F1+1{P1} · Fn+4{P2} · R
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd40: begin  // F1+1{P1} · Fn+4{P2} · W
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd41: begin  // F1+4{D3} · Fn+2{P2} · I3{D2}
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd42: begin  // F1+1{P1} · Fn+4{P2} · R · R
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd43: begin  // F1+1{P1} · Fn+4{P2} · W · W
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd44: begin  // F1+1{P1} · R · R+2{P3}
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd45: begin  // F1+2{P1+U} · R · R{C2} · R+2{P3}
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd46: begin  // F1 · Fn+1{P1+BR} · IO+3{P3} · W · I4{BR+U}
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd4, next_done: 4'd4, fin_more: 1'b0, fin_done: 1'b0};
+          4'd4: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd47: begin  // F1 · Fn+1{P1+BR} | n x (IO+3{P3} · W) · I4{BR+U}
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd4, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd4, fin_more: 1'b0, fin_done: 1'b0};
+          4'd4: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd48: begin  // F1 · Fn+1{P1+BR} · R+3{P3} · IO · I4{BR+U}
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd4, next_done: 4'd4, fin_more: 1'b0, fin_done: 1'b0};
+          4'd4: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd49: begin  // F1 · Fn+1{P1+BR} | n x (R+3{P3} · IO) · I4{BR+U}
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd4, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd4, fin_more: 1'b0, fin_done: 1'b0};
+          4'd4: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd50: begin  // F1+2{B3} · Fn{B3} · IO{B3}
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd51: begin  // F1+3{P1} · IO
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd52: begin  // F1 · Fa · R
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd53: begin  // F1 · Fa+1{S1} · R / F1 · Fa+1{P2} · R
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd54: begin  // F1 · Fn{S3} · Fa · R
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd55: begin  // F1 · Fn{S3} · Fa+1{P2} · R
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd56: begin  // F1 · Fa+2{O2} · R+1{P3} · W
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd57: begin  // F1 · Fa+3{O2+S1} · R+1{P3} · W / F1 · Fa+3{P2+O2} · R+1{P3} · W
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd58: begin  // F1 · Fn{S3} · Fa+2{O2} · R+1{P3} · W
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd4, next_done: 4'd4, fin_more: 1'b0, fin_done: 1'b0};
+          4'd4: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd59: begin  // F1 · Fa+1{O2} · Fn · R+1{P3}
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd60: begin  // F1 · Fa+2{O2+S1} · Fn · R+1{P3} / F1 · Fa+2{P2+O2} · Fn · R+1{P3}
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd61: begin  // F1 · Fn{S3} · Fa+1{O2} · Fn · R+1{P3}
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd4, next_done: 4'd4, fin_more: 1'b0, fin_done: 1'b0};
+          4'd4: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd62: begin  // F1 · Fa+1{O2} · R+1{P3} / F1 · Fa+1{S1} · R+1{P3} / F1 · Fa+1{P2} · R+1{P3}
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd63: begin  // F1 · Fa+2{O2+S1} · R+1{P3} / F1 · Fa+2{P2+O2} · R+1{P3}
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd64: begin  // F1 · Fn{S3} · Fa+1{O2} · R+1{P3} / F1 · Fn{S3} · Fa+1{P2} · R+1{P3}
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd65: begin  // F1 · Fa+1{O2} · Fn+1{O2} · W
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd66: begin  // F1 · Fa+2{O2+S1} · Fn+1{O2} · W / F1 · Fa+2{P2+O2} · Fn+1{O2} · W
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd67: begin  // F1 · Fn{S3} · Fa+1{O2} · Fn+1{O2} · W
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd4, next_done: 4'd4, fin_more: 1'b0, fin_done: 1'b0};
+          4'd4: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd68: begin  // F1 · Fa+2{O2} · R · W
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd69: begin  // F1 · Fa+3{O2+S1} · R · W / F1 · Fa+3{P2+O2} · R · W
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd70: begin  // F1 · Fn{S3} · Fa+2{O2} · R · W
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd4, next_done: 4'd4, fin_more: 1'b0, fin_done: 1'b0};
+          4'd4: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd71: begin  // F1 · Fa+2{O2} · W
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd72: begin  // F1 · Fa+3{O2+S1} · W / F1 · Fa+3{P2+O2} · W / F1 · Fa+3{P2} · W
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd73: begin  // F1 · Fn{S3} · Fa+2{O2} · W
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd74: begin  // F1 · Fn{S3} · Fa+3{P2+O2} · R+1{P3} · W
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd4, next_done: 4'd4, fin_more: 1'b0, fin_done: 1'b0};
+          4'd4: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd75: begin  // F1 · Fn{S3} · Fa+2{P2+O2} · Fn · R+1{P3}
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd4, next_done: 4'd4, fin_more: 1'b0, fin_done: 1'b0};
+          4'd4: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd76: begin  // F1 · Fn{S3} · Fa+2{P2+O2} · R+1{P3}
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd77: begin  // F1 · Fn{S3} · Fa+2{P2+O2} · Fn+1{O2} · W
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd4, next_done: 4'd4, fin_more: 1'b0, fin_done: 1'b0};
+          4'd4: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd78: begin  // F1 · Fn{S3} · Fa+3{P2+O2} · R · W
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd4, next_done: 4'd4, fin_more: 1'b0, fin_done: 1'b0};
+          4'd4: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd79: begin  // F1 · Fn{S3} · Fa+3{P2+O2} · W
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd80: begin  // F1+4{D3} · Fn+1{P1} · Fa | n x (R)
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd0, fin_more: 1'b0, fin_done: 1'b1};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd0, fin_more: 1'b0, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd81: begin  // F1+4{D3} · Fn+1{P1} · Fa+1{S1} | n x (R) / F1+4{D3} · Fn+1{P1} · Fa+1{P2} | n x (R)
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd0, fin_more: 1'b0, fin_done: 1'b1};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd0, fin_more: 1'b0, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd82: begin  // F1+4{D3} · Fn+1{P1} · Fn{S3} · Fa | n x (R)
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd4, next_done: 4'd0, fin_more: 1'b0, fin_done: 1'b1};
+          4'd4: link = '{reps: 2'd1, next_more: 4'd4, next_done: 4'd0, fin_more: 1'b0, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd83: begin  // F1+4{D3} · Fn+1{P1} · Fa | n x (W)
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd0, fin_more: 1'b0, fin_done: 1'b1};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd0, fin_more: 1'b0, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd84: begin  // F1+4{D3} · Fn+1{P1} · Fa+1{S1} | n x (W) / F1+4{D3} · Fn+1{P1} · Fa+1{P2} | n x (W)
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd0, fin_more: 1'b0, fin_done: 1'b1};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd0, fin_more: 1'b0, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd85: begin  // F1+4{D3} · Fn+1{P1} · Fn{S3} · Fa | n x (W)
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd4, next_done: 4'd0, fin_more: 1'b0, fin_done: 1'b1};
+          4'd4: link = '{reps: 2'd1, next_more: 4'd4, next_done: 4'd0, fin_more: 1'b0, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd86: begin  // F1+4{D3} · Fn+1{P1} · Fn{S3} · Fa+1{P2} | n x (R)
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd4, next_done: 4'd0, fin_more: 1'b0, fin_done: 1'b1};
+          4'd4: link = '{reps: 2'd1, next_more: 4'd4, next_done: 4'd0, fin_more: 1'b0, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd87: begin  // F1+4{D3} · Fn+1{P1} · Fn{S3} · Fa+1{P2} | n x (W)
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd4, next_done: 4'd0, fin_more: 1'b0, fin_done: 1'b1};
+          4'd4: link = '{reps: 2'd1, next_more: 4'd4, next_done: 4'd0, fin_more: 1'b0, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd88: begin  // F1 · Fa · R · R+3{P3}
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd89: begin  // F1 · Fa+1{S1} · R · R+3{P3} / F1 · Fa+1{P2} · R · R+3{P3} / F1 · Fa+1{O2} · R · R+3{P3}
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd90: begin  // F1 · Fn{S3} · Fa · R · R+3{P3}
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd4, next_done: 4'd4, fin_more: 1'b0, fin_done: 1'b0};
+          4'd4: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd91: begin  // F1 · Fn{S3} · Fa+1{P2} · R · R+3{P3} / F1 · Fn{S3} · Fa+1{O2} · R · R+3{P3}
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd4, next_done: 4'd4, fin_more: 1'b0, fin_done: 1'b0};
+          4'd4: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd92: begin  // F1+1{P1} · Fa+1{O2} · R · R · W+1{P4} · W / F1+1{P1} · Fa+1{S4} · R · R · W+1{P4} · W / F1+1{P1} · Fa+1{P2} · R · R · W+1{P4} · W
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd4, next_done: 4'd4, fin_more: 1'b0, fin_done: 1'b0};
+          4'd4: link = '{reps: 2'd1, next_more: 4'd5, next_done: 4'd5, fin_more: 1'b0, fin_done: 1'b0};
+          4'd5: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd93: begin  // F1+1{P1} · Fn{S3} · Fa · R · R · W+1{P4} · W
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd4, next_done: 4'd4, fin_more: 1'b0, fin_done: 1'b0};
+          4'd4: link = '{reps: 2'd1, next_more: 4'd5, next_done: 4'd5, fin_more: 1'b0, fin_done: 1'b0};
+          4'd5: link = '{reps: 2'd1, next_more: 4'd6, next_done: 4'd6, fin_more: 1'b0, fin_done: 1'b0};
+          4'd6: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd94: begin  // F1+1{P1} · Fn{S3} · Fa+1{P2} · R · R · W+1{P4} · W
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd4, next_done: 4'd4, fin_more: 1'b0, fin_done: 1'b0};
+          4'd4: link = '{reps: 2'd1, next_more: 4'd5, next_done: 4'd5, fin_more: 1'b0, fin_done: 1'b0};
+          4'd5: link = '{reps: 2'd1, next_more: 4'd6, next_done: 4'd6, fin_more: 1'b0, fin_done: 1'b0};
+          4'd6: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd95: begin  // F1+1{P1} · Fa+1{O2} · R · W / F1+1{P1} · Fa+1{S4} · R · W / F1+1{P1} · Fa+1{P2} · R · W
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd96: begin  // F1+1{P1} · Fn{S3} · Fa · R · W
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd4, next_done: 4'd4, fin_more: 1'b0, fin_done: 1'b0};
+          4'd4: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd97: begin  // F1+1{P1} · Fn{S3} · Fa+1{P2} · R · W
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd4, next_done: 4'd4, fin_more: 1'b0, fin_done: 1'b0};
+          4'd4: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd98: begin  // F1 · Fa · R · R
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd99: begin  // F1 · Fa+1{S1} · R · R / F1 · Fa+1{P2} · R · R
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd100: begin  // F1 · Fn{S3} · Fa · R · R
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd4, next_done: 4'd4, fin_more: 1'b0, fin_done: 1'b0};
+          4'd4: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd101: begin  // F1 · Fn{S3} · Fa+1{P2} · R · R
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd4, next_done: 4'd4, fin_more: 1'b0, fin_done: 1'b0};
+          4'd4: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd102: begin  // F1+1{P1} · Fa+1{O2} · R · R+2{P3} · W+1{P4} · W / F1+1{P1} · Fa+1{S4} · R · R+2{P3} · W+1{P4} · W / F1+1{P1} · Fa+1{P2} · R · R+2{P3} · W+1{P4} · W
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd4, next_done: 4'd4, fin_more: 1'b0, fin_done: 1'b0};
+          4'd4: link = '{reps: 2'd1, next_more: 4'd5, next_done: 4'd5, fin_more: 1'b0, fin_done: 1'b0};
+          4'd5: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd103: begin  // F1+1{P1} · Fn{S3} · Fa · R · R+2{P3} · W+1{P4} · W
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd4, next_done: 4'd4, fin_more: 1'b0, fin_done: 1'b0};
+          4'd4: link = '{reps: 2'd1, next_more: 4'd5, next_done: 4'd5, fin_more: 1'b0, fin_done: 1'b0};
+          4'd5: link = '{reps: 2'd1, next_more: 4'd6, next_done: 4'd6, fin_more: 1'b0, fin_done: 1'b0};
+          4'd6: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd104: begin  // F1+1{P1} · Fn{S3} · Fa+1{P2} · R · R+2{P3} · W+1{P4} · W
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd4, next_done: 4'd4, fin_more: 1'b0, fin_done: 1'b0};
+          4'd4: link = '{reps: 2'd1, next_more: 4'd5, next_done: 4'd5, fin_more: 1'b0, fin_done: 1'b0};
+          4'd5: link = '{reps: 2'd1, next_more: 4'd6, next_done: 4'd6, fin_more: 1'b0, fin_done: 1'b0};
+          4'd6: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd105: begin  // F1+1{P1} · Fa+1{O2} · R+2{P3} · W / F1+1{P1} · Fa+1{S4} · R+2{P3} · W / F1+1{P1} · Fa+1{P2} · R+2{P3} · W
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd106: begin  // F1+1{P1} · Fn{S3} · Fa · R+2{P3} · W
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd4, next_done: 4'd4, fin_more: 1'b0, fin_done: 1'b0};
+          4'd4: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd107: begin  // F1+1{P1} · Fn{S3} · Fa+1{P2} · R+2{P3} · W
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd4, next_done: 4'd4, fin_more: 1'b0, fin_done: 1'b0};
+          4'd4: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd108: begin  // F1 · Fa · R · R{MD+MO} · I4{D2+MO} · I8x31{D2} with n x I7{D4} inline · I8x2{D2} · I3{D2}
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd4, next_done: 4'd4, fin_more: 1'b0, fin_done: 1'b0};
+          4'd4: link = '{reps: 2'd1, next_more: 4'd4, next_done: 4'd5, fin_more: 1'b0, fin_done: 1'b0};
+          4'd5: link = '{reps: 2'd2, next_more: 4'd6, next_done: 4'd6, fin_more: 1'b0, fin_done: 1'b0};
+          4'd6: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd109: begin  // F1 · Fa · R · R{MD+MO} · I4{D2+MO} · I8{D2} · I7{D2}
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd4, next_done: 4'd4, fin_more: 1'b0, fin_done: 1'b0};
+          4'd4: link = '{reps: 2'd1, next_more: 4'd5, next_done: 4'd5, fin_more: 1'b0, fin_done: 1'b0};
+          4'd5: link = '{reps: 2'd1, next_more: 4'd6, next_done: 4'd6, fin_more: 1'b0, fin_done: 1'b0};
+          4'd6: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd110: begin  // F1 · Fa+1{S1} · R · R{MD+MO} · I4{D2+MO} · I8x31{D2} with n x I7{D4} inline · I8x2{D2} · I3{D2} / F1 · Fa+1{P2} · R · R{MD+MO} · I4{D2+MO} · I8x31{D2} with n x I7{D4} inline · I8x2{D2} · I3{D2}
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd4, next_done: 4'd4, fin_more: 1'b0, fin_done: 1'b0};
+          4'd4: link = '{reps: 2'd1, next_more: 4'd4, next_done: 4'd5, fin_more: 1'b0, fin_done: 1'b0};
+          4'd5: link = '{reps: 2'd2, next_more: 4'd6, next_done: 4'd6, fin_more: 1'b0, fin_done: 1'b0};
+          4'd6: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd111: begin  // F1 · Fa+1{S1} · R · R{MD+MO} · I4{D2+MO} · I8{D2} · I7{D2} / F1 · Fa+1{P2} · R · R{MD+MO} · I4{D2+MO} · I8{D2} · I7{D2}
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd4, next_done: 4'd4, fin_more: 1'b0, fin_done: 1'b0};
+          4'd4: link = '{reps: 2'd1, next_more: 4'd5, next_done: 4'd5, fin_more: 1'b0, fin_done: 1'b0};
+          4'd5: link = '{reps: 2'd1, next_more: 4'd6, next_done: 4'd6, fin_more: 1'b0, fin_done: 1'b0};
+          4'd6: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd112: begin  // F1 · Fn{S3} · Fa · R · R{MD+MO} · I4{D2+MO} · I8x31{D2} with n x I7{D4} inline · I8x2{D2} · I3{D2}
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd4, next_done: 4'd4, fin_more: 1'b0, fin_done: 1'b0};
+          4'd4: link = '{reps: 2'd1, next_more: 4'd5, next_done: 4'd5, fin_more: 1'b0, fin_done: 1'b0};
+          4'd5: link = '{reps: 2'd1, next_more: 4'd5, next_done: 4'd6, fin_more: 1'b0, fin_done: 1'b0};
+          4'd6: link = '{reps: 2'd2, next_more: 4'd7, next_done: 4'd7, fin_more: 1'b0, fin_done: 1'b0};
+          4'd7: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd113: begin  // F1 · Fn{S3} · Fa · R · R{MD+MO} · I4{D2+MO} · I8{D2} · I7{D2}
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd4, next_done: 4'd4, fin_more: 1'b0, fin_done: 1'b0};
+          4'd4: link = '{reps: 2'd1, next_more: 4'd5, next_done: 4'd5, fin_more: 1'b0, fin_done: 1'b0};
+          4'd5: link = '{reps: 2'd1, next_more: 4'd6, next_done: 4'd6, fin_more: 1'b0, fin_done: 1'b0};
+          4'd6: link = '{reps: 2'd1, next_more: 4'd7, next_done: 4'd7, fin_more: 1'b0, fin_done: 1'b0};
+          4'd7: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd114: begin  // F1 · Fn{S3} · Fa+1{P2} · R · R{MD+MO} · I4{D2+MO} · I8x31{D2} with n x I7{D4} inline · I8x2{D2} · I3{D2}
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd4, next_done: 4'd4, fin_more: 1'b0, fin_done: 1'b0};
+          4'd4: link = '{reps: 2'd1, next_more: 4'd5, next_done: 4'd5, fin_more: 1'b0, fin_done: 1'b0};
+          4'd5: link = '{reps: 2'd1, next_more: 4'd5, next_done: 4'd6, fin_more: 1'b0, fin_done: 1'b0};
+          4'd6: link = '{reps: 2'd2, next_more: 4'd7, next_done: 4'd7, fin_more: 1'b0, fin_done: 1'b0};
+          4'd7: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd115: begin  // F1 · Fn{S3} · Fa+1{P2} · R · R{MD+MO} · I4{D2+MO} · I8{D2} · I7{D2}
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd4, next_done: 4'd4, fin_more: 1'b0, fin_done: 1'b0};
+          4'd4: link = '{reps: 2'd1, next_more: 4'd5, next_done: 4'd5, fin_more: 1'b0, fin_done: 1'b0};
+          4'd5: link = '{reps: 2'd1, next_more: 4'd6, next_done: 4'd6, fin_more: 1'b0, fin_done: 1'b0};
+          4'd6: link = '{reps: 2'd1, next_more: 4'd7, next_done: 4'd7, fin_more: 1'b0, fin_done: 1'b0};
+          4'd7: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd116: begin  // F1 · Fa · R+2{MD+MO} · I4x15{D2}
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          default: ;
+        endcase
+      end
+      8'd117: begin  // F1 · Fa · R{MD+MO} · I6{D2+MO} · I4{D2}
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd4, next_done: 4'd4, fin_more: 1'b0, fin_done: 1'b0};
+          4'd4: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd118: begin  // F1 · Fa+1{S1} · R+2{MD+MO} · I4x15{D2} / F1 · Fa+1{P2} · R+2{MD+MO} · I4x15{D2}
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          default: ;
+        endcase
+      end
+      8'd119: begin  // F1 · Fa+1{S1} · R{MD+MO} · I6{D2+MO} · I4{D2} / F1 · Fa+1{P2} · R{MD+MO} · I6{D2+MO} · I4{D2}
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd4, next_done: 4'd4, fin_more: 1'b0, fin_done: 1'b0};
+          4'd4: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd120: begin  // F1 · Fn{S3} · Fa · R+2{MD+MO} · I4x15{D2}
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd4, next_done: 4'd4, fin_more: 1'b0, fin_done: 1'b0};
+          4'd4: link = '{reps: 2'd1, next_more: 4'd4, next_done: 4'd4, fin_more: 1'b0, fin_done: 1'b0};
+          default: ;
+        endcase
+      end
+      8'd121: begin  // F1 · Fn{S3} · Fa · R{MD+MO} · I6{D2+MO} · I4{D2}
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd4, next_done: 4'd4, fin_more: 1'b0, fin_done: 1'b0};
+          4'd4: link = '{reps: 2'd1, next_more: 4'd5, next_done: 4'd5, fin_more: 1'b0, fin_done: 1'b0};
+          4'd5: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd122: begin  // F1 · Fn{S3} · Fa+1{P2} · R+2{MD+MO} · I4x15{D2}
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd4, next_done: 4'd4, fin_more: 1'b0, fin_done: 1'b0};
+          4'd4: link = '{reps: 2'd1, next_more: 4'd4, next_done: 4'd4, fin_more: 1'b0, fin_done: 1'b0};
+          default: ;
+        endcase
+      end
+      8'd123: begin  // F1 · Fn{S3} · Fa+1{P2} · R{MD+MO} · I6{D2+MO} · I4{D2}
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd4, next_done: 4'd4, fin_more: 1'b0, fin_done: 1'b0};
+          4'd4: link = '{reps: 2'd1, next_more: 4'd5, next_done: 4'd5, fin_more: 1'b0, fin_done: 1'b0};
+          4'd5: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd124: begin  // F1 · Fa · R · R{MD+MO} · I5{D5+MO} · I7x104{D5}
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd4, next_done: 4'd4, fin_more: 1'b0, fin_done: 1'b0};
+          4'd4: link = '{reps: 2'd1, next_more: 4'd4, next_done: 4'd4, fin_more: 1'b0, fin_done: 1'b0};
+          default: ;
+        endcase
+      end
+      8'd125: begin  // F1 · Fa+1{S1} · R · R{MD+MO} · I5{D5+MO} · I7x104{D5} / F1 · Fa+1{P2} · R · R{MD+MO} · I5{D5+MO} · I7x104{D5}
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd4, next_done: 4'd4, fin_more: 1'b0, fin_done: 1'b0};
+          4'd4: link = '{reps: 2'd1, next_more: 4'd4, next_done: 4'd4, fin_more: 1'b0, fin_done: 1'b0};
+          default: ;
+        endcase
+      end
+      8'd126: begin  // F1 · Fn{S3} · Fa · R · R{MD+MO} · I5{D5+MO} · I7x104{D5}
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd4, next_done: 4'd4, fin_more: 1'b0, fin_done: 1'b0};
+          4'd4: link = '{reps: 2'd1, next_more: 4'd5, next_done: 4'd5, fin_more: 1'b0, fin_done: 1'b0};
+          4'd5: link = '{reps: 2'd1, next_more: 4'd5, next_done: 4'd5, fin_more: 1'b0, fin_done: 1'b0};
+          default: ;
+        endcase
+      end
+      8'd127: begin  // F1 · Fn{S3} · Fa+1{P2} · R · R{MD+MO} · I5{D5+MO} · I7x104{D5}
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd4, next_done: 4'd4, fin_more: 1'b0, fin_done: 1'b0};
+          4'd4: link = '{reps: 2'd1, next_more: 4'd5, next_done: 4'd5, fin_more: 1'b0, fin_done: 1'b0};
+          4'd5: link = '{reps: 2'd1, next_more: 4'd5, next_done: 4'd5, fin_more: 1'b0, fin_done: 1'b0};
+          default: ;
+        endcase
+      end
+      8'd128: begin  // F1 · Fa · R{MD+MO} · I3{B6+D2+MO} · I6x16{B6+D2} / F1 · Fa · R{MD+MO} · I5{D2+MO}
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          default: ;
+        endcase
+      end
+      8'd129: begin  // F1 · Fa+1{S1} · R{MD+MO} · I3{B6+D2+MO} · I6x16{B6+D2} / F1 · Fa+1{S1} · R{MD+MO} · I5{D2+MO} / F1 · Fa+1{P2} · R{MD+MO} · I3{B6+D2+MO} · I6x16{B6+D2} / F1 · Fa+1{P2} · R{MD+MO} · I5{D2+MO}
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          default: ;
+        endcase
+      end
+      8'd130: begin  // F1 · Fn{S3} · Fa · R{MD+MO} · I3{B6+D2+MO} · I6x16{B6+D2} / F1 · Fn{S3} · Fa · R{MD+MO} · I5{D2+MO}
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd4, next_done: 4'd4, fin_more: 1'b0, fin_done: 1'b0};
+          4'd4: link = '{reps: 2'd1, next_more: 4'd4, next_done: 4'd4, fin_more: 1'b0, fin_done: 1'b0};
+          default: ;
+        endcase
+      end
+      8'd131: begin  // F1 · Fn{S3} · Fa+1{P2} · R{MD+MO} · I3{B6+D2+MO} · I6x16{B6+D2} / F1 · Fn{S3} · Fa+1{P2} · R{MD+MO} · I5{D2+MO}
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd4, next_done: 4'd4, fin_more: 1'b0, fin_done: 1'b0};
+          4'd4: link = '{reps: 2'd1, next_more: 4'd4, next_done: 4'd4, fin_more: 1'b0, fin_done: 1'b0};
+          default: ;
+        endcase
+      end
+      8'd132: begin  // F1 · Fa+2{O2+S1} · R · R+3{P3} / F1 · Fa+2{P2+O2} · R · R+3{P3}
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd133: begin  // F1 · Fn{S3} · Fa+2{P2+O2} · R · R+3{P3}
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd4, next_done: 4'd4, fin_more: 1'b0, fin_done: 1'b0};
+          4'd4: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd134: begin  // F1 · Fa+2{O2} · W · W
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd135: begin  // F1 · Fa+3{O2+S1} · W · W / F1 · Fa+3{P2+O2} · W · W
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd136: begin  // F1 · Fn{S3} · Fa+2{O2} · W · W
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd4, next_done: 4'd4, fin_more: 1'b0, fin_done: 1'b0};
+          4'd4: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd137: begin  // F1 · Fn{S3} · Fa+3{P2+O2} · W · W
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd4, next_done: 4'd4, fin_more: 1'b0, fin_done: 1'b0};
+          4'd4: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd138: begin  // F1 · Fa+1{P2}
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd139: begin  // F1 · Fa+2{P2+S1} / F1 · Fa+2{P2}
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd140: begin  // F1 · Fn{S3} · Fa+1{P2}
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd141: begin  // F1 · Fn{S3} · Fa+2{P2}
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd142: begin  // F1 · Fa+4{P2+S1} · W+2{C1} · W / F1 · Fa+4{P2} · W+2{C1} · W
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd143: begin  // F1 · Fn{S3} · Fa+3{P2} · W+2{C1} · W
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd4, next_done: 4'd4, fin_more: 1'b0, fin_done: 1'b0};
+          4'd4: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd144: begin  // F1 · Fa+4{P2} · W
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd145: begin  // F1 · Fn{S3} · Fa+4{P2} · W+2{C1} · W
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd4, next_done: 4'd4, fin_more: 1'b0, fin_done: 1'b0};
+          4'd4: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd146: begin  // F1 · Fa · R+1{P3} · W
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd147: begin  // F1 · Fa+1{S1} · R+1{P3} · W / F1 · Fa+1{P2} · R+1{P3} · W
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd148: begin  // F1 · Fn{S3} · Fa · R+1{P3} · W
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd4, next_done: 4'd4, fin_more: 1'b0, fin_done: 1'b0};
+          4'd4: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd149: begin  // F1 · Fn{S3} · Fa+1{P2} · R+1{P3} · W
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd4, next_done: 4'd4, fin_more: 1'b0, fin_done: 1'b0};
+          4'd4: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd150: begin  // F1 · Fa · R+1{P3}
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd151: begin  // F1 · Fn{S3} · Fa · R+1{P3}
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd152: begin  // F1 · Fa+1{O2} · R+2{P3} · W
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd153: begin  // F1 · Fa+2{O2+S1} · R+2{P3} · W / F1 · Fa+2{P2+O2} · R+2{P3} · W
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd154: begin  // F1 · Fn{S3} · Fa+1{O2} · R+2{P3} · W
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd4, next_done: 4'd4, fin_more: 1'b0, fin_done: 1'b0};
+          4'd4: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd155: begin  // F1 · Fn{S3} · Fa+2{P2+O2} · R+2{P3} · W
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd4, next_done: 4'd4, fin_more: 1'b0, fin_done: 1'b0};
+          4'd4: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd156: begin  // F1+4{D3} · Fa+2{P2}
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd157: begin  // F1+4{D3} · Fa+3{P2+S1} / F1+4{D3} · Fa+3{P2}
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd158: begin  // F1+4{D3} · Fn{S3} · Fa+2{P2}
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd159: begin  // F1+4{D3} · Fn{S3} · Fa+3{P2}
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd160: begin  // F1+2{U} · Fa · R · R+2{P3}
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd161: begin  // F1+2{U} · Fa+1{S1} · R · R{C2} · R+2{P3} / F1+2{U} · Fa+1{P2} · R · R{C2} · R+2{P3}
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd4, next_done: 4'd4, fin_more: 1'b0, fin_done: 1'b0};
+          4'd4: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd162: begin  // F1+2{U} · Fn{S3} · Fa · R · R{C2} · R+2{P3}
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd4, next_done: 4'd4, fin_more: 1'b0, fin_done: 1'b0};
+          4'd4: link = '{reps: 2'd1, next_more: 4'd5, next_done: 4'd5, fin_more: 1'b0, fin_done: 1'b0};
+          4'd5: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd163: begin  // F1+2{U} · Fa+1{P2} · R · R+2{P3}
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd164: begin  // F1+2{U} · Fn{S3} · Fa+1{P2} · R · R{C2} · R+2{P3}
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd4, next_done: 4'd4, fin_more: 1'b0, fin_done: 1'b0};
+          4'd4: link = '{reps: 2'd1, next_more: 4'd5, next_done: 4'd5, fin_more: 1'b0, fin_done: 1'b0};
+          4'd5: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd165: begin  // F1+2{B4} · I3{B4} | n x (I3{B4})
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd0, fin_more: 1'b0, fin_done: 1'b1};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd0, fin_more: 1'b0, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd166: begin  // F1+1{P1} · R · R · R
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd167: begin  // F1+1{P1} · R · R · R · R{C2}
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd4, next_done: 4'd4, fin_more: 1'b0, fin_done: 1'b0};
+          4'd4: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd168: begin  // F1+2{P1}
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd169: begin  // F1+2{D2} | n x (I7{D2}) · I7{D2}
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd170: begin  // F1+1{B2}
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd171: begin  // F1+4{D3} · Fn+1{P1} · EPU
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd172: begin  // F1+4{D3} · Fn+1{U} · I4{U}
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd173: begin  // F1+4{D3} · Fn+1{P1} | n x (EPU)
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd0, fin_more: 1'b0, fin_done: 1'b1};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd0, fin_more: 1'b0, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd174: begin  // F1+2{D2} · I3{D2}
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd175: begin  // F1+3{P1} · W · W
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd176: begin  // F1+3{P1} · W
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd177: begin  // F1+2{P1} · R · R+1{P3}
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd178: begin  // F1+2{P1} · R
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd179: begin  // F1+4{D2} · I8x32{D2} with n x I7{D4} inline · I8x2{D2} · I3{D2}
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd2, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd180: begin  // F1+4{D2} · I8x2{D2} · I7{D2}
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd2, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd181: begin  // F1+3{D2} · I4x16{D2}
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          default: ;
+        endcase
+      end
+      8'd182: begin  // F1+3{D2} · I8{D2} · I4{D2}
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd183: begin  // F1+2{D2} · I4{D5} · I7x105{D5} / F1+2{D2} · I6x17{B6+D2} / F1+2{D2} · I8{D2}
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          default: ;
+        endcase
+      end
+      8'd184: begin  // F1+2{D2} · I8{D2}
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd185: begin  // F1+4{D3} · R
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd186: begin  // F1+4{D3} · R · R{C2}
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd187: begin  // F1+3{P1}
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd188: begin  // F1+2{D2} · I6{D2}
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd189: begin  // F1+4{D3} · Fn+3{P1} | n x (I3{D2})
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          default: ;
+        endcase
+      end
+      8'd190: begin  // F1+4{D3} · Fn+2{P1} · I3{D2} | n x (I3{D2})
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          default: ;
+        endcase
+      end
+      8'd191: begin  // F1 · Fn+1{P1+BR} · R+2{P2} · R+3{P3} · W · I4{BR+U}
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd4, next_done: 4'd4, fin_more: 1'b0, fin_done: 1'b0};
+          4'd4: link = '{reps: 2'd1, next_more: 4'd5, next_done: 4'd5, fin_more: 1'b0, fin_done: 1'b0};
+          4'd5: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd192: begin  // F1 · Fn+1{P1+BR} · R+2{P2} · R+3{P3} · I3{D2} · I4{BR+U}
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd4, next_done: 4'd4, fin_more: 1'b0, fin_done: 1'b0};
+          4'd4: link = '{reps: 2'd1, next_more: 4'd5, next_done: 4'd5, fin_more: 1'b0, fin_done: 1'b0};
+          4'd5: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd193: begin  // F1 · Fn+1{P1+BR} | n x (R+2{P2} · R+3{P3} · W) · I4{BR+U}
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd5, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd4, next_done: 4'd4, fin_more: 1'b0, fin_done: 1'b0};
+          4'd4: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd5, fin_more: 1'b0, fin_done: 1'b0};
+          4'd5: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd194: begin  // F1 · Fn+1{P1+BR} | n x (R+2{P2} · R+3{P3} · I3{D2}) · I4{BR+U}
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd5, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd4, next_done: 4'd4, fin_more: 1'b0, fin_done: 1'b0};
+          4'd4: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd5, fin_more: 1'b0, fin_done: 1'b0};
+          4'd5: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd195: begin  // F1 · Fn+1{P1+BR} · R+3{P3} · I3{D2} · I4{BR+U}
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd4, next_done: 4'd4, fin_more: 1'b0, fin_done: 1'b0};
+          4'd4: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd196: begin  // F1 · Fn+1{P1+BR} · R+3{P3} · W · I4{BR+U}
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd4, next_done: 4'd4, fin_more: 1'b0, fin_done: 1'b0};
+          4'd4: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd197: begin  // F1 · Fn+1{P1+BR} | n x (R+3{P3} · W) · I4{BR+U}
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd4, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd4, fin_more: 1'b0, fin_done: 1'b0};
+          4'd4: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd198: begin  // F1 · Fn+1{P1+BR} · R · R+4{P3} · I4{D2} · I4{BR+U}
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd4, next_done: 4'd4, fin_more: 1'b0, fin_done: 1'b0};
+          4'd4: link = '{reps: 2'd2, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd199: begin  // F1 · Fn+1{P1+BR} | n x (R+3{P3} · I3{D2}) · I4{BR+U}
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd4, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd4, fin_more: 1'b0, fin_done: 1'b0};
+          4'd4: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd200: begin  // F1 · Fn+1{P1+BR} | n x (R · R+4{P3} · I4{D2}) · I4{BR+U}
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd5, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd4, next_done: 4'd4, fin_more: 1'b0, fin_done: 1'b0};
+          4'd4: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd5, fin_more: 1'b0, fin_done: 1'b0};
+          4'd5: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd201: begin  // F1+2{D2} · I4{D2}
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd202: begin  // AF+4{B5t} · W+1{B5} · W+1{B5} · W+4{B5} · R · R
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd4, next_done: 4'd4, fin_more: 1'b0, fin_done: 1'b0};
+          4'd4: link = '{reps: 2'd1, next_more: 4'd5, next_done: 4'd5, fin_more: 1'b0, fin_done: 1'b0};
+          4'd5: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd203: begin  // AF+4{B5t} · W+1{B5} · W{B5} · W+1{B5} · W+4{B5} · R · R · R{B5}
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd4, next_done: 4'd4, fin_more: 1'b0, fin_done: 1'b0};
+          4'd4: link = '{reps: 2'd1, next_more: 4'd5, next_done: 4'd5, fin_more: 1'b0, fin_done: 1'b0};
+          4'd5: link = '{reps: 2'd1, next_more: 4'd6, next_done: 4'd6, fin_more: 1'b0, fin_done: 1'b0};
+          4'd6: link = '{reps: 2'd1, next_more: 4'd7, next_done: 4'd7, fin_more: 1'b0, fin_done: 1'b0};
+          4'd7: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd204: begin  // AF+4{B5t} · IA{B5} · W+1{B5} · W+1{B5} · W+4{B5} · R · R
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd4, next_done: 4'd4, fin_more: 1'b0, fin_done: 1'b0};
+          4'd4: link = '{reps: 2'd1, next_more: 4'd5, next_done: 4'd5, fin_more: 1'b0, fin_done: 1'b0};
+          4'd5: link = '{reps: 2'd1, next_more: 4'd6, next_done: 4'd6, fin_more: 1'b0, fin_done: 1'b0};
+          4'd6: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      8'd205: begin  // AF+4{B5t} · IA{B5} · W+1{B5} · W{B5} · W+1{B5} · W+4{B5} · R · R · R{B5}
+        unique case (pos)
+          4'd0: link = '{reps: 2'd1, next_more: 4'd1, next_done: 4'd1, fin_more: 1'b0, fin_done: 1'b0};
+          4'd1: link = '{reps: 2'd1, next_more: 4'd2, next_done: 4'd2, fin_more: 1'b0, fin_done: 1'b0};
+          4'd2: link = '{reps: 2'd1, next_more: 4'd3, next_done: 4'd3, fin_more: 1'b0, fin_done: 1'b0};
+          4'd3: link = '{reps: 2'd1, next_more: 4'd4, next_done: 4'd4, fin_more: 1'b0, fin_done: 1'b0};
+          4'd4: link = '{reps: 2'd1, next_more: 4'd5, next_done: 4'd5, fin_more: 1'b0, fin_done: 1'b0};
+          4'd5: link = '{reps: 2'd1, next_more: 4'd6, next_done: 4'd6, fin_more: 1'b0, fin_done: 1'b0};
+          4'd6: link = '{reps: 2'd1, next_more: 4'd7, next_done: 4'd7, fin_more: 1'b0, fin_done: 1'b0};
+          4'd7: link = '{reps: 2'd1, next_more: 4'd8, next_done: 4'd8, fin_more: 1'b0, fin_done: 1'b0};
+          4'd8: link = '{reps: 2'd1, next_more: 4'd0, next_done: 4'd0, fin_more: 1'b1, fin_done: 1'b1};
+          default: ;
+        endcase
+      end
+      default: ;
+    endcase
+  end
+
+endmodule

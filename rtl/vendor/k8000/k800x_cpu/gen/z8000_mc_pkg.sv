@@ -1,0 +1,60 @@
+// DERIVED FILE, but a COMMITTED SOURCE of k8000: check it in, review its
+// diffs, and build from it. Nothing in k8000's lint/build/test reads any
+// other repo.
+//
+// Do not hand-edit: it is emitted by cmd/mcrom from the Z8000 Go golden
+// model's machine-cycle programs, and 'make refresh-rtl' (maintainers only,
+// needs that model) will overwrite it. What proves it correct HERE is
+// tb_mc_table replaying rtl/k800x_cpu/z8000_mc_table.txt against it.
+//
+// z8000_mc_pkg: machine-cycle program ROM types. A program is a list of
+// entries. An entry is one machine cycle (mc_cycle_t), and how the program
+// goes on after it (mc_link_t): how many times the cycle runs in a row,
+// the position that follows when the datapath asks for another repetition
+// (next_more) and when it does not (next_done), and whether the program
+// ends after it (fin_more, fin_done).
+
+package z8000_mc_pkg;
+
+  localparam int MC_FORM_W   = 9;
+  localparam int MC_PROG_W   = 8;
+  localparam int MC_POS_W    = 4;
+  localparam int MC_REPS_W   = 2;
+  localparam int MC_CLOCKS_W = 4;
+
+  // The trap and interrupt entry programs, nonsegmented and segmented.
+  localparam int MC_PROG_TRAP_NS  = 202;
+  localparam int MC_PROG_TRAP_SEG = 203;
+  localparam int MC_PROG_INT_NS   = 204;
+  localparam int MC_PROG_INT_SEG  = 205;
+
+  // F1 first instruction word, FN later word, FA address word, R/W memory
+  // read/write, IO, EPU transfer, AF aborted fetch, I internal operation,
+  // IA interrupt acknowledge, IU internal operations ended by the serial
+  // unit, repeated until its last.
+  typedef enum logic [3:0] {
+    MC_F1, MC_FN, MC_FA, MC_R, MC_W, MC_IO, MC_EPU, MC_AF, MC_I, MC_IA, MC_IU
+  } mc_kind_e;
+
+  typedef enum logic [1:0] {
+    MC_COL_NS, MC_COL_SS, MC_COL_SL
+  } mc_col_e;
+
+  typedef enum logic [1:0] {
+    MC_PATH_DEFAULT, MC_PATH_NOT_TAKEN, MC_PATH_ZERO
+  } mc_path_e;
+
+  typedef struct packed {
+    mc_kind_e               kind;
+    logic [MC_CLOCKS_W-1:0] clocks;     // bus cycle: tail; internal: length
+  } mc_cycle_t;
+
+  typedef struct packed {
+    logic [MC_REPS_W-1:0]   reps;
+    logic [MC_POS_W-1:0]    next_more;
+    logic [MC_POS_W-1:0]    next_done;
+    logic                   fin_more;
+    logic                   fin_done;
+  } mc_link_t;
+
+endpackage

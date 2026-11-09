@@ -1,0 +1,10 @@
+`verilator_config
+// Vendored RTL is linted in its own repos.
+lint_off -file "rtl/vendor/*"
+lint_off -file "*/rtl/vendor/*"
+// GHDL netlists of the vendored VHDL cores.
+lint_off -file "*/obj_dir/ghdl/*"
+lint_off -file "obj_dir/ghdl/*"
+// Simulation copy of the vendored SDRAM controller.
+lint_off -file "*/obj_dir/sdram/*"
+lint_off -file "obj_dir/sdram/*"

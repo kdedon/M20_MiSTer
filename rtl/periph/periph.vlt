@@ -1,0 +1,12 @@
+`verilator_config
+// Verbatim copies of the KF headers missing from rtl/vendor.
+lint_off -file "*/rtl/periph/inc/*"
+lint_off -file "rtl/periph/inc/*"
+// Non-lint warnings in the vendored KF cores (lint/vendor.vlt waives lint only).
+lint_off -rule COMBDLY -file "*rtl/vendor/KF82*"
+lint_off -rule COMBDLY -file "rtl/vendor/KF82*"
+// Modified copy of vendored KF8259 control logic (vendor style kept).
+lint_off -file "*rtl/periph/KF8259_Control_Logic.sv"
+lint_off -file "rtl/periph/KF8259_Control_Logic.sv"
+lint_off -rule COMBDLY -file "*rtl/periph/KF8259_Control_Logic.sv"
+lint_off -rule COMBDLY -file "rtl/periph/KF8259_Control_Logic.sv"

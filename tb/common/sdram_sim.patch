@@ -1,0 +1,68 @@
+--- a/sdram.sv
++++ b/sdram.sv
+@@ -32,7 +32,7 @@
+ 	input             init,        // reset to initialize RAM
+ 	input             clk,         // clock ~100MHz
+ 
+-	inout  reg [15:0] SDRAM_DQ,    // 16 bit bidirectional data bus
++	inout  wire [15:0] SDRAM_DQ,    // 16 bit bidirectional data bus
+ 	output reg [12:0] SDRAM_A,     // 13 bit multiplexed address bus
+ 	output            SDRAM_DQML,  // two byte masks
+ 	output            SDRAM_DQMH,  // 
+@@ -68,6 +68,10 @@
+ assign SDRAM_nCAS = command[1];
+ assign SDRAM_nWE  = command[0];
+ assign SDRAM_CKE  = 1;
++
++reg [15:0] dq_out;
++reg        dq_oe = 0;
++assign SDRAM_DQ = dq_oe ? dq_out : 16'bZ;
+ assign {SDRAM_DQMH,SDRAM_DQML} = SDRAM_A[12:11];
+ 
+ localparam BURST_LENGTH        = 4;
+@@ -109,6 +113,9 @@
+ localparam STATE_RFSH    = 11;
+ 
+ 
++reg        old_cpreq = 0;
++reg  [3:0] state = STATE_STARTUP;
++
+ always @(posedge clk) begin
+ 	reg [CAS_LATENCY:0] data_ready_delay;
+ 
+@@ -116,8 +123,6 @@
+ 	reg [12:0] cas_addr;
+ 	reg [15:0] saved_data;
+ 	reg  [8:0] cpcnt;
+-	reg        old_cpreq = 0;
+-	reg  [3:0] state = STATE_STARTUP;
+ 	reg        refresh_old;
+ 
+ 	refresh_count <= refresh_count+1'b1;
+@@ -126,7 +131,7 @@
+ 	if(data_ready_delay[0]) ready <= 1;
+ 
+ 	dout <= SDRAM_DQ;
+-	SDRAM_DQ <= 'Z;
++	dq_oe <= 0;
+ 
+ 	if(SDRAM_EN) begin
+ 		command <= CMD_NOP;
+@@ -240,7 +245,7 @@
+ 				SDRAM_A       <= cas_addr;
+ 				if(saved_wr) begin
+ 					command    <= CMD_WRITE;
+-					SDRAM_DQ   <= saved_data;
++					{dq_oe, dq_out} <= {1'b1, saved_data};
+ 					ready      <= 1;
+ 				end
+ 				else begin
+@@ -255,7 +260,7 @@
+ 				cas_addr[8:0] <= cas_addr[8:0] + 1'd1;
+ 				cpcnt         <= cpcnt - 1'd1;
+ 				command       <= CMD_WRITE;
+-				SDRAM_DQ      <= cpdin;
++				{dq_oe, dq_out} <= {1'b1, cpdin};
+ 				if(!cpcnt) begin
+ 					state      <= STATE_IDLE_4;
+ 					cprd       <= 0;

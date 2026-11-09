@@ -1,0 +1,4 @@
+# Video block (m20_video).  The MC6845 netlist is listed in files.qip.
+set_global_assignment -name SYSTEMVERILOG_FILE [file join $::quartus(qip_path) m20_vplane.sv]
+set_global_assignment -name SYSTEMVERILOG_FILE [file join $::quartus(qip_path) m20_vid_out.sv]
+set_global_assignment -name SYSTEMVERILOG_FILE [file join $::quartus(qip_path) m20_video.sv]
