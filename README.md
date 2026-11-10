@@ -51,6 +51,18 @@ Hard disk images are raw, 6 heads × 33 sectors × 256 bytes per cylinder, secto
 truncate -s 9123840 games/M20/hd0.img
 ```
 
+A drive is empty until its image is mounted, so the boot ROM asks for a disk if it starts first.
+
+- At core start, `games/M20/boot0.vhd` (any floppy image, renamed) is mounted on Floppy 0 before the machine starts; `boot2.vhd` goes to Hard disk 0.
+- In an MGL, mount the floppy before loading the firmware: the firmware load resets the machine.
+
+```
+<file delay="1" type="s" index="0" path="pcos20f.img"/>
+<file delay="1" type="f" index="1" path="rom20f.rom"/>
+```
+
+Paths are relative to `games/M20`. With `boot.rom` loaded at start, end the MGL with `<reset delay="1"/>` instead.
+
 A blank disk reads as formatted and empty: ROM 2.x reports `Invalid File Error 00 on Drive 10` and boots from the floppy. Prepare it under PCOS 2.x with `vformat 10:`. PCOS 1.x calls ROM 1.0 routines and does not run with ROM 2.x.
 
 ## OSD
@@ -59,8 +71,8 @@ A blank disk reads as formatted and empty: ROM 2.x reports `Invalid File Error 0
 |---|---|
 | Floppy 0 / 1 | Mount an image |
 | Hard disk 0 / 1 | Mount an image; the card is fitted while one is mounted (ROM 2.x) |
-| Configuration | Memory and video cards: B/W, 4 or 8 colours, 32K or 128K cards |
-| Jumpers ZA/SPARE1 | ROM 1.x: run or skip self-tests. ROM 2.x: drive type (160K, 320K, 640K, or ask) |
+| Configuration | Memory and video cards: B/W, 4 or 8 colours, 32K, 128K or no cards. Default B/W 128K cards (512 KB); PCOS 2.x does not boot with no cards |
+| Jumpers ZA/SPARE1 | ROM 2.x: drive type (320K, 640K, 160K, or ask). ROM 1.x: run or skip self-tests. Default 2.x 320K drives; ROM 1.x needs 1.x full tests, since skipping them also skips the keyboard check that tells PCOS 1.x its layout |
 | Aspect ratio | Original, full screen, custom |
 | IEEE-488 card, Twin RS-232 card | Fit the card |
 | Serial port | RS-232 port on the MiSTer UART: mainboard, twin card A or B. The others see an idle line. |
@@ -68,11 +80,13 @@ A blank disk reads as formatted and empty: ROM 2.x reports `Invalid File Error 0
 | Load extension ROM | Load the extension sockets |
 | Reset | |
 
-Change the configuration, jumpers or cards, then reset.
+Change the configuration, jumpers or cards, then reset. Options are kept in `config/M20_v5.CFG`; delete it to return to the defaults.
 
 ## Keyboard
 
 Italian layout. Keys map by position, except , ; . which follow their legends.
+
+Ctrl+Esc is CTRL+RESET, the PCOS logical reset (boot PCOS again). RESET on its own is an ordinary key, and the boot ROM has no reset key: at its prompts use OSD Reset.
 
 | PC key | M20 key |
 |---|---|
