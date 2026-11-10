@@ -13,10 +13,12 @@
 //
 // Keys: +keys=<text> is typed once the disk has been quiet for +kquiet
 // clocks after the ROM was left (letters, digits, space, '.', ',';
-// '~' = RETURN; a RETURN is added at the end).  The run then continues for
+// '~' = RETURN, '`' = wait 1 s, then until the disks are quiet; a RETURN is
+// added at the end).  The run then continues for
 // +kpost clocks after the last key, or until the disk is quiet again.
 //
 // Plusargs: +rom=<file> (8 or 16 KB) +img=<file> +out=<dir> +maxclk=<n> +cfg=<n> +za=<n> +spare1=<n>
+//   +hd=<file> (hard disk 0 image)
 //   +ext=<file> (extension ROM, up to 48 KB)  +ieee +twin (cards fitted)
 //   +bootkey=<c> (key pressed when the ROM first reads the keyboard data port)
 //   +stoppc=<hex> (end the run, passing, at the first IF1 of <seg>offset, e.g. 74010)
@@ -33,6 +35,7 @@ module tb_core;
   import "DPI-C" function int fb_dump(input string path, input int w, input int h);
 
   localparam int IMG_MX = 655360;
+  localparam int HD_MX  = 180 * 99 * 512;
 
   logic clk = 1'b0;
   always #10417 clk = ~clk;          // 48 MHz
@@ -86,17 +89,20 @@ module tb_core;
   logic [1:0][31:0]  fd_lba;
   logic [1:0]        fd_rd, fd_wr;
   logic [1:0][7:0]   fd_din;
+  logic [1:0][31:0]  hd_lba;
+  logic [1:0]        hd_rd, hd_wr;
+  logic [1:0][7:0]   hd_din;
 
-  disk_stream u_ds (
-    .clk(clk), .rst_n(ds_rst_n), .core_rst_n(rst_n), .bpc('0),
+  disk_stream #(.UMAX(99)) u_ds (
+    .clk(clk), .rst_n(ds_rst_n), .core_rst_n(rst_n), .bpc({12'd99, 12'd99}),
     .img_mounted(img_mounted), .img_readonly(img_readonly), .img_size(img_size),
     .h_lba(h_lba), .h_blk_cnt(h_blk_cnt), .h_rd(h_rd), .h_wr(h_wr), .h_ack(h_ack),
     .h_buff_addr(h_buff_addr), .h_buff_dout(h_buff_dout), .h_buff_din(h_buff_din),
     .h_buff_wr(h_buff_wr),
     .d_mounted(d_mounted), .d_readonly(d_readonly), .d_size(d_size),
-    .d_lba({32'd0, 32'd0, fd_lba}), .d_scr(4'b0000),
-    .d_rd({2'b00, fd_rd}), .d_wr({2'b00, fd_wr}), .d_ack(d_ack),
-    .d_buff_addr(d_buff_addr), .d_buff_dout(d_buff_dout), .d_buff_din({16'hFFFF, fd_din}),
+    .d_lba({hd_lba, fd_lba}), .d_scr(4'b0000),
+    .d_rd({hd_rd, fd_rd}), .d_wr({hd_wr, fd_wr}), .d_ack(d_ack),
+    .d_buff_addr(d_buff_addr), .d_buff_dout(d_buff_dout), .d_buff_din({hd_din, fd_din}),
     .d_buff_wr(d_buff_wr),
     .resident(resident), .busy(ds_busy), .wb_busy(wb_busy), .fmt_full(fmt_full),
     .ld_min(ld_min), .ld_max(ld_max)
@@ -116,6 +122,8 @@ module tb_core;
     .fd_lba(fd_lba), .fd_rd(fd_rd), .fd_wr(fd_wr), .fd_ack(d_ack[1:0]),
     .fd_buff_addr(d_buff_addr), .fd_buff_dout(d_buff_dout), .fd_buff_din(fd_din),
     .fd_buff_wr(d_buff_wr),
+    .hd_mounted(d_mounted[3:2]), .hd_lba(hd_lba), .hd_rd(hd_rd), .hd_wr(hd_wr),
+    .hd_ack(d_ack[3:2]), .hd_buff_din(hd_din),
     .ps2_key(ps2_key), .osd_active(1'b0),
     .ser_rxd(1'b1), .ser_txd(ser_txd), .ser_cts_n(1'b0), .ser_dsr_n(1'b0),
     .ser_rts_n(ser_rts_n), .ser_dtr_n(ser_dtr_n),
@@ -125,10 +133,13 @@ module tb_core;
   );
 
   // ---- run state ----
-  string  img_file, out_dir, keys;
-  int     img_sz = 0;
+  string  img_file, out_dir, keys, hd_file;
+  int     img_sz = 0, hd_sz = 0;
   logic [7:0] img [IMG_MX];
+  logic [7:0] hd_img [HD_MX];
   longint clk_n = 0, maxclk = 64'd1_500_000_000;
+  longint last_disk = 0;
+  longint kquiet;
   longint pctrace_from = -1, pctrace_to = -1;
   bit     labels = 1;
   longint iolog_from = -1;
@@ -146,7 +157,7 @@ module tb_core;
     return real'(clk_n) / 48000.0;
   endfunction
 
-  // ---- hps_io block server (slot 0 = drive 0 image; others empty) ----
+  // ---- hps_io block server (slot 0 = drive 0 image, slot 2 = +hd image) ----
   int hps_reads = 0, hps_writes = 0;
   initial begin : server
     forever begin
@@ -161,7 +172,8 @@ module tb_core;
           for (int i = 0; i < n; i++) begin
             h_buff_addr <= 14'(i);
             if (!w) begin
-              h_buff_dout <= (s == 0 && base + i < img_sz) ? img[base + i] : 8'h00;
+              h_buff_dout <= (s == 0 && base + i < img_sz) ? img[base + i] :
+                             (s == 2 && base + i < hd_sz) ? hd_img[base + i] : 8'h00;
               h_buff_wr <= 1'b1;
               @(posedge clk);
               h_buff_wr <= 1'b0;
@@ -173,9 +185,14 @@ module tb_core;
                 img[base + i] = h_buff_din;
                 void'(img_wr(img_file, base + i, h_buff_din));
               end
+              if (s == 2 && base + i < hd_sz && hd_img[base + i] != h_buff_din) begin
+                hd_img[base + i] = h_buff_din;
+                void'(img_wr(hd_file, base + i, h_buff_din));
+              end
             end
           end
           if (w) hps_writes++; else hps_reads++;
+          if (s == 2) last_disk = clk_n;
           $display("[%9.3f ms] hps %s slot %0d lba %0d x%0d", ms(), w ? "write" : "read", s,
                    h_lba[s], int'(h_blk_cnt[s]) + 1);
           h_ack[s] <= 1'b0;
@@ -187,7 +204,6 @@ module tb_core;
 
   // ---- drive requests ----
   int     n_lba = 0, n_lba_wr = 0;
-  longint last_disk = 0;
   logic [1:0] fd_rd_q = 2'b00, fd_wr_q = 2'b00;
   always @(posedge clk) begin
     for (int d = 0; d < 2; d++) begin
@@ -462,6 +478,12 @@ module tb_core;
   task automatic type_keys(input string s);
     for (int i = 0; i < s.len(); i++) begin
       logic [8:0] k;
+      if (s[i] == "`") begin
+        $display("[%9.3f ms] waiting for the disks to be quiet", ms());
+        repeat (48_000_000) @(posedge clk);
+        while (clk_n - last_disk <= kquiet && clk_n < maxclk) @(posedge clk);
+        continue;
+      end
       k = ps2_code(s[i]);
       if (k == 9'h000) begin $display("key '%c' not mapped", s[i]); continue; end
       $display("[%9.3f ms] key '%s'", ms(), (s[i] == "~") ? "RETURN" : string'(s[i]));
@@ -491,7 +513,7 @@ module tb_core;
     logic [7:0] rom_img [0:16383];
     logic [7:0] ext_img [0:49151];
     int rom_n, ext_n;
-    longint kquiet, kpost, status_every, next_status;
+    longint kpost, status_every, next_status;
     bit keys_sent;
 
     if ($value$plusargs("cfg=%d", code)) cfg = 3'(code);
@@ -550,6 +572,19 @@ module tb_core;
     img_mounted[0] <= 1'b1;
     repeat (8) @(posedge clk);
     img_mounted[0] <= 1'b0;
+    if ($value$plusargs("hd=%s", hd_file)) begin
+      fd = $fopen(hd_file, "rb");
+      if (fd == 0) $fatal(1, "cannot open %s", hd_file);
+      hd_sz = $fread(hd_img, fd);
+      $fclose(fd);
+      if (hd_sz != HD_MX) $fatal(1, "%s: %0d bytes, expected %0d", hd_file, hd_sz, HD_MX);
+      $display("tb_core: hard disk 0 %s (%0d B)", hd_file, hd_sz);
+      repeat (8) @(posedge clk);
+      img_size <= 64'(hd_sz);
+      img_mounted[2] <= 1'b1;
+      repeat (8) @(posedge clk);
+      img_mounted[2] <= 1'b0;
+    end
     // ioctl downloads while the machine is held in reset
     @(posedge clk); rom_ext <= 1'b0; rom_start <= 1'b1;
     @(posedge clk); rom_start <= 1'b0;

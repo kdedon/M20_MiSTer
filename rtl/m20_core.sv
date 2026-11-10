@@ -10,6 +10,8 @@
 //   i8251 x2       U22 keyboard, U131 RS-232 (J7, the HPS UART)
 //   m20_kbd        the keyboard unit (8048 HLE) on the U22 serial line
 //   m20_fdc        FD1797 (U14) and two drives on the disk_stream drive side
+//   m20_hdc        hard disk card, two drives on the disk_stream drive side;
+//                  INTRQ not wired
 //   m20_ieee       IEEE-488 card (optional), slave 8259 on IR1
 //   m20_twin       twin RS-232 card (optional), slave 8259 on IR7
 //
@@ -62,6 +64,14 @@ module m20_core (
   output logic [1:0][7:0]  fd_buff_din,
   input  logic             fd_buff_wr,
 
+  // Hard disks (disk_stream slots 2 and 3; buffer bus, size, readonly shared)
+  input  logic [1:0]       hd_mounted,
+  output logic [1:0][31:0] hd_lba,
+  output logic [1:0]       hd_rd,
+  output logic [1:0]       hd_wr,
+  input  logic [1:0]       hd_ack,
+  output logic [1:0][7:0]  hd_buff_din,
+
   // Keyboard
   input  logic [10:0]      ps2_key,
   input  logic             osd_active,
@@ -109,6 +119,7 @@ module m20_core (
   logic [1:0]  fdc_ds;
   logic        fdc_motor, fdc_dden_n, fdc_tg43;
   logic        fdc_intrq, fdc_drq, fdc_busy;
+  logic        hdc_intrq;
   logic        kbd_rxrdy, kbd_txrdy, ser_rxrdy;
   logic        kbd_txd, kbd_rxd;
   logic        ppi_ir6;
@@ -116,7 +127,7 @@ module m20_core (
 
   // cs_latch is decoded inside the mainboard (port 0x21 latch U15/U16).
   logic unused_ok;
-  assign unused_ok = &{1'b0, ce16, cs_latch, fdc_drq, fdc_busy, fdc_motor, fdc_tg43};
+  assign unused_ok = &{1'b0, ce16, cs_latch, fdc_drq, fdc_busy, fdc_motor, fdc_tg43, hdc_intrq};
 
   // ------------------------------------------------------------ mainboard
   m20_mainboard u_mb (
@@ -156,8 +167,8 @@ module m20_core (
   );
 
   // ------------------------------------------------------ expansion cards
-  logic        ieee_cs, ieee_cs16, twin_cs, twin_cs16;
-  logic [7:0]  ieee_rdata, twin_rdata;
+  logic        hd_sel, ieee_cs, ieee_cs16, twin_cs, twin_cs16;
+  logic [7:0]  hd_rdata, ieee_rdata, twin_rdata;
   logic [15:0] ieee_pic, twin_pic;
   logic [1:0]  tw_rxd, tw_txd, tw_cts_n, tw_dsr_n, tw_rts_n, tw_dtr_n;
 
@@ -176,8 +187,8 @@ module m20_core (
     .rts_n(tw_rts_n), .dtr_n(tw_dtr_n)
   );
 
-  assign cs_exp      = ieee_cs || twin_cs;
-  assign exp_rdata   = ieee_cs ? ieee_rdata : twin_rdata;
+  assign cs_exp      = hd_sel || ieee_cs || twin_cs;
+  assign exp_rdata   = hd_sel ? hd_rdata : ieee_cs ? ieee_rdata : twin_rdata;
   assign cs_exp16    = ieee_cs16 || twin_cs16;
   assign exp_rdata16 = ieee_cs16 ? ieee_pic : twin_pic;
 
@@ -272,6 +283,17 @@ module m20_core (
   );
 
   assign led_fdd = |fdc_ds;
+
+  // ------------------------------------------------------------- hard disk
+  m20_hdc u_hdc (
+    .clk, .rst_n,
+    .io_addr, .io_wdata, .io_rd, .io_wr, .io_rd_end, .io_wr_end,
+    .sel(hd_sel), .rdata(hd_rdata), .intrq(hdc_intrq),
+    .d_mounted(hd_mounted), .d_readonly(fd_readonly), .d_size(fd_size),
+    .d_lba(hd_lba), .d_rd(hd_rd), .d_wr(hd_wr), .d_ack(hd_ack),
+    .d_buff_addr(fd_buff_addr), .d_buff_dout(fd_buff_dout), .d_buff_din(hd_buff_din),
+    .d_buff_wr(fd_buff_wr)
+  );
 
   logic unused_io;
   assign unused_io = &{1'b0, io_addr[15:3], io_addr[0], io_wdata[15:8]};

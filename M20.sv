@@ -52,6 +52,8 @@ localparam CONF_STR = {
 	"-;",
 	"S0,IMG,Floppy 0;",
 	"S1,IMG,Floppy 1;",
+	"S2,IMG,Hard disk 0;",
+	"S3,IMG,Hard disk 1;",
 	"-;",
 	"O[3:1],Configuration,128K B/W,B/W 32K cards,B/W 128K cards,4 colours 32K,4 colours 128K,8 colours 32K,8 colours 128K;",
 	"O[6:4],Jumpers ZA/SPARE1,1.x full tests,1.x skip tests,2.x 320K drives,2.x 160K drives,2.x 640K drives,2.x ask drive type;",
@@ -255,9 +257,9 @@ assign UART_DTR = ser_dtr_n;
 
 ///////////////////////   DISK IMAGES   //////////////////////////
 
-// Floppy images are streamed from the SD card on demand, one cylinder per
-// drive in BRAM, written back in the background (disk_stream).
-// Slots 2 and 3 (hard disks in disk_stream) have no mount line in CONF_STR.
+// Disk images are streamed from the SD card on demand, one cylinder per
+// drive in BRAM, written back in the background (disk_stream).  Slots 0
+// and 1 are floppies, 2 and 3 hard disks (99 blocks per cylinder).
 wire [3:0][31:0] st_h_lba;
 wire [3:0][5:0]  st_h_blk_cnt;
 wire  [7:0]      st_h_din;
@@ -279,22 +281,25 @@ wire  [3:0]      core_sd_ack;
 wire  [8:0]      core_sd_buff_addr;
 wire  [7:0]      core_sd_buff_dout;
 wire [1:0][7:0]  core_fd_buff_din;
+wire [1:0][31:0] core_hd_lba;
+wire  [1:0]      core_hd_rd, core_hd_wr;
+wire [1:0][7:0]  core_hd_buff_din;
 wire             core_sd_buff_wr;
 wire  [3:0]      ds_resident;
 wire             img_loading, img_wb_busy, fmt_full;
 wire [1:0][15:0] ld_min, ld_max;
 
-disk_stream u_disk_stream (
-	.clk(clk_sys), .rst_n(sdram_rst_n), .core_rst_n(rst_n), .bpc('0),
+disk_stream #(.UMAX(99)) u_disk_stream (
+	.clk(clk_sys), .rst_n(sdram_rst_n), .core_rst_n(rst_n), .bpc({12'd99, 12'd99}),
 	.img_mounted(img_mounted), .img_readonly(img_readonly), .img_size(img_size),
 	.h_lba(st_h_lba), .h_blk_cnt(st_h_blk_cnt), .h_rd(sd_rd), .h_wr(sd_wr), .h_ack(sd_ack),
 	.h_buff_addr(sd_buff_addr), .h_buff_dout(sd_buff_dout), .h_buff_din(st_h_din),
 	.h_buff_wr(sd_buff_wr),
 	.d_mounted(core_img_mounted), .d_readonly(core_img_readonly), .d_size(core_img_size),
-	.d_lba({32'd0, 32'd0, core_fd_lba}), .d_scr(4'd0),
-	.d_rd({2'b00, core_fd_rd}), .d_wr({2'b00, core_fd_wr}), .d_ack(core_sd_ack),
+	.d_lba({core_hd_lba, core_fd_lba}), .d_scr(4'd0),
+	.d_rd({core_hd_rd, core_fd_rd}), .d_wr({core_hd_wr, core_fd_wr}), .d_ack(core_sd_ack),
 	.d_buff_addr(core_sd_buff_addr), .d_buff_dout(core_sd_buff_dout),
-	.d_buff_din({8'hFF, 8'hFF, core_fd_buff_din}),
+	.d_buff_din({core_hd_buff_din, core_fd_buff_din}),
 	.d_buff_wr(core_sd_buff_wr),
 	.resident(ds_resident), .busy(img_loading), .wb_busy(img_wb_busy), .fmt_full(fmt_full),
 	.ld_min(ld_min), .ld_max(ld_max)
@@ -319,6 +324,8 @@ m20_core u_core (
 	.fd_lba(core_fd_lba), .fd_rd(core_fd_rd), .fd_wr(core_fd_wr), .fd_ack(core_sd_ack[1:0]),
 	.fd_buff_addr(core_sd_buff_addr), .fd_buff_dout(core_sd_buff_dout), .fd_buff_din(core_fd_buff_din),
 	.fd_buff_wr(core_sd_buff_wr),
+	.hd_mounted(core_img_mounted[3:2]), .hd_lba(core_hd_lba), .hd_rd(core_hd_rd), .hd_wr(core_hd_wr),
+	.hd_ack(core_sd_ack[3:2]), .hd_buff_din(core_hd_buff_din),
 	.ps2_key(ps2_key), .osd_active(OSD_STATUS),
 	.ser_rxd(uart_rxd_s), .ser_txd(ser_txd), .ser_cts_n(uart_cts_s), .ser_dsr_n(uart_dsr_s),
 	.ser_rts_n(ser_rts_n), .ser_dtr_n(ser_dtr_n),

@@ -8,6 +8,7 @@ The Olivetti L1 M20 (1982): a Zilog Z8001 personal computer running PCOS.
 - Up to 512 KB RAM in every PCOS memory configuration.
 - 512×256 bitmap video: black and white, 4 or 8 colours.
 - Two floppy drives (FD1797), streamed from SD.
+- Optional hard disk card (WD1000-compatible) with two drives, present while an image is mounted.
 - M20 keyboard from PS/2, with buzzer.
 - RS-232 port on the MiSTer UART.
 - 8259 PIC, 8253 PIT, 8255 PPI.
@@ -44,11 +45,20 @@ Raw `.img`, every sector 256 bytes (track 0 side 0 holds 128-byte FM sectors in 
 | 143,360 | 160K, single sided |
 | 655,360 | 640K, 80 cylinders |
 
+Hard disk images are raw, 6 heads × 33 sectors × 256 bytes per cylinder, sectors in cylinder/head/sector order. A 9 MB drive (180 cylinders) is 9,123,840 bytes; a blank one:
+
+```
+truncate -s 9123840 games/M20/hd0.img
+```
+
+A blank disk reads as formatted and empty: ROM 2.x reports `Invalid File Error 00 on Drive 10` and boots from the floppy. Prepare it under PCOS 2.x with `vformat 10:`. PCOS 1.x calls ROM 1.0 routines and does not run with ROM 2.x.
+
 ## OSD
 
 | Option | Meaning |
 |---|---|
 | Floppy 0 / 1 | Mount an image |
+| Hard disk 0 / 1 | Mount an image; the card is fitted while one is mounted (ROM 2.x) |
 | Configuration | Memory and video cards: B/W, 4 or 8 colours, 32K or 128K cards |
 | Jumpers ZA/SPARE1 | ROM 1.x: run or skip self-tests. ROM 2.x: drive type (160K, 320K, 640K, or ask) |
 | Aspect ratio | Original, full screen, custom |
