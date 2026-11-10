@@ -40,6 +40,7 @@ M20.sv          hps_io, CONF_STR, pll, SDRAM, disk_stream, video_mixer, UART
     ├── periph/i8251.sv ×2     async USART
     ├── periph/m20_kbd.sv      keyboard: PS/2 in, 1200 8N2 serial
     ├── fdc/m20_fdc.sv         FD1797 on the sd_* block interface
+    ├── hdc/m20_hdc.sv         hard disk card (WD1000 registers), ports 0x1C0-0x1CF
     ├── exp/m20_ieee.sv        IEEE-488 card, slave 8259 on IR1
     ├── exp/m20_twin.sv        twin RS-232 card, slave 8259 on IR7
     └── exp/m20_cascade.sv     slave 8259 vector during VI acknowledge
@@ -51,6 +52,7 @@ M20.sv          hps_io, CONF_STR, pll, SDRAM, disk_stream, video_mixer, UART
 | `rtl/video/` | `m20_video` | `tb/video/` |
 | `rtl/periph/` | each module | `tb/periph/` |
 | `rtl/fdc/`, `rtl/host/` | `m20_fdc` | `tb/fdc/` |
+| `rtl/hdc/` | `m20_hdc` | `tb/hdc/` |
 | `rtl/exp/` | `m20_ieee`, `m20_twin`, `m20_cascade` | `tb/exp/` |
 | `rtl/m20_core.sv`, `M20.sv` | `m20_core` | `tb/core/` |
 
@@ -74,7 +76,7 @@ Standard I/O (status 0010). A11–A15 = 0; A9–A10 are ignored, so ports mirror
 
 Devices return `*_rdata` while `cs && io_rd`; the mainboard samples at /DS rise. Byte devices drive D7–D0 and D15–D8 read 0xFF. The PIC returns 16 bits (§3.4).
 
-Expansion cards decode their own ports: `cs_exp`/`exp_rdata` (byte port) and `cs_exp16`/`exp_rdata16` (slave 8259 word).
+Expansion cards decode their own ports: `cs_exp`/`exp_rdata` (byte port, hard disk and cards) and `cs_exp16`/`exp_rdata16` (slave 8259 word).
 
 ### 3.2 Memory
 

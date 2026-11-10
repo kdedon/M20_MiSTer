@@ -7,8 +7,9 @@
 #                        is 1 (+spare1=0 via RUNARGS for types 0/1), so ZA=1 selects
 #                        80-track drives (double step on a 35-track image)
 #   make KEYS=           boot only (ends when the disk has been quiet)
-#   make RUNARGS=...     extra plusargs (+maxclk=n +pctrace=n +pcto=n +iolog=n)
+#   make RUNARGS=...     extra plusargs (+maxclk=n +pctrace=n +pcto=n +iolog=n +hd=file)
 #   make IMG_SRC=...     another 286,720-byte PCOS image with track 0
+#                        (ROM 2.x needs PCOS 2.x: PCOS 1.x calls ROM 1.0 routines)
 #   make BOOT_ROM=f.bin ROM=x   a boot.rom file (8 or 16 KB) instead of a dump build
 #   make CARDS=1         IEEE-488 and twin RS-232 cards fitted
 #   make T0_SRC=...      take track 0 (first 4096 B) from this image
@@ -23,6 +24,7 @@ include $(ROOT)/mk/bus.mk
 include $(ROOT)/mk/video.mk
 include $(ROOT)/mk/periph.mk
 include $(ROOT)/mk/fdc.mk
+include $(ROOT)/mk/hdc.mk
 include $(ROOT)/mk/exp.mk
 
 IMG_SRC ?= $(HOME)/git/olivetti_m20/reference/software/os/pcos102.img
@@ -34,7 +36,7 @@ OUT     ?= out
 OBJ     ?= obj_dir
 HERE    := tb/core
 
-SRCS := $(BUS_SRCS) $(VIDEO_SRCS) $(PERIPH_SRCS) $(FDC_SRCS) $(EXP_SRCS) $(HOST_SRCS) $(ROOT)/rtl/m20_core.sv \
+SRCS := $(BUS_SRCS) $(VIDEO_SRCS) $(PERIPH_SRCS) $(FDC_SRCS) $(HDC_SRCS) $(EXP_SRCS) $(HOST_SRCS) $(ROOT)/rtl/m20_core.sv \
         ../bus/sdram_lat.sv tb_core.sv
 CSRCS := ../fdc/img_io.cpp fb_io.cpp
 VFLAGS := --binary --timing --timescale 1ps/1ps -O3 -j 8 --top-module tb_core \

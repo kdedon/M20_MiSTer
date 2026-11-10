@@ -64,7 +64,7 @@ module tb_bus;
     .cs_ser(cs_ser), .cs_pit(cs_pit), .cs_pic(cs_pic), .cs_pal(cs_pal),
     .fdc_rdata(fdc_rdata), .crtc_rdata(crtc_rdata), .ppi_rdata(ppi_rdata), .kbd_rdata(kbd_rdata),
     .ser_rdata(ser_rdata), .pit_rdata(pit_rdata), .pic_rdata(pic_rdata),
-    .cs_exp(1'b0), .exp_rdata(8'h00), .cs_exp16(1'b0), .exp_rdata16(16'h0000),
+    .cs_exp(1'b0), .exp_rdata(8'hFF), .cs_exp16(1'b0), .exp_rdata16(16'hFFFF),
     .pic_int(pic_int), .pic_inta_n(pic_inta_n), .pit_out2(pit_out2), .crt_fetch(crt_fetch),
     .fdc_ds(fdc_ds), .fdc_motor(fdc_motor), .fdc_dden_n(fdc_dden_n), .fdc_tg43(fdc_tg43)
   );
