@@ -14,13 +14,14 @@ include mk/bus.mk
 include mk/video.mk
 include mk/periph.mk
 include mk/fdc.mk
+include mk/exp.mk
 
-CORE_SRCS := $(BUS_SRCS) $(VIDEO_SRCS) $(PERIPH_SRCS) $(FDC_SRCS) $(ROOT)/rtl/m20_core.sv
+CORE_SRCS := $(BUS_SRCS) $(VIDEO_SRCS) $(PERIPH_SRCS) $(FDC_SRCS) $(EXP_SRCS) $(ROOT)/rtl/m20_core.sv
 CORE_VFLAGS := $(PERIPH_VFLAGS)
 
 .PHONY: lint lint-core tb tb-core build clean
 
-lint: lint-core lint-bus lint-video lint-periph lint-fdc
+lint: lint-core lint-bus lint-video lint-periph lint-fdc lint-exp
 	@# Quartus 17 sizes N'(... int'(x) ...) as one bit: the index silently loses bits.
 	@if grep -rnE "[0-9]'\([^;]*int'\(" rtl --include='*.sv' --exclude-dir=vendor M20.sv; then echo "lint: size cast of an int' cast"; exit 1; fi
 	@echo "lint: clean"
@@ -28,7 +29,7 @@ lint: lint-core lint-bus lint-video lint-periph lint-fdc
 lint-core:
 	$(VERILATOR) --lint-only -Wall --top-module m20_core $(CORE_VFLAGS) $(CORE_SRCS)
 
-tb: tb-bus tb-video tb-periph tb-fdc
+tb: tb-bus tb-video tb-periph tb-fdc tb-exp
 
 tb-core:
 	$(MAKE) -C tb/core

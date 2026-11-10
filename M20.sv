@@ -35,6 +35,9 @@ assign USER_OUT  = 7'h7F;
 //   0       reset
 //   3:1     configuration (jumpers BW^COL, 32^128, COL4^8)
 //   6:4     jumpers ZA/SPARE1 (port 0x21 D3/D4): self-test switch, ROM 2.x floppy type
+//   7       IEEE-488 card
+//   8       twin RS-232 card
+//   10:9    serial port on the UART: mainboard, twin A, twin B
 //   122:121 aspect ratio
 //////////////////////////////////////////////////////////////////
 
@@ -53,11 +56,16 @@ localparam CONF_STR = {
 	"O[3:1],Configuration,128K B/W,B/W 32K cards,B/W 128K cards,4 colours 32K,4 colours 128K,8 colours 32K,8 colours 128K;",
 	"O[6:4],Jumpers ZA/SPARE1,1.x full tests,1.x skip tests,2.x 320K drives,2.x 160K drives,2.x 640K drives,2.x ask drive type;",
 	"-;",
+	"O[7],IEEE-488 card,Off,On;",
+	"O[8],Twin RS-232 card,Off,On;",
+	"O[10:9],Serial port,Mainboard,Twin card A,Twin card B;",
+	"-;",
 	"O[122:121],Aspect ratio,Original,Full Screen,[ARC1],[ARC2];",
 	"-;",
 	"F1,ROMBIN,Load Firmware;",
+	"F2,ROMBIN,Load extension ROM;",
 	"R[0],Reset;",
-	"v,1;",
+	"v,2;",
 	"V,v",`BUILD_DATE
 };
 
@@ -165,8 +173,11 @@ c900_rst_sync u_rst (.clk(clk_sys), .arst(reset_req), .pll_locked(pll_locked), .
 reg [2:0] cfg_code = 3'd5;
 reg       cfg_za     = 1'b1;
 reg       cfg_spare1 = 1'b1;
+reg       cfg_ieee, cfg_twin;
 always @(posedge clk_sys) begin
 	if (!rst_n) begin
+		cfg_ieee <= status[7];
+		cfg_twin <= status[8];
 		case (status[3:1])
 			3'd0: cfg_code <= 3'd5;   // 128K, B/W
 			3'd1: cfg_code <= 3'd7;   // 32K cards, B/W
@@ -193,8 +204,16 @@ end
 
 ///////////////////////   FIRMWARE   /////////////////////////////
 
-// boot.rom (index 0) or Load Firmware (index 1): 8 KB.
-wire rom_wr = ioctl_download && ioctl_wr && (ioctl_index[5:0] <= 6'd1) && (ioctl_addr[26:13] == 14'd0);
+// boot.rom (index 0) or Load Firmware (index 1): up to 16 KB.  Extension
+// ROM (index 2): up to 48 KB.
+wire rom_ext   = ioctl_index[5:0] == 6'd2;
+wire rom_index = ioctl_index[5:0] <= 6'd2;
+wire rom_wr    = ioctl_download && ioctl_wr && rom_index &&
+                 (ioctl_addr[26:16] == 11'd0) && (rom_ext || ioctl_addr[15:14] == 2'd0);
+
+reg  dl_q = 1'b0;
+always @(posedge clk_sys) dl_q <= ioctl_download;
+wire rom_start = ioctl_download && !dl_q && rom_index;
 
 ///////////////////////   MEMORY   ///////////////////////////////
 
@@ -220,11 +239,14 @@ c900_sdram u_sdram (
 
 ///////////////////////   SERIAL   ///////////////////////////////
 
-// The RS-232 8251 (U131, J7) is wired to the HPS UART.
+// The HPS UART goes to the RS-232 port picked in the OSD.
 wire uart_rxd_s, uart_cts_s, uart_dsr_s;
 c900_sync2 #(.INIT(1'b1)) u_rxd_sync (.clk(clk_sys), .d(UART_RXD), .q(uart_rxd_s));
 c900_sync2 #(.INIT(1'b1)) u_cts_sync (.clk(clk_sys), .d(UART_CTS), .q(uart_cts_s));
 c900_sync2 #(.INIT(1'b1)) u_dsr_sync (.clk(clk_sys), .d(UART_DSR), .q(uart_dsr_s));
+
+reg  [1:0] ser_sel = 2'd0;
+always @(posedge clk_sys) ser_sel <= status[10:9];
 
 wire ser_txd, ser_rts_n, ser_dtr_n;
 assign UART_TXD = ser_txd;
@@ -287,7 +309,9 @@ wire       beep, led_fdd;
 m20_core u_core (
 	.clk(clk_sys), .rst_n(rst_n),
 	.cfg_code(cfg_code), .cfg_za(cfg_za), .cfg_spare1(cfg_spare1),
-	.rom_wr(rom_wr), .rom_addr(ioctl_addr[12:0]), .rom_data(ioctl_dout),
+	.cfg_ieee(cfg_ieee), .cfg_twin(cfg_twin), .ser_sel(ser_sel),
+	.rom_wr(rom_wr), .rom_addr(ioctl_addr[15:0]), .rom_data(ioctl_dout),
+	.rom_ext(rom_ext), .rom_start(rom_start),
 	.mem_addr(mem_addr), .mem_rd(mem_rd), .mem_wr(mem_wr), .mem_be(mem_be),
 	.mem_wdata(mem_wdata), .mem_rdata(mem_rdata), .mem_rvalid(mem_rvalid), .mem_ack(mem_ack),
 	.mem_ready(sdram_ready), .mem_refresh_ok(mem_refresh_ok),

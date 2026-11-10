@@ -1,0 +1,5 @@
+set_global_assignment -name SYSTEMVERILOG_FILE [file join $::quartus(qip_path) m20_xpic.sv]
+set_global_assignment -name SYSTEMVERILOG_FILE [file join $::quartus(qip_path) m20_gpib.sv]
+set_global_assignment -name SYSTEMVERILOG_FILE [file join $::quartus(qip_path) m20_ieee.sv]
+set_global_assignment -name SYSTEMVERILOG_FILE [file join $::quartus(qip_path) m20_twin.sv]
+set_global_assignment -name SYSTEMVERILOG_FILE [file join $::quartus(qip_path) m20_cascade.sv]

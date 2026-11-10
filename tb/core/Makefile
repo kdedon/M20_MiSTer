@@ -9,6 +9,8 @@
 #   make KEYS=           boot only (ends when the disk has been quiet)
 #   make RUNARGS=...     extra plusargs (+maxclk=n +pctrace=n +pcto=n +iolog=n)
 #   make IMG_SRC=...     another 286,720-byte PCOS image with track 0
+#   make BOOT_ROM=f.bin ROM=x   a boot.rom file (8 or 16 KB) instead of a dump build
+#   make CARDS=1         IEEE-488 and twin RS-232 cards fitted
 #   make T0_SRC=...      take track 0 (first 4096 B) from this image
 #   make clean
 # A run takes about 45 min (PCOS prompt at 17 s machine time).
@@ -21,6 +23,7 @@ include $(ROOT)/mk/bus.mk
 include $(ROOT)/mk/video.mk
 include $(ROOT)/mk/periph.mk
 include $(ROOT)/mk/fdc.mk
+include $(ROOT)/mk/exp.mk
 
 IMG_SRC ?= $(HOME)/git/olivetti_m20/reference/software/os/pcos102.img
 ROM     ?= 1.0
@@ -31,7 +34,7 @@ OUT     ?= out
 OBJ     ?= obj_dir
 HERE    := tb/core
 
-SRCS := $(BUS_SRCS) $(VIDEO_SRCS) $(PERIPH_SRCS) $(FDC_SRCS) $(HOST_SRCS) $(ROOT)/rtl/m20_core.sv \
+SRCS := $(BUS_SRCS) $(VIDEO_SRCS) $(PERIPH_SRCS) $(FDC_SRCS) $(EXP_SRCS) $(HOST_SRCS) $(ROOT)/rtl/m20_core.sv \
         ../bus/sdram_lat.sv tb_core.sv
 CSRCS := ../fdc/img_io.cpp fb_io.cpp
 VFLAGS := --binary --timing --timescale 1ps/1ps -O3 -j 8 --top-module tb_core \
@@ -39,6 +42,8 @@ VFLAGS := --binary --timing --timescale 1ps/1ps -O3 -j 8 --top-module tb_core \
           $(PERIPH_VFLAGS) -CFLAGS -O2
 RUNFL := +verilator+rand+reset+2 +verilator+seed+5
 ROM_LABELS := $(if $(filter 1.0 1.0bc,$(ROM)),,+rom20)
+BOOT_ROM ?= $(OBJ)/boot$(ROM).rom
+CARD_ARGS := $(if $(CARDS),+ieee +twin)
 
 .PHONY: all run clean
 
@@ -52,14 +57,14 @@ $(OBJ)/boot$(ROM).rom: $(ROOT)/scripts/make_boot_rom.sh
 	@mkdir -p $(OBJ)
 	$(ROOT)/scripts/make_boot_rom.sh $(ROM) $@
 
-run: $(OBJ)/Vtb_core $(OBJ)/boot$(ROM).rom
+run: $(OBJ)/Vtb_core $(BOOT_ROM)
 	@mkdir -p $(OUT)
 	rm -f $(OUT)/*.ppm $(OUT)/*.png
 	cp $(IMG_SRC) $(OBJ)/m20_boot$(ROM).img
 	chmod u+w $(OBJ)/m20_boot$(ROM).img
 	$(if $(T0_SRC),dd if=$(T0_SRC) of=$(OBJ)/m20_boot$(ROM).img bs=4096 count=1 conv=notrunc status=none)
-	cd $(ROOT) && stdbuf -oL $(HERE)/$(OBJ)/Vtb_core $(RUNFL) +cfg=$(CFG) +za=$(ZA) $(ROM_LABELS) \
-	  +rom=$(HERE)/$(OBJ)/boot$(ROM).rom +img=$(HERE)/$(OBJ)/m20_boot$(ROM).img +out=$(HERE)/$(OUT) \
+	cd $(ROOT) && stdbuf -oL $(HERE)/$(OBJ)/Vtb_core $(RUNFL) +cfg=$(CFG) +za=$(ZA) $(ROM_LABELS) $(CARD_ARGS) \
+	  +rom=$(abspath $(BOOT_ROM)) +img=$(HERE)/$(OBJ)/m20_boot$(ROM).img +out=$(HERE)/$(OUT) \
 	  +keys=$(KEYS) $(RUNARGS) | tee $(HERE)/$(OUT)/run.log
 	@for f in $(OUT)/*.ppm; do python3 -I ppm2png.py $$f > /dev/null; done
 	@grep -q '^PASS' $(OUT)/run.log

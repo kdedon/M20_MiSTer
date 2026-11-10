@@ -39,7 +39,10 @@ M20.sv          hps_io, CONF_STR, pll, SDRAM, disk_stream, video_mixer, UART
     ├── periph/m20_ppi.sv      8255, Centronics stub
     ├── periph/i8251.sv ×2     async USART
     ├── periph/m20_kbd.sv      keyboard: PS/2 in, 1200 8N2 serial
-    └── fdc/m20_fdc.sv         FD1797 on the sd_* block interface
+    ├── fdc/m20_fdc.sv         FD1797 on the sd_* block interface
+    ├── exp/m20_ieee.sv        IEEE-488 card, slave 8259 on IR1
+    ├── exp/m20_twin.sv        twin RS-232 card, slave 8259 on IR7
+    └── exp/m20_cascade.sv     slave 8259 vector during VI acknowledge
 ```
 
 | Directory | Lint top | Bench |
@@ -48,6 +51,7 @@ M20.sv          hps_io, CONF_STR, pll, SDRAM, disk_stream, video_mixer, UART
 | `rtl/video/` | `m20_video` | `tb/video/` |
 | `rtl/periph/` | each module | `tb/periph/` |
 | `rtl/fdc/`, `rtl/host/` | `m20_fdc` | `tb/fdc/` |
+| `rtl/exp/` | `m20_ieee`, `m20_twin`, `m20_cascade` | `tb/exp/` |
 | `rtl/m20_core.sv`, `M20.sv` | `m20_core` | `tb/core/` |
 
 Each block has a `<dir>.qip` (included from `files.qip`) and `mk/<dir>.mk` (`<DIR>_SRCS`, `tb-<dir>` target).
@@ -70,6 +74,8 @@ Standard I/O (status 0010). A11–A15 = 0; A9–A10 are ignored, so ports mirror
 
 Devices return `*_rdata` while `cs && io_rd`; the mainboard samples at /DS rise. Byte devices drive D7–D0 and D15–D8 read 0xFF. The PIC returns 16 bits (§3.4).
 
+Expansion cards decode their own ports: `cs_exp`/`exp_rdata` (byte port) and `cs_exp16`/`exp_rdata16` (slave 8259 word).
+
 ### 3.2 Memory
 
 The mainboard translates through the PROM and reads 0xFFFF where nothing is mapped. 512 KB is the maximum: the 128K-card PROM tables wrap past it.
@@ -84,7 +90,7 @@ The mainboard translates through the PROM and reads 0xFFFF where nothing is mapp
 
 The CPU waits at T3 until read data arrives. An SDRAM round trip (100–200 ns) is shorter than a T-state (250 ns), so this rarely stretches.
 
-Boot ROM: 8 KB BRAM loaded as `boot.rom` (ioctl index 0); `scripts/make_boot_rom.sh` builds it from ROM dumps. Extension sockets read 0xFFFF.
+Boot ROM: up to 16 KB BRAM loaded as `boot.rom` (ioctl index 0); `scripts/make_boot_rom.sh` builds it from ROM dumps. Extension sockets: up to 48 KB (ioctl index 2), 0xFFFF where empty.
 
 ### 3.3 Video plane snoop
 
@@ -107,7 +113,9 @@ Plane *n* is DRAM device *n*, block 0. CPU writes there are mirrored into the vi
 | 8259 input | Source |
 |---|---|
 | IR0 | FDC INTRQ |
-| IR1, IR2, IR7 | 0 |
+| IR1 | IEEE-488 card (slave) |
+| IR2 | 0 |
+| IR7 | twin RS-232 card (slave) |
 | IR3 | RS-232 RxRDY |
 | IR4 | keyboard RxRDY |
 | IR5 | keyboard TxRDY (JP4 6-3) |

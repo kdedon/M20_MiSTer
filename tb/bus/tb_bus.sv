@@ -30,7 +30,8 @@ module tb_bus;
   logic [2:0] cfg;
   logic       za;
   logic       rom_wr = 1'b0;
-  logic [12:0] rom_addr = 13'd0;
+  logic [15:0] rom_addr = 16'd0;
+  logic        rom_start = 1'b0;
   logic [7:0]  rom_data = 8'd0;
 
   // ---- DUT ----
@@ -51,6 +52,7 @@ module tb_bus;
   m20_mainboard #(.PROM_FILE("../../rtl/bus/m20_prom.hex")) dut (
     .clk(clk), .rst_n(rst_n), .ce16(ce16), .ce_pit(ce_pit), .ce_usart(ce_usart), .ce_fdc(ce_fdc),
     .cfg_code(cfg), .cfg_za(za), .cfg_spare1(1'b1), .rom_wr(rom_wr), .rom_addr(rom_addr), .rom_data(rom_data),
+    .rom_ext(1'b0), .rom_start(rom_start),
     .mem_addr(mem_addr), .mem_rd(mem_rd), .mem_wr(mem_wr), .mem_be(mem_be), .mem_wdata(mem_wdata),
     .mem_rdata(mem_rdata), .mem_rvalid(mem_rvalid), .mem_ack(mem_ack), .mem_ready(mem_ready),
     .mem_refresh_ok(mem_refresh_ok),
@@ -62,6 +64,7 @@ module tb_bus;
     .cs_ser(cs_ser), .cs_pit(cs_pit), .cs_pic(cs_pic), .cs_pal(cs_pal),
     .fdc_rdata(fdc_rdata), .crtc_rdata(crtc_rdata), .ppi_rdata(ppi_rdata), .kbd_rdata(kbd_rdata),
     .ser_rdata(ser_rdata), .pit_rdata(pit_rdata), .pic_rdata(pic_rdata),
+    .cs_exp(1'b0), .exp_rdata(8'h00), .cs_exp16(1'b0), .exp_rdata16(16'h0000),
     .pic_int(pic_int), .pic_inta_n(pic_inta_n), .pit_out2(pit_out2), .crt_fetch(crt_fetch),
     .fdc_ds(fdc_ds), .fdc_motor(fdc_motor), .fdc_dden_n(fdc_dden_n), .fdc_tg43(fdc_tg43)
   );
@@ -436,8 +439,10 @@ module tb_bus;
     $display("tb_bus: config code %0d, ZA %0d, %s", cfg, za, rom_file);
     // ioctl download while reset is held
     repeat (4) @(posedge clk);
+    rom_start <= 1'b1;
+    @(posedge clk); rom_start <= 1'b0;
     for (int i = 0; i < 8192; i++) begin
-      @(posedge clk); rom_wr <= 1'b1; rom_addr <= 13'(i); rom_data <= rom_img[i];
+      @(posedge clk); rom_wr <= 1'b1; rom_addr <= 16'(i); rom_data <= rom_img[i];
       @(posedge clk); rom_wr <= 1'b0;
     end
     repeat (8) @(posedge clk);

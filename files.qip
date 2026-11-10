@@ -29,6 +29,7 @@ set_global_assignment -name QIP_FILE rtl/bus/bus.qip
 set_global_assignment -name QIP_FILE rtl/video/video.qip
 set_global_assignment -name QIP_FILE rtl/periph/periph.qip
 set_global_assignment -name QIP_FILE rtl/fdc/fdc.qip
+set_global_assignment -name QIP_FILE rtl/exp/exp.qip
 
 # Machine top and shell
 set_global_assignment -name SYSTEMVERILOG_FILE rtl/m20_core.sv

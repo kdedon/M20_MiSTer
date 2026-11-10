@@ -11,10 +11,10 @@
 // {ICW2[7:3], IR} while the second pulse is low; with ICW2 = 0 the
 // identifier low byte is 2n.
 //
-// IR0 FDC INTRQ, IR3 RS-232 RxRDY, IR4 keyboard RxRDY, IR5 keyboard
-// TxRDY, IR6 8255 PC3; IR1, IR2, IR7 (expansion) are 0.  The ROM programs
-// cascade mode, but no slave is fitted, so the master (/SP = 1) always
-// supplies the vector.
+// IR0 FDC INTRQ, IR1 *COMVI1, IR2 *COMVI2, IR3 RS-232 RxRDY, IR4 keyboard
+// RxRDY, IR5 keyboard TxRDY, IR6 8255 PC3, IR7 *SYSINT.  The ROM programs
+// cascade mode with slaves on IR1, IR2, IR7: for those the master puts the
+// slave number on CAS0-2 during the acknowledge and drives no vector.
 `default_nettype none
 module m20_pic (
   input  logic        clk,
@@ -33,20 +33,24 @@ module m20_pic (
   output logic        pic_int,        // to the CPU /VI (active high here)
   // requests
   input  logic        ir_fdc,         // IR0
+  input  logic        ir_comvi1,      // IR1
+  input  logic        ir_comvi2,      // IR2
   input  logic        ir_ser_rxrdy,   // IR3
   input  logic        ir_kbd_rxrdy,   // IR4
   input  logic        ir_kbd_txrdy,   // IR5
-  input  logic        ir_ppi          // IR6
+  input  logic        ir_ppi,         // IR6
+  input  logic        ir_sysint,      // IR7
+  output logic [2:0]  cas             // CAS0-2
 );
 
   wire       rd_act = cs_pic & io_rd;
   wire       wr_act = cs_pic & io_wr;
   wire       inta   = ~pic_inta_n;
-  wire [7:0] ir     = {1'b0, ir_ppi, ir_kbd_txrdy, ir_kbd_rxrdy, ir_ser_rxrdy, 2'b00, ir_fdc};
+  wire [7:0] ir     = {ir_sysint, ir_ppi, ir_kbd_txrdy, ir_kbd_rxrdy, ir_ser_rxrdy,
+                       ir_comvi2, ir_comvi1, ir_fdc};
 
   logic [7:0] kf_dout;
   logic       nc_dbio, nc_casio, nc_buf, nc_spen;
-  logic [2:0] nc_cas;
 
   KF8259 u_kf8259 (
     .clock                          (clk),
@@ -59,7 +63,7 @@ module m20_pic (
     .data_bus_out                   (kf_dout),
     .data_bus_io                    (nc_dbio),
     .cascade_in                     (3'b000),
-    .cascade_out                    (nc_cas),
+    .cascade_out                    (cas),
     .cascade_io                     (nc_casio),
     .slave_program_n                (1'b1),
     .buffer_enable                  (nc_buf),
@@ -83,7 +87,7 @@ module m20_pic (
   /* verilator lint_off UNUSEDSIGNAL */
   wire unused_ok = &{1'b0, io_rd_end, io_wr_end, io_addr[15:2], io_addr[0],
                      io_wdata[15:9], io_wdata[0],
-                     nc_dbio, nc_cas, nc_casio, nc_buf, nc_spen};
+                     nc_dbio, nc_casio, nc_buf, nc_spen};
   /* verilator lint_on UNUSEDSIGNAL */
 
 endmodule
