@@ -12,7 +12,9 @@
 // Selects are levels from the /AS latch to the clock after /DS rises (so
 // they cover the io_*_end pulse).  Read data: byte devices on D7-D0 with
 // D15-D8 floating High; the 8259 word as its wrapper gives it; anything
-// else reads 0xFFFF.  Every output is combinational from registers.
+// else reads 0xFFFF.  Expansion cards decode their own ports and raise
+// cs_exp (byte port) or cs_exp16 (8259 on D1-D8).  Every output is
+// combinational from registers.
 `default_nettype none
 module m20_iodec (
   input  logic [15:5] addr,        // latched at /AS
@@ -41,6 +43,10 @@ module m20_iodec (
   input  logic [7:0]  ser_rdata,
   input  logic [7:0]  pit_rdata,
   input  logic [15:0] pic_rdata,
+  input  logic        cs_exp,
+  input  logic [7:0]  exp_rdata,
+  input  logic        cs_exp16,
+  input  logic [15:0] exp_rdata16,
   output logic [15:0] rdata
 );
   logic       sel;
@@ -80,6 +86,8 @@ module m20_iodec (
       cs_ser:   rdata = {8'hFF, ser_rdata};
       cs_pit:   rdata = {8'hFF, pit_rdata};
       cs_pic:   rdata = pic_rdata;
+      cs_exp:   rdata = {8'hFF, exp_rdata};
+      cs_exp16: rdata = exp_rdata16;
       default:  rdata = 16'hFFFF;
     endcase
   end

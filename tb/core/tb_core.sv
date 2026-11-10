@@ -16,10 +16,13 @@
 // '~' = RETURN; a RETURN is added at the end).  The run then continues for
 // +kpost clocks after the last key, or until the disk is quiet again.
 //
-// Plusargs: +rom=<file> +img=<file> +out=<dir> +maxclk=<n> +cfg=<n> +za=<n> +spare1=<n>
+// Plusargs: +rom=<file> (8 or 16 KB) +img=<file> +out=<dir> +maxclk=<n> +cfg=<n> +za=<n> +spare1=<n>
+//   +ext=<file> (extension ROM, up to 48 KB)  +ieee +twin (cards fitted)
+//   +bootkey=<c> (key pressed when the ROM first reads the keyboard data port)
+//   +stoppc=<hex> (end the run, passing, at the first IF1 of <seg>offset, e.g. 74010)
 //   +dumpmem=<clk> (DRAM dump at the first /SEGT after clk) +dumpend (DRAM dump at the end)
 //   +watchw=<hex> (log writes to one DRAM word)
-//   +pctrace=<from> +pcto=<to> (IF1 trace window, clocks)  +iolog=<from> (I/O log)
+//   +pctrace=<from> +pcto=<to> (IF1 and data read trace window, clocks)  +iolog=<from> (I/O log)
 //   +rom20 (labels off: ROM 2.0 has other addresses)
 `default_nettype none
 module tb_core;
@@ -40,8 +43,10 @@ module tb_core;
   logic       za = 1'b1;
   logic       spare1 = 1'b1;
   logic        rom_wr = 1'b0;
-  logic [12:0] rom_addr = 13'd0;
+  logic [15:0] rom_addr = 16'd0;
   logic [7:0]  rom_data = 8'd0;
+  logic        rom_ext = 1'b0, rom_start = 1'b0;
+  logic        cfg_ieee = 1'b0, cfg_twin = 1'b0;
   logic [10:0] ps2_key = 11'd0;
 
   // ---- SDRAM ----
@@ -102,7 +107,8 @@ module tb_core;
   logic [7:0] vid_r, vid_g, vid_b;
   m20_core dut (
     .clk(clk), .rst_n(rst_n), .cfg_code(cfg), .cfg_za(za), .cfg_spare1(spare1),
-    .rom_wr(rom_wr), .rom_addr(rom_addr), .rom_data(rom_data),
+    .cfg_ieee(cfg_ieee), .cfg_twin(cfg_twin), .ser_sel(2'd0),
+    .rom_wr(rom_wr), .rom_addr(rom_addr), .rom_data(rom_data), .rom_ext(rom_ext), .rom_start(rom_start),
     .mem_addr(mem_addr), .mem_rd(mem_rd), .mem_wr(mem_wr), .mem_be(mem_be),
     .mem_wdata(mem_wdata), .mem_rdata(mem_rdata), .mem_rvalid(mem_rvalid), .mem_ack(mem_ack),
     .mem_ready(mem_ready), .mem_refresh_ok(mem_refresh_ok),
@@ -128,6 +134,7 @@ module tb_core;
   longint iolog_from = -1;
   int     errors = 0;
   bit     done = 0;
+  bit     stop_hit = 0;
   string  end_reason = "maxclk";
 
   task automatic fail(input string msg);
@@ -283,7 +290,13 @@ module tb_core;
       logic [15:0] got;
       got = dut.u_mb.ad_q;
       if (c_st == ST_IO && iolog_from >= 0 && clk_n >= iolog_from) io_event($sformatf("IN  %04h -> %04h", c_addr, got));
+      if (c_st == ST_IO && c_addr == 16'h00A1 && !kbd_read_seen) begin
+        kbd_read_seen = 1;
+        $display("[%9.3f ms] first keyboard data read", ms());
+      end
       if (c_st == ST_INSTR_FETCH_FIRST) on_if1({c_sn, c_addr}, got);
+      if (c_st == ST_DATA_MEM && clk_n >= pctrace_from && clk_n <= pctrace_to)
+        $display("[%9.3f ms] RD  <%02h>%04h -> %04h", ms(), c_sn, c_addr, got);
     end
     p_as = as_n; p_ds = ds_n;
   end
@@ -327,8 +340,16 @@ module tb_core;
     io_rep = 0;
   endtask
 
+  bit kbd_read_seen = 0;
+  int stoppc = -1;
   task automatic on_if1(input logic [22:0] pc, input logic [15:0] op);
     n_if1++;
+    if (stoppc >= 0 && {pc[22:16], pc[15:0]} == 23'(stoppc) && !done) begin
+      $display("[%9.3f ms] milestone: reached <%02h>%04h (+stoppc)", ms(), pc[22:16], pc[15:0]);
+      end_reason = "stoppc";
+      stop_hit = 1;
+      done = 1;
+    end
     if (clk_n >= pctrace_from && clk_n <= pctrace_to)
       $display("[%9.3f ms] IF1 <%02h>%04h %04h", ms(), pc[22:16], pc[15:0], op);
     if (pc == last_pc && op == 16'hE8FF) same_pc++; else same_pc = 0;
@@ -451,11 +472,25 @@ module tb_core;
     end
   endtask
 
+  // ---- boot key: held for 1 s from the ROM's first keyboard read ----
+  string bootkey;
+  initial begin
+    if ($value$plusargs("bootkey=%s", bootkey)) begin
+      wait (kbd_read_seen);
+      $display("[%9.3f ms] boot key '%s' pressed", ms(), bootkey);
+      key_event(ps2_code(bootkey[0]), 1'b1);
+      repeat (48_000_000) @(posedge clk);
+      key_event(ps2_code(bootkey[0]), 1'b0);
+    end
+  end
+
   // ---- run ----
   initial begin
     int fd, n, code;
-    string rom_file;
-    logic [7:0] rom_img [0:8191];
+    string rom_file, ext_file;
+    logic [7:0] rom_img [0:16383];
+    logic [7:0] ext_img [0:49151];
+    int rom_n, ext_n;
     longint kquiet, kpost, status_every, next_status;
     bit keys_sent;
 
@@ -479,12 +514,24 @@ module tb_core;
     void'($value$plusargs("kpost=%d", kpost));
     void'($value$plusargs("iolog=%d", iolog_from));
     labels = !$test$plusargs("rom20");
+    cfg_ieee = $test$plusargs("ieee");
+    cfg_twin = $test$plusargs("twin");
+    if ($value$plusargs("stoppc=%h", code)) stoppc = code;
 
     fd = $fopen(rom_file, "rb");
     if (fd == 0) $fatal(1, "cannot open %s", rom_file);
-    n = $fread(rom_img, fd);
+    rom_n = $fread(rom_img, fd);
     $fclose(fd);
-    if (n != 8192) $fatal(1, "%s: %0d bytes, expected 8192", rom_file, n);
+    if (rom_n != 8192 && rom_n != 16384) $fatal(1, "%s: %0d bytes, expected 8192 or 16384", rom_file, rom_n);
+    ext_n = 0;
+    if ($value$plusargs("ext=%s", ext_file)) begin
+      fd = $fopen(ext_file, "rb");
+      if (fd == 0) $fatal(1, "cannot open %s", ext_file);
+      ext_n = $fread(ext_img, fd);
+      $fclose(fd);
+      $display("tb_core: extension ROM %s (%0d B)", ext_file, ext_n);
+    end
+    if (cfg_ieee || cfg_twin) $display("tb_core: cards fitted:%s%s", cfg_ieee ? " IEEE-488" : "", cfg_twin ? " twin RS-232" : "");
 
     fd = $fopen(img_file, "rb");
     if (fd == 0) $fatal(1, "cannot open %s", img_file);
@@ -503,10 +550,21 @@ module tb_core;
     img_mounted[0] <= 1'b1;
     repeat (8) @(posedge clk);
     img_mounted[0] <= 1'b0;
-    // ioctl download while the machine is held in reset
-    for (int i = 0; i < 8192; i++) begin
-      @(posedge clk); rom_wr <= 1'b1; rom_addr <= 13'(i); rom_data <= rom_img[i];
+    // ioctl downloads while the machine is held in reset
+    @(posedge clk); rom_ext <= 1'b0; rom_start <= 1'b1;
+    @(posedge clk); rom_start <= 1'b0;
+    for (int i = 0; i < rom_n; i++) begin
+      @(posedge clk); rom_wr <= 1'b1; rom_addr <= 16'(i); rom_data <= rom_img[i];
       @(posedge clk); rom_wr <= 1'b0;
+    end
+    if (ext_n > 0) begin
+      @(posedge clk); rom_ext <= 1'b1; rom_start <= 1'b1;
+      @(posedge clk); rom_start <= 1'b0;
+      for (int i = 0; i < ext_n; i++) begin
+        @(posedge clk); rom_wr <= 1'b1; rom_addr <= 16'(i); rom_data <= ext_img[i];
+        @(posedge clk); rom_wr <= 1'b0;
+      end
+      @(posedge clk); rom_ext <= 1'b0;
     end
     wait (mem_ready);
     repeat (8) @(posedge clk);
@@ -546,7 +604,8 @@ module tb_core;
              end_reason, clk_n, real'(clk_n) / 48.0e6, frames, n_if1, last_pc[22:16], last_pc[15:0]);
     $display("     disk: %0d LBA reads, %0d LBA writes, %0d hps reads, %0d hps writes; DRAM %0d rd %0d wr",
              n_lba, n_lba_wr, hps_reads, hps_writes, n_rd, n_wr);
-    if (!left_rom) fail("the boot ROM never started the loaded program");
+    if (!left_rom && !stop_hit) fail("the boot ROM never started the loaded program");
+    if (stoppc >= 0 && !stop_hit) fail("+stoppc address never reached");
     if (errors == 0) $display("PASS");
     else $display("FAIL: %0d errors", errors);
     $finish;

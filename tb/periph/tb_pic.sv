@@ -24,10 +24,14 @@ module tb_pic;
     .pic_inta_n   (pic_inta_n),
     .pic_int      (pic_int),
     .ir_fdc       (ir_fdc),
+    .ir_comvi1    (1'b0),
+    .ir_comvi2    (1'b0),
     .ir_ser_rxrdy (ir_ser),
     .ir_kbd_rxrdy (ir_kbd_rx),
     .ir_kbd_txrdy (ir_kbd_tx),
-    .ir_ppi       (ir_ppi)
+    .ir_ppi       (ir_ppi),
+    .ir_sysint    (1'b0),
+    .cas          ()
   );
 
   assign rd_mux = pic_rdata;

@@ -15,7 +15,9 @@
 //   cfg_spare1           in   SPARE1 jumper JP3, port 0x21 D4.  ROM 2.x reads
 //                             D4:D3 as the floppy type: 0 = ask, 1 = 160K,
 //                             2 = 320K, 3 = 640K (types 1-3 run the self-tests)
-//   rom_wr rom_addr[12:0] rom_data[7:0]  in  boot.rom loader (ioctl index 0)
+//   rom_wr rom_addr[15:0] rom_data[7:0]  in  ROM loader: boot.rom (rom_ext = 0) or
+//   rom_ext rom_start                         extension ROM (rom_ext = 1); rom_start
+//                                             marks a new download
 //   mem_addr[23:1] mem_rd mem_wr mem_be[1:0] mem_wdata[15:0]   out
 //   mem_rdata[15:0] mem_rvalid mem_ack mem_ready               in
 //   mem_refresh_ok       out  no request outstanding
@@ -25,6 +27,8 @@
 //   fdc_rdata crtc_rdata ppi_rdata kbd_rdata ser_rdata pit_rdata [7:0]  in
 //   pic_rdata[15:0]      in   8259 word: {7'h7F, D7-D0, 1'b1}, or
 //                             {7'h7F, vector, 1'b0} during the second INTA
+//   cs_exp exp_rdata[7:0]          in  expansion card byte port selected, its data
+//   cs_exp16 exp_rdata16[15:0]     in  expansion card word port (8259 on D1-D8)
 //   pic_int              in   8259 INT (High = request) -> CPU /VI
 //   pic_inta_n           out  8259 /INTA (two pulses per VI acknowledge)
 //   pit_out2             in   8253 OUT2 -> NVI flip-flop
@@ -42,7 +46,7 @@
 //
 // Assumed: the CRT DRAM window is CRT_WIN clocks from
 // crt_fetch; port 0x21 latch, boot and SEGT flip-flops reset as below; the
-// U18B J input is Low; extension ROM sockets and SRAM0 read 0xFFFF; reads in
+// U18B J input is Low; SRAM0 reads 0xFFFF; reads in
 // NVI acknowledge read 0xFFFF; /WAIT, /BUSREQ, /STOP, NMI, MEMDIS inactive;
 // the CPU leaves reset 8 CPU clocks after rst_n.
 `default_nettype none
@@ -66,8 +70,10 @@ module m20_mainboard
   input  logic        cfg_spare1,
 
   input  logic        rom_wr,
-  input  logic [12:0] rom_addr,
+  input  logic [15:0] rom_addr,
   input  logic [7:0]  rom_data,
+  input  logic        rom_ext,
+  input  logic        rom_start,
 
   output logic [23:1] mem_addr,
   output logic        mem_rd,
@@ -108,6 +114,10 @@ module m20_mainboard
   input  logic [7:0]  ser_rdata,
   input  logic [7:0]  pit_rdata,
   input  logic [15:0] pic_rdata,
+  input  logic        cs_exp,
+  input  logic [7:0]  exp_rdata,
+  input  logic        cs_exp16,
+  input  logic [15:0] exp_rdata16,
 
   input  logic        pic_int,
   output logic        pic_inta_n,
@@ -243,9 +253,9 @@ module m20_mainboard
 
   // While BOOT is set every memory cycle selects the boot EPROMs (TA14,
   // TA15, TSN0 inhibited, U36 forced to O0).  ROM sockets 1-3, 7 are
-  // unused; 4-6 are empty extension sockets; SRAM0 is not fitted.
+  // unused; 4-6 are the extension sockets; SRAM0 is not fitted.
   logic rom_sel, dram_sel;
-  assign rom_sel  = mem_c && (boot_q || (prom_en && !prom_q[7] && prom_q[2:0] == 3'd0));
+  assign rom_sel  = mem_c && (boot_q || (prom_en && !prom_q[7]));
   assign dram_sel = mem_c && !boot_q && prom_en && prom_q[7] && !prom_q[5];
 
   // ---- SEGT U6B -----------------------------------------------------------
@@ -258,8 +268,8 @@ module m20_mainboard
   // ---- boot EPROMs --------------------------------------------------------
   logic [15:0] rom_q;
   m20_boot_rom u54_u65 (
-    .clk(clk), .addr(a_q[12:1]), .q(rom_q),
-    .ld_we(rom_wr), .ld_addr(rom_addr), .ld_data(rom_data)
+    .clk(clk), .blk(boot_q ? 3'd0 : prom_q[2:0]), .addr(a_q[13:1]), .q(rom_q),
+    .ld_start(rom_start), .ld_ext(rom_ext), .ld_we(rom_wr), .ld_addr(rom_addr), .ld_data(rom_data)
   );
 
   // ---- DRAM ---------------------------------------------------------------
@@ -337,7 +347,9 @@ module m20_mainboard
     .cs_kbd(cs_kbd), .cs_ser(cs_ser), .cs_pit(cs_pit), .cs_pic(cs_pic), .cs_pal(cs_pal),
     .fdc_rdata(fdc_rdata), .latch_rdata(lat_rd), .crtc_rdata(crtc_rdata),
     .ppi_rdata(ppi_rdata), .kbd_rdata(kbd_rdata), .ser_rdata(ser_rdata),
-    .pit_rdata(pit_rdata), .pic_rdata(pic_rdata), .rdata(io_word)
+    .pit_rdata(pit_rdata), .pic_rdata(pic_rdata),
+    .cs_exp(cs_exp), .exp_rdata(exp_rdata), .cs_exp16(cs_exp16), .exp_rdata16(exp_rdata16),
+    .rdata(io_word)
   );
 
   // ---- interrupts -----------------------------------------------------------
