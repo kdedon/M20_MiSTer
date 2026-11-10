@@ -92,7 +92,7 @@ The mainboard translates through the PROM and reads 0xFFFF where nothing is mapp
 
 The CPU waits at T3 until read data arrives. An SDRAM round trip (100–200 ns) is shorter than a T-state (250 ns), so this rarely stretches.
 
-Boot ROM: up to 16 KB BRAM loaded as `boot.rom` (ioctl index 0); `scripts/make_boot_rom.sh` builds it from ROM dumps. Extension sockets: up to 48 KB (ioctl index 2), 0xFFFF where empty.
+Boot ROM: up to 16 KB BRAM loaded as `boot.rom` (ioctl index 0) or with Load Firmware (index 1); `scripts/make_boot_rom.sh` builds it from ROM dumps. Extension sockets: up to 48 KB (ioctl index 2), 0xFFFF where empty.
 
 ### 3.3 Video plane snoop
 

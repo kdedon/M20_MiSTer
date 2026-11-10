@@ -55,8 +55,8 @@ localparam CONF_STR = {
 	"S2,IMG,Hard disk 0;",
 	"S3,IMG,Hard disk 1;",
 	"-;",
-	"O[3:1],Configuration,128K B/W,B/W 32K cards,B/W 128K cards,4 colours 32K,4 colours 128K,8 colours 32K,8 colours 128K;",
-	"O[6:4],Jumpers ZA/SPARE1,1.x full tests,1.x skip tests,2.x 320K drives,2.x 160K drives,2.x 640K drives,2.x ask drive type;",
+	"O[3:1],Configuration,B/W 128K cards,B/W 32K cards,B/W no cards,4 colours 32K,4 colours 128K,8 colours 32K,8 colours 128K;",
+	"O[6:4],Jumpers ZA/SPARE1,2.x 320K drives,2.x 640K drives,2.x 160K drives,2.x ask drive type,1.x full tests,1.x skip tests;",
 	"-;",
 	"O[7],IEEE-488 card,Off,On;",
 	"O[8],Twin RS-232 card,Off,On;",
@@ -67,7 +67,7 @@ localparam CONF_STR = {
 	"F1,ROMBIN,Load Firmware;",
 	"F2,ROMBIN,Load extension ROM;",
 	"R[0],Reset;",
-	"v,2;",
+	"v,5;",
 	"V,v",`BUILD_DATE
 };
 
@@ -172,8 +172,8 @@ c900_rst_sync u_rst (.clk(clk_sys), .arst(reset_req), .pll_locked(pll_locked), .
 
 // Jumpers are read at reset, as on the board.  OSD order -> configuration
 // code {BW^COL, 32^128, COL4^8} (port 0x21 D7..D5).
-reg [2:0] cfg_code = 3'd5;
-reg       cfg_za     = 1'b1;
+reg [2:0] cfg_code = 3'd6;
+reg       cfg_za     = 1'b0;
 reg       cfg_spare1 = 1'b1;
 reg       cfg_ieee, cfg_twin;
 always @(posedge clk_sys) begin
@@ -181,25 +181,25 @@ always @(posedge clk_sys) begin
 		cfg_ieee <= status[7];
 		cfg_twin <= status[8];
 		case (status[3:1])
-			3'd0: cfg_code <= 3'd5;   // 128K, B/W
+			3'd0: cfg_code <= 3'd6;   // 128K cards, B/W
 			3'd1: cfg_code <= 3'd7;   // 32K cards, B/W
-			3'd2: cfg_code <= 3'd6;   // 128K cards, B/W
+			3'd2: cfg_code <= 3'd5;   // no cards, B/W
 			3'd3: cfg_code <= 3'd3;   // 32K cards, 4 colours
 			3'd4: cfg_code <= 3'd1;   // 128K cards, 4 colours
 			3'd5: cfg_code <= 3'd2;   // 32K cards, 8 colours
 			3'd6: cfg_code <= 3'd0;   // 128K cards, 8 colours
-			default: cfg_code <= 3'd5;
+			default: cfg_code <= 3'd6;
 		endcase
 		// {SPARE1, ZA} = port 0x21 D4:D3.  ROM 1.x reads ZA as the self-test
 		// switch; ROM 2.x reads D4:D3 as the floppy type (0 = ask).
 		case (status[6:4])
-			3'd0: {cfg_spare1, cfg_za} <= 2'b11;   // 1.x full tests
-			3'd1: {cfg_spare1, cfg_za} <= 2'b10;   // 1.x skip tests
-			3'd2: {cfg_spare1, cfg_za} <= 2'b10;   // 2.x type 2, 320K
-			3'd3: {cfg_spare1, cfg_za} <= 2'b01;   // 2.x type 1, 160K
-			3'd4: {cfg_spare1, cfg_za} <= 2'b11;   // 2.x type 3, 640K
-			3'd5: {cfg_spare1, cfg_za} <= 2'b00;   // 2.x ask at boot
-			default: {cfg_spare1, cfg_za} <= 2'b11;
+			3'd0: {cfg_spare1, cfg_za} <= 2'b10;   // 2.x type 2, 320K
+			3'd1: {cfg_spare1, cfg_za} <= 2'b11;   // 2.x type 3, 640K
+			3'd2: {cfg_spare1, cfg_za} <= 2'b01;   // 2.x type 1, 160K
+			3'd3: {cfg_spare1, cfg_za} <= 2'b00;   // 2.x ask at boot
+			3'd4: {cfg_spare1, cfg_za} <= 2'b11;   // 1.x full tests
+			3'd5: {cfg_spare1, cfg_za} <= 2'b10;   // 1.x skip tests
+			default: {cfg_spare1, cfg_za} <= 2'b10;
 		endcase
 	end
 end
