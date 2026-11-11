@@ -43,7 +43,8 @@ M20.sv          hps_io, CONF_STR, pll, SDRAM, disk_stream, video_mixer, UART
     ├── hdc/m20_hdc.sv         hard disk card (WD1000 registers), ports 0x1C0-0x1CF
     ├── exp/m20_ieee.sv        IEEE-488 card, slave 8259 on IR1
     ├── exp/m20_twin.sv        twin RS-232 card, slave 8259 on IR7
-    └── exp/m20_cascade.sv     slave 8259 vector during VI acknowledge
+    ├── exp/m20_cascade.sv     slave 8259 vector during VI acknowledge
+    └── apb/m20_apb.sv         APB 1086 8086 card, bus master on the ext_* port
 ```
 
 | Directory | Lint top | Bench |
@@ -54,6 +55,7 @@ M20.sv          hps_io, CONF_STR, pll, SDRAM, disk_stream, video_mixer, UART
 | `rtl/fdc/`, `rtl/host/` | `m20_fdc` | `tb/fdc/` |
 | `rtl/hdc/` | `m20_hdc` | `tb/hdc/` |
 | `rtl/exp/` | `m20_ieee`, `m20_twin`, `m20_cascade` | `tb/exp/` |
+| `rtl/apb/` | `m20_apb` | `tb/apb/` |
 | `rtl/m20_core.sv`, `M20.sv` | `m20_core` | `tb/core/` |
 
 Each block has a `<dir>.qip` (included from `files.qip`) and `mk/<dir>.mk` (`<DIR>_SRCS`, `tb-<dir>` target).

@@ -26,6 +26,10 @@
 //   +watchw=<hex> (log writes to one DRAM word)
 //   +pctrace=<from> +pcto=<to> (IF1 and data read trace window, clocks)  +iolog=<from> (I/O log)
 //   +rom20 (labels off: ROM 2.0 has other addresses)
+//   +apb=<file> (APB card fitted, apb.rom) +apbkeys=<text> (typed +apbkdelay clocks
+//   after the first /NMI, the ROM's card probe); the 8086 start counts as leaving
+//   the ROM.  With the card, key '^' is COMMAND+RESET (code 0x90).
+//   +kgap=<clk> sets the gap after each key (default 80 ms).
 `default_nettype none
 module tb_core;
   import z8000_zbus_pkg::*;
@@ -51,6 +55,9 @@ module tb_core;
   logic        rom_ext = 1'b0, rom_start = 1'b0;
   logic        cfg_ieee = 1'b0, cfg_twin = 1'b0;
   logic [10:0] ps2_key = 11'd0;
+  logic        apb_fitted = 1'b0, apb_ld_we = 1'b0, apb_run;
+  logic [14:0] apb_ld_addr = '0;
+  logic [7:0]  apb_ld_data = '0;
 
   // ---- SDRAM ----
   logic [23:1] mem_addr;
@@ -115,6 +122,8 @@ module tb_core;
     .clk(clk), .rst_n(rst_n), .cfg_code(cfg), .cfg_za(za), .cfg_spare1(spare1),
     .cfg_ieee(cfg_ieee), .cfg_twin(cfg_twin), .ser_sel(2'd0),
     .rom_wr(rom_wr), .rom_addr(rom_addr), .rom_data(rom_data), .rom_ext(rom_ext), .rom_start(rom_start),
+    .apb_fitted(apb_fitted), .apb_ld_we(apb_ld_we), .apb_ld_addr(apb_ld_addr),
+    .apb_ld_data(apb_ld_data), .apb_run(apb_run),
     .mem_addr(mem_addr), .mem_rd(mem_rd), .mem_wr(mem_wr), .mem_be(mem_be),
     .mem_wdata(mem_wdata), .mem_rdata(mem_rdata), .mem_rvalid(mem_rvalid), .mem_ack(mem_ack),
     .mem_ready(mem_ready), .mem_refresh_ok(mem_refresh_ok),
@@ -317,6 +326,101 @@ module tb_core;
     p_as = as_n; p_ds = ds_n;
   end
 
+  // ---- APB: 8086 runs and its I/O ----
+  logic p_run = 1'b0, p_nmi = 1'b1;
+  int   n_nmi = 0, n_runs = 0;
+  longint t_nmi0 = -1;
+  always @(posedge clk) if (rst_n) begin
+    if (p_nmi && !dut.ext_nmi_n) begin
+      n_nmi++;
+      if (t_nmi0 < 0) t_nmi0 = clk_n;
+      $display("[%9.3f ms] /NMI (card handshake) %0d", ms(), n_nmi);
+    end
+    if (apb_run != p_run) begin
+      $display("[%9.3f ms] APB run %0d", ms(), apb_run);
+      if (apb_run) begin
+        n_runs++;
+        if (!left_rom) begin
+          left_rom = 1;
+          t_left_rom = clk_n;
+          $display("[%9.3f ms] milestone: 8086 started", ms());
+        end
+      end
+    end
+    p_nmi = dut.ext_nmi_n;
+    p_run = apb_run;
+  end
+
+  // +apbring=<hex word>: when an 8086 read of the vector table returns this
+  // word, print the last 4096 8086 requests (ROM fetches only where the flow jumps; the delay loop left out)
+  int   apbring = -1;
+  string ring [4096];
+  int   ring_n = 0;
+  bit   ring_done = 0;
+  logic [19:0] ring_a;
+  logic ring_rd, ring_io;
+  logic [19:0] ring_f = '0;
+  // +apbwa=<hex addr> +apbwd=<hex word>: the same on an 8086 write of that word there
+  int   apbwa = -1, apbwd = 0;
+  // +apbnone=<clk> +apbtop=<hex>: the same on the first 8086 read from apbtop-DFFFF from that clock
+  longint apbnone = -1;
+  int     apbtop = 'h1C000;
+  initial void'($value$plusargs("apbtop=%h", apbtop));
+  initial void'($value$plusargs("apbnone=%d", apbnone));
+  initial void'($value$plusargs("apbring=%h", apbring));
+  initial void'($value$plusargs("apbwa=%h", apbwa));
+  initial void'($value$plusargs("apbwd=%h", apbwd));
+  always @(posedge clk) if (apbring >= 0 && !ring_done) begin
+    if (dut.u_apb.start && !(dut.u_apb.c_addr >= 20'hFE434 && dut.u_apb.c_addr < 20'hFE44A) &&
+        !(dut.u_apb.c_rd && !dut.u_apb.c_io && dut.u_apb.c_addr[19:14] == 6'h3F &&
+          (dut.u_apb.c_addr == ring_f + 20'd2 || dut.u_apb.c_addr == ring_f + 20'd1))) begin
+      ring[ring_n++ % 4096] = $sformatf("[%9.3f ms] %s%s %05h w%0d d %04h", ms(),
+        dut.u_apb.c_inta ? "inta" : dut.u_apb.c_wr ? "wr" : "rd", dut.u_apb.c_io ? " io" : "",
+        dut.u_apb.c_addr, dut.u_apb.c_word, dut.u_apb.c_dout);
+    end
+    if (dut.u_apb.start) begin
+      ring_a  = dut.u_apb.c_addr;
+      ring_rd = dut.u_apb.c_rd && !dut.u_apb.c_io;
+      ring_io = dut.u_apb.c_rd && dut.u_apb.c_io;
+      if (dut.u_apb.c_rd && !dut.u_apb.c_io && dut.u_apb.c_addr[19:14] == 6'h3F) ring_f = dut.u_apb.c_addr;
+    end
+    if (dut.u_apb.start && dut.u_apb.c_rd && !dut.u_apb.c_io && dut.u_apb.c_addr >= 20'(apbtop) &&
+        dut.u_apb.c_addr < 20'hE0000 && apbnone >= 0 && clk_n >= apbnone) begin
+      for (int i = ring_n - 4096; i < ring_n; i++) if (i >= 0) $display("%s", ring[i % 4096]);
+      $display("[%9.3f ms] read above the memory top %05h", ms(), dut.u_apb.c_addr);
+      ring_done = 1;
+    end
+    if (dut.u_apb.start && dut.u_apb.c_wr && !dut.u_apb.c_io && apbwa >= 0 &&
+        dut.u_apb.c_addr == 20'(apbwa) && dut.u_apb.c_dout == 16'(apbwd)) begin
+      for (int i = ring_n - 4096; i < ring_n; i++) if (i >= 0) $display("%s", ring[i % 4096]);
+      ring_done = 1;
+    end
+    if (dut.u_apb.c_ready && dut.u_apb.ce8) begin
+      if (ring_io) ring[ring_n++ % 4096] = $sformatf("    in %04h", dut.u_apb.c_din);
+      if (ring_rd && ring_a < 20'h00400 && dut.u_apb.c_din == 16'(apbring)) begin
+        for (int i = ring_n - 4096; i < ring_n; i++) if (i >= 0) $display("%s", ring[i % 4096]);
+        ring_done = 1;
+      end
+    end
+  end
+
+  // +fdclog: FD1797 register writes and command ends
+  logic p_intrq = 1'b0;
+  always @(posedge clk) if (rst_n && $test$plusargs("fdclog")) begin
+    if (dut.u_fdc.ev_wr)
+      $display("[%9.3f ms] FDC reg %0d <= %02h", ms(), dut.u_fdc.acc_a, dut.u_fdc.acc_d);
+    if (dut.u_fdc.intrq && !p_intrq)
+      $display("[%9.3f ms] FDC INTRQ, status %02h, %0d LBA reads", ms(), dut.u_fdc.status, n_lba);
+    p_intrq <= dut.u_fdc.intrq;
+  end
+  // +apbdump=<clk>: print the 8086 request ring at that clock
+  longint apbdump = -1;
+  initial void'($value$plusargs("apbdump=%d", apbdump));
+  always @(posedge clk) if (apbdump >= 0 && clk_n == apbdump && !ring_done) begin
+    for (int i = ring_n - 4096; i < ring_n; i++) if (i >= 0) $display("%s", ring[i % 4096]);
+    ring_done = 1;
+  end
+
   // +watchw=<hex>: log CPU writes to one DRAM word (mem_addr[23:1])
   int   watchw = -1;
   logic p_mem_wr = 1'b0;
@@ -475,6 +579,9 @@ module tb_core;
     ps2_key <= {~ps2_key[10], press, code};
   endtask
 
+  longint kgap = 64'd3_840_000;
+  initial void'($value$plusargs("kgap=%d", kgap));
+
   task automatic type_keys(input string s);
     for (int i = 0; i < s.len(); i++) begin
       logic [8:0] k;
@@ -484,13 +591,25 @@ module tb_core;
         while (clk_n - last_disk <= kquiet && clk_n < maxclk) @(posedge clk);
         continue;
       end
+      if (s[i] == "^" && apb_fitted) begin
+        $display("[%9.3f ms] key COMMAND+RESET", ms());
+        key_event(9'h00D, 1'b1);
+        repeat (480_000) @(posedge clk);
+        key_event(9'h076, 1'b1);
+        repeat (960_000) @(posedge clk);
+        key_event(9'h076, 1'b0);
+        repeat (480_000) @(posedge clk);
+        key_event(9'h00D, 1'b0);
+        repeat (3_840_000) @(posedge clk);
+        continue;
+      end
       k = ps2_code(s[i]);
       if (k == 9'h000) begin $display("key '%c' not mapped", s[i]); continue; end
       $display("[%9.3f ms] key '%s'", ms(), (s[i] == "~") ? "RETURN" : string'(s[i]));
       key_event(k, 1'b1);
       repeat (960_000) @(posedge clk);      // 20 ms held
       key_event(k, 1'b0);
-      repeat (3_840_000) @(posedge clk);    // 80 ms gap
+      repeat (kgap) @(posedge clk);
     end
   endtask
 
@@ -513,8 +632,9 @@ module tb_core;
     logic [7:0] rom_img [0:16383];
     logic [7:0] ext_img [0:49151];
     int rom_n, ext_n;
-    longint kpost, status_every, next_status;
-    bit keys_sent;
+    longint kpost, status_every, next_status, apbkdelay;
+    bit keys_sent, apb_keys_sent;
+    string apb_file, apb_keys;
 
     if ($value$plusargs("cfg=%d", code)) cfg = 3'(code);
     if ($value$plusargs("za=%d", code)) za = code[0];
@@ -559,7 +679,7 @@ module tb_core;
     if (fd == 0) $fatal(1, "cannot open %s", img_file);
     img_sz = $fread(img, fd);
     $fclose(fd);
-    if (img_sz != 286720) $fatal(1, "%s: %0d bytes, expected 286720", img_file, img_sz);
+    if (img_sz != 286720 && img_sz != 368640) $fatal(1, "%s: %0d bytes, expected 286720 or 368640", img_file, img_sz);
 
     $display("tb_core: config code %0d, ZA %0d, rom %s, drive 0 %s (%0d B), keys \"%s\"",
              cfg, za, rom_file, img_file, img_sz, keys);
@@ -601,6 +721,23 @@ module tb_core;
       end
       @(posedge clk); rom_ext <= 1'b0;
     end
+    if ($value$plusargs("apb=%s", apb_file)) begin
+      logic [7:0] apb_img [0:18431];
+      fd = $fopen(apb_file, "rb");
+      if (fd == 0) $fatal(1, "cannot open %s", apb_file);
+      n = $fread(apb_img, fd);
+      $fclose(fd);
+      if (n != 18432) $fatal(1, "%s: %0d bytes, expected 18432", apb_file, n);
+      for (int i = 0; i < 18432; i++) begin
+        @(posedge clk); apb_ld_we <= 1'b1; apb_ld_addr <= 15'(i); apb_ld_data <= apb_img[i];
+      end
+      @(posedge clk); apb_ld_we <= 1'b0;
+      apb_fitted <= 1'b1;
+      $display("tb_core: APB card fitted, %s", apb_file);
+    end
+    if (!$value$plusargs("apbkeys=%s", apb_keys)) apb_keys = "";
+    apbkdelay = 64'd48_000_000;
+    void'($value$plusargs("apbkdelay=%d", apbkdelay));
     wait (mem_ready);
     repeat (8) @(posedge clk);
     rst_n <= 1'b1;
@@ -608,8 +745,14 @@ module tb_core;
     status_every = 64'd24_000_000;          // 0.5 s
     next_status = status_every;
     keys_sent = 0;
+    apb_keys_sent = 0;
     while (!done && clk_n < maxclk) begin
       @(posedge clk);
+      if (!apb_keys_sent && apb_keys != "" && t_nmi0 >= 0 && clk_n - t_nmi0 > apbkdelay) begin
+        snap("apb_prompt.ppm");
+        type_keys(apb_keys);
+        apb_keys_sent = 1;
+      end
       if (clk_n >= next_status) begin
         next_status += status_every;
         $display("[%9.3f ms] status: IF1 <%02h>%04h, %0d frames (%0dx%0d), %0d LBA reads, %0d hps reads, DRAM %0d rd %0d wr",

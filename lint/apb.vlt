@@ -1,0 +1,4 @@
+`verilator_config
+// The 8086 core is a lightly patched third-party copy.
+lint_off -file "*/rtl/apb/z8086*.sv"
+lint_off -file "rtl/apb/z8086*.sv"

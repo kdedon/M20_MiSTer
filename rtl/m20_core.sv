@@ -14,6 +14,7 @@
 //                  INTRQ not wired
 //   m20_ieee       IEEE-488 card (optional), slave 8259 on IR1
 //   m20_twin       twin RS-232 card (optional), slave 8259 on IR7
+//   m20_apb        APB 1086 8086 card (optional), bus master via /BUSREQ
 //
 // The UART (ser_*) goes to one RS-232 port, picked by ser_sel; the others
 // see an idle line with CTS and DSR asserted.
@@ -38,6 +39,13 @@ module m20_core (
   input  logic [7:0]       rom_data,
   input  logic             rom_ext,
   input  logic             rom_start,
+
+  // APB 1086 card: fitted (sampled at reset), apb.rom download
+  input  logic             apb_fitted,
+  input  logic             apb_ld_we,
+  input  logic [14:0]      apb_ld_addr,
+  input  logic [7:0]       apb_ld_data,
+  output logic             apb_run,
 
   // DRAM (SDRAM controller client)
   output logic [23:1]      mem_addr,
@@ -124,6 +132,11 @@ module m20_core (
   logic        kbd_txd, kbd_rxd;
   logic        ppi_ir6;
   logic [7:0]  ppi_pa, ppi_pc;
+  logic        ext_busreq_n, ext_nmi_n, ext_busack_n, ext_clk_rise, nvi;
+  logic        ext_as_n, ext_ds_n, ext_ad_drive, ext_r_w, ext_b_w;
+  logic [15:0] ext_ad, ext_rdata;
+  logic [6:0]  ext_sn;
+  logic [3:0]  ext_st;
 
   // cs_latch is decoded inside the mainboard (port 0x21 latch U15/U16).
   logic unused_ok;
@@ -143,7 +156,20 @@ module m20_core (
     .fdc_rdata, .crtc_rdata, .ppi_rdata, .kbd_rdata, .ser_rdata, .pit_rdata, .pic_rdata,
     .cs_exp, .exp_rdata, .cs_exp16, .exp_rdata16,
     .pic_int, .pic_inta_n, .pit_out2, .crt_fetch,
-    .fdc_ds, .fdc_motor, .fdc_dden_n, .fdc_tg43
+    .fdc_ds, .fdc_motor, .fdc_dden_n, .fdc_tg43,
+    .ext_busreq_n, .ext_nmi_n, .ext_busack_n, .ext_clk_rise, .ext_as_n, .ext_ds_n, .ext_ad,
+    .ext_ad_drive, .ext_sn, .ext_st, .ext_r_w, .ext_b_w, .ext_rdata, .nvi
+  );
+
+  // -------------------------------------------------------------- APB 1086
+  m20_apb u_apb (
+    .clk, .rst_n, .fitted(apb_fitted),
+    .ld_we(apb_ld_we), .ld_addr(apb_ld_addr), .ld_data(apb_ld_data),
+    .busreq_n(ext_busreq_n), .nmi_n(ext_nmi_n), .busack_n(ext_busack_n), .clk_rise(ext_clk_rise),
+    .as_n(ext_as_n), .ds_n(ext_ds_n), .ad(ext_ad), .ad_drive(ext_ad_drive), .sn(ext_sn),
+    .st(ext_st), .r_w(ext_r_w), .b_w(ext_b_w), .rdata(ext_rdata),
+    .io_addr, .io_act(io_rd || io_wr), .io_end(io_rd_end || io_wr_end),
+    .vi(pic_int), .nvi, .run(apb_run)
   );
 
   // ---------------------------------------------------------------- video

@@ -31,6 +31,7 @@ set_global_assignment -name QIP_FILE rtl/periph/periph.qip
 set_global_assignment -name QIP_FILE rtl/fdc/fdc.qip
 set_global_assignment -name QIP_FILE rtl/hdc/hdc.qip
 set_global_assignment -name QIP_FILE rtl/exp/exp.qip
+set_global_assignment -name QIP_FILE rtl/apb/apb.qip
 
 # Machine top and shell
 set_global_assignment -name SYSTEMVERILOG_FILE rtl/m20_core.sv

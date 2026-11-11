@@ -16,9 +16,10 @@ include mk/periph.mk
 include mk/fdc.mk
 include mk/hdc.mk
 include mk/exp.mk
+include mk/apb.mk
 
-CORE_SRCS := $(BUS_SRCS) $(VIDEO_SRCS) $(PERIPH_SRCS) $(FDC_SRCS) $(HDC_SRCS) $(EXP_SRCS) $(ROOT)/rtl/m20_core.sv
-CORE_VFLAGS := $(PERIPH_VFLAGS)
+CORE_SRCS := $(BUS_SRCS) $(VIDEO_SRCS) $(PERIPH_SRCS) $(FDC_SRCS) $(HDC_SRCS) $(EXP_SRCS) $(APB_SRCS) $(ROOT)/rtl/m20_core.sv
+CORE_VFLAGS := $(PERIPH_VFLAGS) $(ROOT)/lint/apb.vlt
 
 .PHONY: lint lint-core tb tb-core build clean
 
