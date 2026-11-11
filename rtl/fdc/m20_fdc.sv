@@ -32,6 +32,10 @@
 // Image size <= 143360 is single sided; cylinders = size / (4096 * sides),
 // at most 84.
 //
+// PC images (163840, 184320, 327680, 368640 bytes): 40 cylinders, 8 or 9
+// sectors of 512 bytes, all MFM, 1:1 interleave; block
+// (cyl * sides + side) * spt + sector - 1.  The revolution has spt slots.
+//
 // Command bit 1 (U) sets SSO, which selects the head; no side compare.
 // Type II bit 3 (L): 1 = 128 << code, 0 = 256, 512, 1024, 128.  A transfer
 // longer than the sector reads gap filler (FF FM, 4E MFM) and ends with
@@ -55,6 +59,8 @@
 `default_nettype none
 module m20_fdc #(
   parameter int unsigned SLOT_T = 12500,    // ticks per sector slot (200 ms / 16)
+  parameter int unsigned SLOT_T8 = 25000,   // PC, 8 sectors
+  parameter int unsigned SLOT_T9 = 22222,   // PC, 9 sectors
   parameter int unsigned ID_T   = 600,      // ID position in the slot
   parameter int unsigned IDX_T  = 4000,     // index pulse width
   parameter int unsigned MS     = 1000      // ticks per ms
@@ -93,11 +99,11 @@ module m20_fdc #(
   input  logic             d_buff_wr
 );
   localparam int unsigned MS6  = 6 * MS, MS12 = 12 * MS, MS20 = 20 * MS, MS30 = 30 * MS;
-  localparam int unsigned SLOT_M1 = SLOT_T - 1;
+  localparam int unsigned SLOT_M1 = SLOT_T - 1, SLOT8_M1 = SLOT_T8 - 1, SLOT9_M1 = SLOT_T9 - 1;
   localparam logic [15:0] T_SETTLE = MS30[15:0];
-  localparam logic [13:0] SLOT_END = SLOT_M1[13:0];
-  localparam logic [13:0] ID_POS   = ID_T[13:0];
-  localparam logic [13:0] IDX_W    = IDX_T[13:0];
+  localparam logic [14:0] SLOT_END = SLOT_M1[14:0], SLOT8_END = SLOT8_M1[14:0], SLOT9_END = SLOT9_M1[14:0];
+  localparam logic [14:0] ID_POS   = ID_T[14:0];
+  localparam logic [14:0] IDX_W    = IDX_T[14:0];
   localparam logic [6:0]  CYL_MAX  = 7'd83;
 
   function automatic logic [15:0] step_t(input logic [1:0] r);
@@ -152,47 +158,63 @@ module m20_fdc #(
   assign ev_wr_dat = ev_wr && acc_a == 2'd3;
 
   // ---- media ------------------------------------------------------------------------
-  // Per drive: medium present, write protect, double sided, cylinders.
-  logic [1:0]      mnt, ro, ds2;
+  // Per drive: medium present, write protect, double sided, cylinders, PC
+  // format and its 9-sector variant.
+  logic [1:0]      mnt, ro, ds2, pc, pc9;
   logic [1:0][6:0] ncyl;
+  logic            sz_pc, sz_pc9, sz_pcds;
+  assign sz_pc9  = d_size == 64'd184320 || d_size == 64'd368640;
+  assign sz_pc   = sz_pc9 || d_size == 64'd163840 || d_size == 64'd327680;
+  assign sz_pcds = d_size == 64'd327680 || d_size == 64'd368640;
   always_ff @(posedge clk) begin
     if (!rst_n) begin
-      mnt <= 2'b00; ro <= 2'b00; ds2 <= 2'b00; ncyl <= '0;
+      mnt <= 2'b00; ro <= 2'b00; ds2 <= 2'b00; pc <= 2'b00; pc9 <= 2'b00; ncyl <= '0;
     end else begin
       for (int i = 0; i < 2; i++)
         if (d_mounted[i]) begin
           mnt[i]  <= d_size[22:0] != 23'd0 && d_size[63:23] == 41'd0;
           ro[i]   <= d_readonly;
-          ds2[i]  <= d_size[22:0] > 23'd143360;
-          if (d_size[22:0] > 23'd143360)
-            ncyl[i] <= (d_size[22:13] > 10'd84) ? 7'd84 : d_size[19:13];
-          else
-            ncyl[i] <= {1'b0, d_size[17:12]};
+          pc[i]   <= sz_pc;
+          pc9[i]  <= sz_pc9;
+          if (sz_pc) begin
+            ds2[i]  <= sz_pcds;
+            ncyl[i] <= 7'd40;
+          end else begin
+            ds2[i]  <= d_size[22:0] > 23'd143360;
+            if (d_size[22:0] > 23'd143360)
+              ncyl[i] <= (d_size[22:13] > 10'd84) ? 7'd84 : d_size[19:13];
+            else
+              ncyl[i] <= {1'b0, d_size[17:12]};
+          end
         end
     end
   end
 
-  // ---- spindle: 16 slots per revolution -----------------------------------------------
-  logic [13:0] rot_t;
-  logic [3:0]  rot_s;
+  // ---- spindle: 16 slots per revolution (PC: one per sector), the selected drive's ---
+  logic        sel_pc, sel_pc9;
+  logic [14:0] rot_t, slot_end;
+  logic [3:0]  rot_s, s_last;
+  assign slot_end = !sel_pc ? SLOT_END : sel_pc9 ? SLOT9_END : SLOT8_END;
+  assign s_last   = !sel_pc ? 4'd15 : sel_pc9 ? 4'd8 : 4'd7;
   always_ff @(posedge clk) begin
     if (!rst_n) begin
-      rot_t <= 14'd0; rot_s <= 4'd0;
+      rot_t <= 15'd0; rot_s <= 4'd0;
     end else if (ce_fdc) begin
-      if (rot_t == SLOT_END) begin
-        rot_t <= 14'd0;
-        rot_s <= rot_s + 4'd1;
+      if (rot_t >= slot_end) begin
+        rot_t <= 15'd0;
+        rot_s <= (rot_s >= s_last) ? 4'd0 : rot_s + 4'd1;
       end else begin
-        rot_t <= rot_t + 14'd1;
+        rot_t <= rot_t + 15'd1;
       end
     end
   end
   logic idx_lvl, idx_rise, id_ev;
   assign idx_lvl  = rot_s == 4'd0 && rot_t < IDX_W;
-  assign idx_rise = ce_fdc && rot_s == 4'd0 && rot_t == 14'd0;
+  assign idx_rise = ce_fdc && rot_s == 4'd0 && rot_t == 15'd0;
   assign id_ev    = ce_fdc && rot_t == ID_POS;
   logic [4:0] id_sec;                         // sector number of the passing ID
-  assign id_sec = rot_s[0] ? {2'b00, rot_s[3:1]} + 5'd1 : {2'b00, rot_s[3:1]} + 5'd9;
+  assign id_sec = sel_pc ? {1'b0, rot_s} + 5'd1 :
+                  rot_s[0] ? {2'b00, rot_s[3:1]} + 5'd1 : {2'b00, rot_s[3:1]} + 5'd9;
 
   // ---- selected drive ---------------------------------------------------------------
   logic [1:0][6:0] head;
@@ -205,21 +227,28 @@ module m20_fdc #(
   assign cyl    = head[sel];
   assign tr00   = sel_ok && cyl == 7'd0;
   assign wp_in  = sel_ok && ro[sel];
+  assign sel_pc  = pc[sel];
+  assign sel_pc9 = pc9[sel];
   logic exists, trk_fm, den_ok;
   assign exists = ready && cyl < ncyl[sel] && (!sso || ds2[sel]);
-  assign trk_fm = cyl == 7'd0 && !sso;
+  assign trk_fm = cyl == 7'd0 && !sso && !sel_pc;
   assign den_ok = fdc_dden_n == trk_fm;
 
-  function automatic logic [31:0] lba_of(input logic d2, input logic [6:0] c, input logic s,
-                                         input logic [2:0] k);
-    return d2 ? {21'd0, c, s, k} : {22'd0, c, k};
+  // Image block k of a track (M20: sector pair, PC: sector - 1).
+  function automatic logic [31:0] lba_of(input logic p, input logic p9, input logic d2,
+                                         input logic [6:0] c, input logic s, input logic [3:0] k);
+    logic [31:0] t;
+    t = d2 ? {24'd0, c, s} : {25'd0, c};
+    if (!p)      return {t[28:0], k[2:0]};
+    else if (p9) return {t[28:0], 3'd0} + t + {28'd0, k};
+    else         return {t[28:0], 3'd0} + {28'd0, k};
   endfunction
 
-  // ---- track buffer: 8 image blocks ----------------------------------------------------
-  logic [11:0] a_addr, b_addr, b_wa;
+  // ---- track buffer: 16 image blocks (M20 uses 8) ---------------------------------------
+  logic [12:0] a_addr, b_addr, b_wa;
   logic [7:0]  a_q, b_q, b_d;
   logic        a_we, b_we;
-  (* ramstyle = "M10K, no_rw_check" *) logic [7:0] tbuf [0:4095];
+  (* ramstyle = "M10K, no_rw_check" *) logic [7:0] tbuf [0:8191];
   always_ff @(posedge clk) begin
     if (a_we) tbuf[a_addr] <= d_buff_dout;
     a_q <= tbuf[a_addr];
@@ -234,14 +263,14 @@ module m20_fdc #(
   blk_e        b_st;
   logic        b_drv, b_wr;
   logic [31:0] b_lba;
-  logic [2:0]  b_slot;
+  logic [3:0]  b_slot;
   logic        blk_go, blk_go_wr, blk_go_drv;   // from the sequencer, one clock
   logic [31:0] blk_go_lba;
-  logic [2:0]  blk_go_slot;
+  logic [3:0]  blk_go_slot;
   logic        blk_pend;
   always_ff @(posedge clk) begin
     if (!rst_n) begin
-      b_st <= B_IDLE; b_drv <= 1'b0; b_wr <= 1'b0; b_lba <= 32'd0; b_slot <= 3'd0;
+      b_st <= B_IDLE; b_drv <= 1'b0; b_wr <= 1'b0; b_lba <= 32'd0; b_slot <= 4'd0;
     end else begin
       unique case (b_st)
         B_IDLE: if (blk_go) begin
@@ -289,7 +318,7 @@ module m20_fdc #(
   logic        rdy_q;
   logic [4:0]  m_sec;
   logic [6:0]  m_cyl;
-  logic        m_side, m_fm, m_drv, m_ex;
+  logic        m_side, m_fm, m_drv, m_ex, m_pc, m_pc9;
   logic [10:0] cnt, len;
   logic [3:0]  k;
   logic [1:0]  wt_f;
@@ -297,7 +326,7 @@ module m20_fdc #(
   logic [7:0]  wt_sec;
   logic [1:0]  wt_sz;
   logic        b_we_q;
-  logic [11:0] b_wa_q;
+  logic [12:0] b_wa_q;
   logic [7:0]  b_d_q;
 
   localparam logic [1:0] WF_NONE = 2'd0, WF_ID = 2'd1, WF_DATA = 2'd2;
@@ -325,19 +354,30 @@ module m20_fdc #(
   assign gap2   = m_fm ? 16'd704  : 16'd704;       // 11 / 22 byte times
   assign wstart = m_fm ? 16'd448  : 16'd512;       // 7 / 16 byte times
   logic [10:0] phys;
-  assign phys = m_fm ? 11'd128 : 11'd256;
+  assign phys = m_fm ? 11'd128 : m_pc ? 11'd512 : 11'd256;
+
+  // matched sector: image block slot, transfer address, sectors per track
+  logic [3:0]  m_slot, m_nblk;
+  logic [12:0] x_addr;
+  assign m_slot = m_pc ? msec_m1[3:0] : {1'b0, msec_m1[3:1]};
+  assign m_nblk = (m_pc && m_pc9) ? 4'd9 : 4'd8;
+  assign x_addr = m_pc ? {msec_m1[3:0], cnt[8:0]} : {1'b0, msec_m1[3:0], cnt[7:0]};
+  logic [7:0] sel_spt;
+  assign sel_spt = !sel_pc ? 8'd16 : sel_pc9 ? 8'd9 : 8'd8;
+  logic [7:0] m_len_code;
+  assign m_len_code = m_pc ? 8'd2 : {7'd0, !m_fm};
 
   // Read Address bytes
   logic [15:0] id_crc;
   logic [7:0]  ra_byte;
   always_comb begin
     id_crc = crc8(crc8(crc8(crc8(crc8(m_fm ? 16'hFFFF : 16'hCDB4, 8'hFE), {1'b0, m_cyl}),
-                            {7'd0, m_side}), {3'd0, m_sec}), {7'd0, !m_fm});
+                            {7'd0, m_side}), {3'd0, m_sec}), m_len_code);
     case (cnt[2:0])
       3'd0:    ra_byte = {1'b0, m_cyl};
       3'd1:    ra_byte = {7'd0, m_side};
       3'd2:    ra_byte = {3'd0, m_sec};
-      3'd3:    ra_byte = {7'd0, !m_fm};
+      3'd3:    ra_byte = m_len_code;
       3'd4:    ra_byte = id_crc[15:8];
       default: ra_byte = id_crc[7:0];
     endcase
@@ -347,7 +387,7 @@ module m20_fdc #(
   assign b_we   = b_we_q;
   assign b_d    = b_d_q;
   assign b_wa   = b_wa_q;
-  assign b_addr = b_we_q ? b_wa : {msec_m1[3:0], cnt[7:0]};
+  assign b_addr = b_we_q ? b_wa : x_addr;
 
   // CPU byte for a write: this clock's bus write, else the data register
   logic [7:0] wbyte;
@@ -361,7 +401,7 @@ module m20_fdc #(
   assign wb = (cnt == 11'd0) ? dat_r : wbyte;
 
   logic wt_v;                                  // the open ID names a sector of this track
-  assign wt_v = m_ex && wt_sec >= 8'd1 && wt_sec <= 8'd16;
+  assign wt_v = m_ex && wt_sec >= 8'd1 && wt_sec <= (m_pc ? {4'd0, m_nblk} : 8'd16);
 
   logic [7:0] cmd_in;
   assign cmd_in = acc_d;
@@ -378,10 +418,11 @@ module m20_fdc #(
       dir_in <= 1'b1; hld <= 1'b0; hld_n <= 4'd0; step_n <= 8'd0; tmr <= 16'd0; idx_n <= 3'd0;
       fi_c <= 3'd0; rdy_q <= 1'b0; sso <= 1'b0; head <= '0;
       m_sec <= 5'd1; m_cyl <= 7'd0; m_side <= 1'b0; m_fm <= 1'b0; m_drv <= 1'b0; m_ex <= 1'b0;
+      m_pc <= 1'b0; m_pc9 <= 1'b0;
       cnt <= 11'd0; len <= 11'd0; k <= 4'd0;
       wt_f <= WF_NONE; wt_n <= 11'd0; wt_sec <= 8'd0; wt_sz <= 2'd0;
-      b_we_q <= 1'b0; b_wa_q <= 12'd0; b_d_q <= 8'h00;
-      blk_go <= 1'b0; blk_go_wr <= 1'b0; blk_go_drv <= 1'b0; blk_go_lba <= 32'd0; blk_go_slot <= 3'd0;
+      b_we_q <= 1'b0; b_wa_q <= 13'd0; b_d_q <= 8'h00;
+      blk_go <= 1'b0; blk_go_wr <= 1'b0; blk_go_drv <= 1'b0; blk_go_lba <= 32'd0; blk_go_slot <= 4'd0;
     end else begin
       blk_go <= 1'b0;
       b_we_q <= 1'b0;
@@ -470,13 +511,16 @@ module m20_fdc #(
           m_cyl  <= cyl;
           m_side <= sso;
           m_ex   <= exists;
+          m_pc   <= sel_pc;
+          m_pc9  <= sel_pc9;
           st     <= S_SRCH;
-          if ((c_rd || c_wr) && exists && sec_r >= 8'd1 && sec_r <= 8'd16) begin
+          if ((c_rd || c_wr) && exists && sec_r >= 8'd1 && sec_r <= sel_spt) begin
             blk_go      <= 1'b1;                          // fetch the sector's block
             blk_go_wr   <= 1'b0;
             blk_go_drv  <= sel;
-            blk_go_lba  <= lba_of(ds2[sel], cyl, sso, sec_m1[3:1]);
-            blk_go_slot <= sec_m1[3:1];
+            blk_go_lba  <= lba_of(sel_pc, sel_pc9, ds2[sel], cyl, sso,
+                                  sel_pc ? sec_m1[3:0] : {1'b0, sec_m1[3:1]});
+            blk_go_slot <= sel_pc ? sec_m1[3:0] : {1'b0, sec_m1[3:1]};
           end
           if (c_wt) begin
             k  <= 4'd0;
@@ -502,6 +546,8 @@ module m20_fdc #(
             m_cyl  <= cyl;
             m_side <= sso;
             m_fm   <= trk_fm;
+            m_pc   <= sel_pc;
+            m_pc9  <= sel_pc9;
             if (c_t1) begin
               if ({1'b0, cyl} == trk_r) st <= S_END;
             end else if (c_ra) begin
@@ -514,7 +560,7 @@ module m20_fdc #(
         // the block may still be on its way
         S_HOLD: if (!blk_pend) begin
           cnt <= 11'd0;
-          len <= (m_fm ? 11'd128 : 11'd256) << !cmd_q[3];
+          len <= phys << !cmd_q[3];
           if (c_rd) begin
             tmr <= dstart;
             st  <= S_RD;
@@ -571,7 +617,7 @@ module m20_fdc #(
           if (cnt != 11'd0 && wlost) f_lost <= 1'b1;
           if (cnt < phys) begin
             b_we_q <= 1'b1;
-            b_wa_q <= {msec_m1[3:0], cnt[7:0]};
+            b_wa_q <= x_addr;
             b_d_q  <= (cnt == 11'd0) ? dat_r : wbyte;
           end
           cnt <= cnt + 11'd1;
@@ -588,8 +634,8 @@ module m20_fdc #(
             blk_go      <= 1'b1;
             blk_go_wr   <= 1'b1;
             blk_go_drv  <= m_drv;
-            blk_go_lba  <= lba_of(ds2[m_drv], m_cyl, m_side, msec_m1[3:1]);
-            blk_go_slot <= msec_m1[3:1];
+            blk_go_lba  <= lba_of(m_pc, m_pc9, ds2[m_drv], m_cyl, m_side, m_slot);
+            blk_go_slot <= m_slot;
           end
           st <= S_WRF;
         end
@@ -622,15 +668,15 @@ module m20_fdc #(
 
         // ---- write track: load the track, stream from index to index, write back ----
         S_WT_LD: if (!blk_pend) begin
-          if (k == 4'd8 || !m_ex) begin
+          if (k == m_nblk || !m_ex) begin
             m_fm <= trk_fm;
             st   <= S_WT_IX;
           end else begin
             blk_go      <= 1'b1;
             blk_go_wr   <= 1'b0;
             blk_go_drv  <= m_drv;
-            blk_go_lba  <= lba_of(ds2[m_drv], m_cyl, m_side, k[2:0]);
-            blk_go_slot <= k[2:0];
+            blk_go_lba  <= lba_of(m_pc, m_pc9, ds2[m_drv], m_cyl, m_side, k);
+            blk_go_slot <= k;
             k           <= k + 4'd1;
           end
         end
@@ -672,9 +718,9 @@ module m20_fdc #(
                 if (wb == 8'hF7 || wt_n == (11'd128 << wt_sz)) begin
                   wt_f <= WF_NONE;
                 end else begin
-                  if (wt_v && wt_n < 11'd256) begin
+                  if (wt_v && wt_n < phys) begin
                     b_we_q <= 1'b1;
-                    b_wa_q <= {wt_sec[3:0] - 4'd1, wt_n[7:0]};
+                    b_wa_q <= m_pc ? {wt_sec[3:0] - 4'd1, wt_n[8:0]} : {1'b0, wt_sec[3:0] - 4'd1, wt_n[7:0]};
                     b_d_q  <= wb;
                   end
                   wt_n <= wt_n + 11'd1;
@@ -694,14 +740,14 @@ module m20_fdc #(
           end
         end
         S_WT_FL: if (!blk_pend) begin
-          if (k == 4'd8 || !m_ex) begin
+          if (k == m_nblk || !m_ex) begin
             st <= S_END;
           end else begin
             blk_go      <= 1'b1;
             blk_go_wr   <= 1'b1;
             blk_go_drv  <= m_drv;
-            blk_go_lba  <= lba_of(ds2[m_drv], m_cyl, m_side, k[2:0]);
-            blk_go_slot <= k[2:0];
+            blk_go_lba  <= lba_of(m_pc, m_pc9, ds2[m_drv], m_cyl, m_side, k);
+            blk_go_slot <= k;
             k           <= k + 4'd1;
           end
         end
@@ -788,6 +834,6 @@ module m20_fdc #(
   assign busy  = busy_q;
 
   logic unused_ok;
-  assign unused_ok = &{1'b0, fdc_motor, fdc_tg43, sec_m1[7:4], sec_m1[0], msec_m1[4], msec_m1[0]};
+  assign unused_ok = &{1'b0, fdc_motor, fdc_tg43, sec_m1[7:4], msec_m1[4]};
 endmodule
 `default_nettype wire

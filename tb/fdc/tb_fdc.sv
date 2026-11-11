@@ -20,6 +20,8 @@
 //     of T0S0 (slot 1); sectors read back, the file checked.
 //   geometry: 640K cylinder 79 side 1; 160K single sided (side 1 RNF),
 //     write protect.
+//   PC 360K: MFM 512 B on T0S0 and cylinder 39 side 1, a 9-sector multi
+//     read then RNF, read address size code 2, sector write, 9 x 512 format.
 `timescale 1ns/1ps
 `default_nettype none
 module tb_fdc;
@@ -381,6 +383,20 @@ module tb_fdc;
       push(8'hF7, 1); push(8'h4E, 54);
     end
   endtask
+  task automatic build_pc(input int cyl, input int side);
+    flen = 0;
+    push(8'h4E, 80); push(8'h00, 12); push(8'hF6, 3); push(8'hFC, 1); push(8'h4E, 50);
+    for (int sc = 1; sc <= 9; sc++) begin
+      push(8'h00, 12); push(8'hF5, 3); push(8'hFE, 1);
+      push(8'(cyl), 1); push(8'(side), 1); push(8'(sc), 1); push(8'h02, 1); push(8'hF7, 1);
+      push(8'h4E, 22); push(8'h00, 12); push(8'hF5, 3); push(8'hFB, 1);
+      for (int i = 0; i < 512; i++) push(fmt_pat(sc, i), 1);
+      push(8'hF7, 1); push(8'h4E, 80);
+    end
+  endtask
+  function automatic int offpc(input int cyl, input int side, input int sec);
+    return ((cyl * 2 + side) * 9 + sec - 1) * 512;
+  endfunction
   task automatic build_fm(input int cyl, input int side);
     flen = 0;
     push(8'hFF, 40); push(8'h00, 6); push(8'hFC, 1); push(8'hFF, 26);
@@ -694,6 +710,60 @@ module tb_fdc;
     check(n == 0 && s[4], $sformatf("160K side 1: %02h", s));
     cmd_write(8'hA8, 256, n, s);
     check(n == 0 && s[6] && !s[0], $sformatf("write protected: %02h", s));
+
+    // ---- slot 1: PC 360K ----------------------------------------------------------------
+    $display("[%0d] PC 360K", cyc);
+    for (int i = 0; i < 368640; i++) img1[i] = pat1(i);
+    mount(1, 368640, 1'b0);
+    fdc_dden_n <= 1'b0;
+    cmd_wait(8'h08, s);
+    io_write(R_SEC, 8'd1);
+    cmd_read(8'h88, n, s);
+    check(n == 512 && s == 8'h00, $sformatf("PC T0S0 sector 1: %0d %02h", n, s));
+    for (int i = 0; i < 512; i++) check(rbuf[i] == pat1(i), "PC T0S0 data");
+    seek(39, 8'h18, s);
+    io_write(R_SEC, 8'd9);
+    cmd_read(8'h8A, n, s);
+    check(n == 512 && s == 8'h00, $sformatf("PC cyl 39 side 1 sector 9: %0d %02h", n, s));
+    for (int i = 0; i < 512; i++) check(rbuf[i] == pat1(offpc(39, 1, 9) + i), "PC cyl 39 data");
+    seek(2, 8'h18, s);
+    io_write(R_SEC, 8'd1);
+    cmd_read(8'h98, n, s);
+    check(n == 9 * 512 && s[4], $sformatf("PC multi read: %0d bytes status %02h", n, s));
+    for (int i = 0; i < 9 * 512; i++) check(rbuf[i] == pat1(offpc(2, 0, 1) + i), "PC multi data");
+    cmd_read(8'hC0, n, s);
+    check(n == 6 && rbuf[0] == 8'd2 && rbuf[1] == 8'd0 && rbuf[3] == 8'd2,
+          $sformatf("PC read address: %0d %02h %02h %02h %02h", n, rbuf[0], rbuf[1], rbuf[2], rbuf[3]));
+    io_write(R_TRK, 8'd2);
+    io_write(R_SEC, 8'd5);
+    for (int i = 0; i < 512; i++) wbuf[i] = 8'(i * 5 + 1);
+    cmd_write(8'hAA, 512, n, s);
+    check(n == 512 && s == 8'h00, $sformatf("PC write: %0d %02h", n, s));
+    cmd_read(8'h8A, n, s);
+    check(n == 512, "PC write read back");
+    for (int i = 0; i < 512; i++) check(rbuf[i] == wbuf[i], "PC write data");
+    seek(3, 8'h18, s);
+    build_pc(3, 0);
+    write_track(8'hF0, n, s);
+    check(s == 8'h00 && n > flen, $sformatf("PC write track: %0d bytes status %02h", n, s));
+    for (int sc = 1; sc <= 9; sc++) begin
+      io_write(R_SEC, 8'(sc));
+      cmd_read(8'h88, n, s);
+      check(n == 512 && s == 8'h00, $sformatf("PC formatted sector %0d: %0d %02h", sc, n, s));
+      for (int i = 0; i < 512; i++)
+        if (rbuf[i] != fmt_pat(sc, i)) begin
+          check(1'b0, $sformatf("PC formatted sector %0d byte %0d", sc, i)); break;
+        end
+    end
+    seek(6, 8'h18, s);
+    cmd_read(8'h88, n, s);
+    flush_wait();
+    for (int i = 0; i < 512; i++) check(img1[offpc(2, 1, 5) + i] == 8'(i * 5 + 1), "PC image: written sector");
+    for (int sc = 1; sc <= 9; sc++)
+      for (int i = 0; i < 512; i++)
+        if (img1[offpc(3, 0, sc) + i] != fmt_pat(sc, i)) begin
+          check(1'b0, $sformatf("PC image: formatted sector %0d byte %0d", sc, i)); break;
+        end
 
     $display("checks %0d, hps reads %0d, writes %0d, cycles %0d", checks, hps_reads, hps_writes, cyc);
     if (errors != 0) $fatal(1, "%0d failures", errors);

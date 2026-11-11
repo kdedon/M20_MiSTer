@@ -38,6 +38,7 @@ assign USER_OUT  = 7'h7F;
 //   7       IEEE-488 card
 //   8       twin RS-232 card
 //   10:9    serial port on the UART: mainboard, twin A, twin B
+//   11      APB 1086 8086 card
 //   122:121 aspect ratio
 //////////////////////////////////////////////////////////////////
 
@@ -61,11 +62,13 @@ localparam CONF_STR = {
 	"O[7],IEEE-488 card,Off,On;",
 	"O[8],Twin RS-232 card,Off,On;",
 	"O[10:9],Serial port,Mainboard,Twin card A,Twin card B;",
+	"O[11],APB 8086 card,Off,On;",
 	"-;",
 	"O[122:121],Aspect ratio,Original,Full Screen,[ARC1],[ARC2];",
 	"-;",
 	"F1,ROMBIN,Load Firmware;",
 	"F2,ROMBIN,Load extension ROM;",
+	"F3,ROM,Load APB ROM;",
 	"R[0],Reset;",
 	"v,5;",
 	"V,v",`BUILD_DATE
@@ -175,11 +178,12 @@ c900_rst_sync u_rst (.clk(clk_sys), .arst(reset_req), .pll_locked(pll_locked), .
 reg [2:0] cfg_code = 3'd6;
 reg       cfg_za     = 1'b0;
 reg       cfg_spare1 = 1'b1;
-reg       cfg_ieee, cfg_twin;
+reg       cfg_ieee, cfg_twin, cfg_apb;
 always @(posedge clk_sys) begin
 	if (!rst_n) begin
 		cfg_ieee <= status[7];
 		cfg_twin <= status[8];
+		cfg_apb  <= status[11];
 		case (status[3:1])
 			3'd0: cfg_code <= 3'd6;   // 128K cards, B/W
 			3'd1: cfg_code <= 3'd7;   // 32K cards, B/W
@@ -209,13 +213,17 @@ end
 // boot.rom (index 0) or Load Firmware (index 1): up to 16 KB.  Extension
 // ROM (index 2): up to 48 KB.
 wire rom_ext   = ioctl_index[5:0] == 6'd2;
-wire rom_index = ioctl_index[5:0] <= 6'd2;
+wire rom_index = ioctl_index[7:0] == 8'd0 || ioctl_index[5:0] == 6'd1 || rom_ext;
 wire rom_wr    = ioctl_download && ioctl_wr && rom_index &&
                  (ioctl_addr[26:16] == 11'd0) && (rom_ext || ioctl_addr[15:14] == 2'd0);
 
 reg  dl_q = 1'b0;
 always @(posedge clk_sys) dl_q <= ioctl_download;
 wire rom_start = ioctl_download && !dl_q && rom_index;
+
+// boot1.rom (index 0x40) or Load APB ROM (index 3): 18 KB APB image.
+wire apb_ld_we = ioctl_download && ioctl_wr && (ioctl_index[7:0] == 8'h40 || ioctl_index[5:0] == 6'd3) &&
+                 (ioctl_addr[26:15] == 12'd0);
 
 ///////////////////////   MEMORY   ///////////////////////////////
 
@@ -309,7 +317,7 @@ disk_stream #(.UMAX(99)) u_disk_stream (
 
 wire       ce_pix, hsync, vsync, hblank, vblank;
 wire [7:0] vid_r, vid_g, vid_b;
-wire       beep, led_fdd;
+wire       beep, led_fdd, apb_run;
 
 m20_core u_core (
 	.clk(clk_sys), .rst_n(rst_n),
@@ -317,6 +325,8 @@ m20_core u_core (
 	.cfg_ieee(cfg_ieee), .cfg_twin(cfg_twin), .ser_sel(ser_sel),
 	.rom_wr(rom_wr), .rom_addr(ioctl_addr[15:0]), .rom_data(ioctl_dout),
 	.rom_ext(rom_ext), .rom_start(rom_start),
+	.apb_fitted(cfg_apb), .apb_ld_we(apb_ld_we), .apb_ld_addr(ioctl_addr[14:0]), .apb_ld_data(ioctl_dout),
+	.apb_run(apb_run),
 	.mem_addr(mem_addr), .mem_rd(mem_rd), .mem_wr(mem_wr), .mem_be(mem_be),
 	.mem_wdata(mem_wdata), .mem_rdata(mem_rdata), .mem_rvalid(mem_rvalid), .mem_ack(mem_ack),
 	.mem_ready(sdram_ready), .mem_refresh_ok(mem_refresh_ok),
@@ -372,6 +382,6 @@ video_mixer #(.LINE_LENGTH(660), .HALF_DEPTH(0), .GAMMA(0)) video_mixer
 // The disk LED stays on while written sectors are still queued for the
 // image file: eject only once it is off.
 assign LED_DISK = {1'b0, led_fdd | img_loading | img_wb_busy};
-assign LED_USER = ~pll_locked;
+assign LED_USER = ~pll_locked | apb_run;
 
 endmodule

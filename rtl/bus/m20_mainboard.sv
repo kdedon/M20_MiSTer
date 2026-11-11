@@ -34,6 +34,11 @@
 //   pit_out2             in   8253 OUT2 -> NVI flip-flop
 //   crt_fetch            in   one-clock pulse at each CRT DRAM fetch
 //   fdc_ds[1:0] fdc_motor fdc_dden_n fdc_tg43   out  port 0x21 write latch
+//   ext_*                bus master port (expansion card): /BUSREQ, /NMI in;
+//                        while /BUSACK is Low the card's /AS /DS AD ST SN R/W
+//                        B/W drive the bus.  ext_rdata = the read capture,
+//                        ext_clk_rise = the CPU clock rise the card steps on,
+//                        nvi = the NVI flip-flop
 //
 // Bus cycle timing (CPU clock rises e0..; master clocks between rises >= 12):
 //   memory read   e0 /AS, e1 /DS low (DRAM read requested), e2 data taken,
@@ -47,7 +52,7 @@
 // Assumed: the CRT DRAM window is CRT_WIN clocks from
 // crt_fetch; port 0x21 latch, boot and SEGT flip-flops reset as below; the
 // U18B J input is Low; SRAM0 reads 0xFFFF; reads in
-// NVI acknowledge read 0xFFFF; /WAIT, /BUSREQ, /STOP, NMI, MEMDIS inactive;
+// NVI acknowledge read 0xFFFF; /WAIT, /STOP, MEMDIS inactive;
 // the CPU leaves reset 8 CPU clocks after rst_n.
 `default_nettype none
 module m20_mainboard
@@ -127,7 +132,22 @@ module m20_mainboard
   output logic [1:0]  fdc_ds,
   output logic        fdc_motor,
   output logic        fdc_dden_n,
-  output logic        fdc_tg43
+  output logic        fdc_tg43,
+
+  input  logic        ext_busreq_n,
+  input  logic        ext_nmi_n,
+  output logic        ext_busack_n,
+  output logic        ext_clk_rise,
+  input  logic        ext_as_n,
+  input  logic        ext_ds_n,
+  input  logic [15:0] ext_ad,
+  input  logic        ext_ad_drive,
+  input  logic [6:0]  ext_sn,
+  input  logic [3:0]  ext_st,
+  input  logic        ext_r_w,
+  input  logic        ext_b_w,
+  output logic [15:0] ext_rdata,
+  output logic        nvi
 );
   localparam int SW = $clog2(STRETCH + 1);
   localparam int CW = $clog2(CRT_WIN + 1);
@@ -161,17 +181,38 @@ module m20_mainboard
   logic [3:0]  cpu_st;
   logic        cpu_busack_n, cpu_mo_n;
   logic        segt_n_q, nvi_q;
+  logic [15:0] z_ad_out;
+  logic        z_ad_drive, z_as_n, z_ds_n, z_r_w, z_b_w;
+  logic [6:0]  z_sn;
+  logic [3:0]  z_st;
 
   z8000_cpu #(.SEGMENTED(1'b1), .VMPU(1'b0)) u58 (
     .clk(clk), .reset_n(cpu_rst_n), .clk_in(cpu_clk_rise),
-    .ad_in(ad_q), .stop_n(1'b1), .wait_n(1'b1), .busreq_n(1'b1),
-    .nmi_n(1'b1), .nvi_n(!nvi_q), .vi_n(!pic_int), .segt_n(segt_n_q),
+    .ad_in(ad_q), .stop_n(1'b1), .wait_n(1'b1), .busreq_n(ext_busreq_n),
+    .nmi_n(ext_nmi_n), .nvi_n(!nvi_q), .vi_n(!pic_int), .segt_n(segt_n_q),
     .abort_n(1'b1), .mi_n(1'b1),
-    .ad_out(cpu_ad_out), .ad_drive(cpu_ad_drive), .bus_drive(cpu_bus_drive),
-    .sn(cpu_sn), .as_n(cpu_as_n), .ds_n(cpu_ds_n), .mreq_n(cpu_mreq_n),
-    .r_w(cpu_r_w), .b_w(cpu_b_w), .n_s(cpu_n_s), .st(cpu_st),
+    .ad_out(z_ad_out), .ad_drive(z_ad_drive), .bus_drive(cpu_bus_drive),
+    .sn(z_sn), .as_n(z_as_n), .ds_n(z_ds_n), .mreq_n(cpu_mreq_n),
+    .r_w(z_r_w), .b_w(z_b_w), .n_s(cpu_n_s), .st(z_st),
     .busack_n(cpu_busack_n), .mo_n(cpu_mo_n)
   );
+
+  // ---- bus master: the Z8001, or the card while /BUSACK is Low --------------
+  always_comb begin
+    if (cpu_busack_n) begin
+      cpu_ad_out = z_ad_out;  cpu_ad_drive = z_ad_drive; cpu_sn = z_sn;
+      cpu_as_n   = z_as_n;    cpu_ds_n     = z_ds_n;     cpu_st = z_st;
+      cpu_r_w    = z_r_w;     cpu_b_w      = z_b_w;
+    end else begin
+      cpu_ad_out = ext_ad;    cpu_ad_drive = ext_ad_drive; cpu_sn = ext_sn;
+      cpu_as_n   = ext_as_n;  cpu_ds_n     = ext_ds_n;     cpu_st = ext_st;
+      cpu_r_w    = ext_r_w;   cpu_b_w      = ext_b_w;
+    end
+  end
+  assign ext_busack_n = cpu_busack_n;
+  assign ext_clk_rise = cpu_clk_rise;
+  assign ext_rdata    = ad_q;
+  assign nvi          = nvi_q;
 
   // ---- strobe edges -------------------------------------------------------
   // Previous /AS, /DS for edge detection.
@@ -396,7 +437,7 @@ module m20_mainboard
   end
 
   logic unused_ok;
-  assign unused_ok = &{1'b0, cpu_bus_drive, cpu_mreq_n, cpu_n_s, cpu_busack_n, cpu_mo_n,
+  assign unused_ok = &{1'b0, cpu_bus_drive, cpu_mreq_n, cpu_n_s, cpu_mo_n,
                        cpu_b_w, cpu_r_w, prom_q[6]};
 endmodule
 `default_nettype wire

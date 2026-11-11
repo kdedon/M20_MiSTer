@@ -66,7 +66,10 @@ module tb_bus;
     .ser_rdata(ser_rdata), .pit_rdata(pit_rdata), .pic_rdata(pic_rdata),
     .cs_exp(1'b0), .exp_rdata(8'hFF), .cs_exp16(1'b0), .exp_rdata16(16'hFFFF),
     .pic_int(pic_int), .pic_inta_n(pic_inta_n), .pit_out2(pit_out2), .crt_fetch(crt_fetch),
-    .fdc_ds(fdc_ds), .fdc_motor(fdc_motor), .fdc_dden_n(fdc_dden_n), .fdc_tg43(fdc_tg43)
+    .fdc_ds(fdc_ds), .fdc_motor(fdc_motor), .fdc_dden_n(fdc_dden_n), .fdc_tg43(fdc_tg43),
+    .ext_busreq_n(1'b1), .ext_nmi_n(1'b1), .ext_busack_n(), .ext_clk_rise(), .ext_as_n(1'b1),
+    .ext_ds_n(1'b1), .ext_ad(16'h0000), .ext_ad_drive(1'b0), .ext_sn(7'd0), .ext_st(4'd0),
+    .ext_r_w(1'b1), .ext_b_w(1'b0), .ext_rdata(), .nvi()
   );
 
   int n_rd, n_wr, n_kbd_tx, n_inta;

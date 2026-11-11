@@ -13,6 +13,10 @@
 #   make BOOT_ROM=f.bin ROM=x   a boot.rom file (8 or 16 KB) instead of a dump build
 #   make CARDS=1         IEEE-488 and twin RS-232 cards fitted
 #   make T0_SRC=...      take track 0 (first 4096 B) from this image
+#   make APB=1 APBKEYS=y IMG_SRC=.../msdos2_0.img ROM=2.0f ZA=0 ...
+#                        APB 1086 card fitted (apb.rom built by make_apb_rom.sh;
+#                        UCODE=<file> for a local microcode copy), APBKEYS typed
+#                        at the "Select Alternate CPU" prompt
 #   make clean
 # A run takes about 45 min (PCOS prompt at 17 s machine time).
 # The image is copied and the boot ROM built into obj_dir (the bench writes the image).
@@ -26,6 +30,7 @@ include $(ROOT)/mk/periph.mk
 include $(ROOT)/mk/fdc.mk
 include $(ROOT)/mk/hdc.mk
 include $(ROOT)/mk/exp.mk
+include $(ROOT)/mk/apb.mk
 
 IMG_SRC ?= $(HOME)/git/olivetti_m20/reference/software/os/pcos102.img
 ROM     ?= 1.0
@@ -35,17 +40,20 @@ ZA      ?= 1
 OUT     ?= out
 OBJ     ?= obj_dir
 HERE    := tb/core
+APB     ?=
+APBKEYS ?= y
 
-SRCS := $(BUS_SRCS) $(VIDEO_SRCS) $(PERIPH_SRCS) $(FDC_SRCS) $(HDC_SRCS) $(EXP_SRCS) $(HOST_SRCS) $(ROOT)/rtl/m20_core.sv \
+SRCS := $(BUS_SRCS) $(VIDEO_SRCS) $(PERIPH_SRCS) $(FDC_SRCS) $(HDC_SRCS) $(EXP_SRCS) $(HOST_SRCS) $(APB_SRCS) $(ROOT)/rtl/m20_core.sv \
         ../bus/sdram_lat.sv tb_core.sv
 CSRCS := ../fdc/img_io.cpp fb_io.cpp
-VFLAGS := --binary --timing --timescale 1ps/1ps -O3 -j 8 --top-module tb_core \
+VFLAGS := --binary --timing --timescale 1ps/1ps -O3 -j 2 --top-module tb_core \
           --x-initial unique --x-assign unique -Wno-fatal -Wno-lint -Wno-style \
           $(PERIPH_VFLAGS) -CFLAGS -O2
 RUNFL := +verilator+rand+reset+2 +verilator+seed+5
 ROM_LABELS := $(if $(filter 1.0 1.0bc,$(ROM)),,+rom20)
 BOOT_ROM ?= $(OBJ)/boot$(ROM).rom
 CARD_ARGS := $(if $(CARDS),+ieee +twin)
+APB_ARGS   := $(if $(APB),+apb=$(HERE)/$(OBJ)/apb.rom +apbkeys=$(APBKEYS),)
 
 .PHONY: all run clean
 
@@ -59,7 +67,11 @@ $(OBJ)/boot$(ROM).rom: $(ROOT)/scripts/make_boot_rom.sh
 	@mkdir -p $(OBJ)
 	$(ROOT)/scripts/make_boot_rom.sh $(ROM) $@
 
-run: $(OBJ)/Vtb_core $(BOOT_ROM)
+$(OBJ)/apb.rom: $(ROOT)/scripts/make_apb_rom.sh
+	@mkdir -p $(OBJ)
+	$(ROOT)/scripts/make_apb_rom.sh $@
+
+run: $(OBJ)/Vtb_core $(BOOT_ROM) $(if $(APB),$(OBJ)/apb.rom)
 	@mkdir -p $(OUT)
 	rm -f $(OUT)/*.ppm $(OUT)/*.png
 	cp $(IMG_SRC) $(OBJ)/m20_boot$(ROM).img
@@ -67,7 +79,7 @@ run: $(OBJ)/Vtb_core $(BOOT_ROM)
 	$(if $(T0_SRC),dd if=$(T0_SRC) of=$(OBJ)/m20_boot$(ROM).img bs=4096 count=1 conv=notrunc status=none)
 	cd $(ROOT) && stdbuf -oL $(HERE)/$(OBJ)/Vtb_core $(RUNFL) +cfg=$(CFG) +za=$(ZA) $(ROM_LABELS) $(CARD_ARGS) \
 	  +rom=$(abspath $(BOOT_ROM)) +img=$(HERE)/$(OBJ)/m20_boot$(ROM).img +out=$(HERE)/$(OUT) \
-	  +keys=$(KEYS) $(RUNARGS) | tee $(HERE)/$(OUT)/run.log
+	  +keys=$(KEYS) $(APB_ARGS) $(RUNARGS) | tee $(HERE)/$(OUT)/run.log
 	@for f in $(OUT)/*.ppm; do python3 -I ppm2png.py $$f > /dev/null; done
 	@grep -q '^PASS' $(OUT)/run.log
 

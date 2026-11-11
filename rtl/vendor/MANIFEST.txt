@@ -10,3 +10,7 @@ KF8259 PCXT_MiSTer fa80b40 rtl/KFPC-XT/HDL/KF8259 (upstream github.com/kitune-sa
 KF8253 PCXT_MiSTer fa80b40 rtl/KFPC-XT/HDL/KF8253 (upstream github.com/kitune-san/KF8253 1b4dca3) -> KF8253/
 KF8255 PCXT_MiSTer fa80b40 rtl/KFPC-XT/HDL/KF8255 (upstream github.com/kitune-san/KF8255 e8bb573) -> KF8255/
 # Local patches (copies outside rtl/vendor, header states the change): rtl/cpu/z8000_execute.sv, z8000_sequencer.sv, z8000_cpu.sv (LDA segment word bit 15)
+# 8086 CPU, Apache-2.0 (stated in its README.md, copied here; the repo has no LICENSE file and the sources no headers):
+z8086 596d9a6616b90c31f35b0d0947d4c1b11aa7a674 github.com/nand2mario/z8086 src/z8086/z8086.sv, alu.sv, README.md -> z8086/
+#   src/z8086/ucode.hex (Intel 8086 microcode, copyright unclear) is not vendored: scripts/make_apb_rom.sh fetches it into apb.rom.
+#   Local patch: rtl/apb/z8086.sv (clock enable, loadable microcode RAM), rtl/apb/z8086_alu.sv (module renamed).

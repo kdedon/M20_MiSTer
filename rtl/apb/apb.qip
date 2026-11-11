@@ -1,0 +1,5 @@
+# APB 1086 card (m20_apb): the 8086 core copy, translator, card logic.
+set_global_assignment -name SYSTEMVERILOG_FILE [file join $::quartus(qip_path) z8086_alu.sv]
+set_global_assignment -name SYSTEMVERILOG_FILE [file join $::quartus(qip_path) z8086.sv]
+set_global_assignment -name SYSTEMVERILOG_FILE [file join $::quartus(qip_path) m20_apb_xlat.sv]
+set_global_assignment -name SYSTEMVERILOG_FILE [file join $::quartus(qip_path) m20_apb.sv]
