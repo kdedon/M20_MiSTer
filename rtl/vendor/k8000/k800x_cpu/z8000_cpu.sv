@@ -17,9 +17,11 @@ module z8000_cpu
   input  logic        clk,        // board master clock; every flop runs on it
   input  logic        reset_n,    // asynchronous, active low
 
-  // CLK pin as the board's rising-edge pulse: High for the one master
-  // clock in which CLK rises (may be every master clock)
-  input  logic        clk_in,
+  // CLK pin as the board's edge pulses: High for the one master clock in
+  // which CLK rises, or falls. Both in one master clock act as the fall,
+  // then the rise.
+  input  logic        clk_rise,
+  input  logic        clk_fall,
 
   // inputs
   input  logic [15:0] ad_in,
@@ -51,7 +53,16 @@ module z8000_cpu
 
   // ---- CLK pin: the rising-edge pulse is the clock enable ---------------------
   logic clk_en;
-  assign clk_en = clk_in;
+  assign clk_en = clk_rise;
+
+  // STOP is sampled on the CLK fall and acted on at the next rise; a rise
+  // in the fall's master clock sees that sample.
+  logic stop_fq, stop_s;
+  always_ff @(posedge clk or negedge reset_n) begin
+    if (!reset_n)      stop_fq <= 1'b1;
+    else if (clk_fall) stop_fq <= stop_n;
+  end
+  assign stop_s = (clk_en && clk_fall) ? stop_n : stop_fq;
 
   // ---- architectural registers ----------------------------------------------
   logic [15:0] fcw;
@@ -111,6 +122,7 @@ module z8000_cpu
   logic [22:0] ex_pc_d;
   logic [15:0] ir_w0, ir_w1, ir_w2;
   logic [22:0] ir_ea;
+  logic        ir_ea_long;
   logic [15:0] ex_flags, ex_flags_mask;
   logic        rf_pending, rf_now, rf_take, rf_keep, bus_lost;
   logic [8:0]  rf_row_in, rf_row_next, rf_cyc_row;
@@ -142,7 +154,8 @@ module z8000_cpu
   logic [4:0] exc_vec;
   ctrl_word_t ctrl_k;
   assign trap_epa = ctrl.valid && ctrl.exec == CLS_EPU && !fcw[13];
-  assign trap_if1 = (ctrl.valid && ctrl.priv && !fcw[14]) || trap_epa;
+  // An undefined word takes the privileged trap in either mode.
+  assign trap_if1 = !ctrl.valid || (ctrl.priv && !fcw[14]) || trap_epa;
   assign ctrl_k   = kill_nx ? '0 : ctrl;
   always_ff @(posedge clk or negedge reset_n) begin
     if (!reset_n) ctrl_q <= '0;
@@ -354,7 +367,9 @@ module z8000_cpu
 
   logic [15:0] sh_cnt;
   logic [5:0]  sh_n;
-  assign sh_cnt = sh_reg ? rf_count : ir_w1;
+  // Static byte forms encode the count as 00|n8; only the low byte counts.
+  assign sh_cnt = sh_reg                     ? rf_count :
+                  ctrl_q.width == WIDTH_BYTE ? {{8{ir_w1[7]}}, ir_w1[7:0]} : ir_w1;
   // Legal counts are at most 32 (long), so six bits.
   assign sh_n   = sh_cnt[15] ? 6'd0 - sh_cnt[5:0] : sh_cnt[5:0];
 
@@ -524,6 +539,7 @@ module z8000_cpu
     .ir_w1        (ir_w1),
     .ir_w2        (ir_w2),
     .ir_ea        (ir_ea),
+    .ir_ea_long   (ir_ea_long),
     .mem_addr     (ex_mem_addr),
     .mem_st       (ex_mem_st),
     .mem_take     (mem_take),
@@ -538,7 +554,7 @@ module z8000_cpu
     .rf_addr      (rf_addr),
     .rf_take      (rf_take),
     .rf_keep      (rf_keep),
-    .stop_n       (stop_n),
+    .stop_n       (stop_s),
     .bus_req      (bus_req),
     .bus_internal (bus_internal),
     .bus_addr     (bus_addr),
@@ -636,6 +652,7 @@ module z8000_cpu
     .pc_off     (pc[15:0]),
     .cyc_end3   (bus_cyc_end3),
     .ea_word    (ir_ea),
+    .ea_long    (ir_ea_long),
     .mem_take   (mem_take),
     .int_take   (int_take),
     .opnd_take  (opnd_take),
@@ -736,6 +753,7 @@ module z8000_cpu
   z8000_bus_unit #(.SEGMENTED(SEGMENTED)) u_bus (
     .clk            (clk),
     .clk_en         (clk_en),
+    .clk_fall       (clk_fall),
     .reset_n        (reset_n),
     .req            (bus_req),
     .req_internal   (bus_internal),
@@ -837,11 +855,10 @@ module z8000_cpu
   // Inputs and registers that later control units will consume.
   // verilator lint_off UNUSEDSIGNAL
   logic unused_ok;
-  assign unused_ok = ^{mi_n,
-                       rf_rdata[63:32], fcw[13:8], fcw[3:0], psap, refresh[15], nspoff, nspseg,
+  assign unused_ok = ^{rf_rdata[63:32], fcw[13:8], fcw[3:0], psap, refresh[15], nspoff, nspseg,
                        halted, ir_w0[15:12], sh_cnt[14:6],
                        ctrl_q.priv, ctrl_q.fcw_op, ctrl_q.fcw_mask, ctrl_q.stk_mode,
-                       ctrl_q.br_mode, ctrl_q.io_spec, ctrl_q.mp_op};
+                       ctrl_q.br_mode, ctrl_q.io_spec};
   // verilator lint_on UNUSEDSIGNAL
 
   // synthesis translate_off
@@ -851,7 +868,22 @@ module z8000_cpu
   // verilator lint_on UNUSEDSIGNAL
   logic [31:0] chk_src_q;
   logic        last_d1_q = 1'b0, sh_run_q = 1'b0, sh_prev_q = 1'b0;
+  // CLK rises and falls in turn; a pulse pair in one master clock is a fall
+  // then a rise.
+  logic        pulse_seen_q = 1'b0, rose_q = 1'b0, pulse_bad_q = 1'b0;
+  always_ff @(posedge clk or negedge reset_n)
+    if (!reset_n) pulse_seen_q <= 1'b0;
+    else if (clk_en || clk_fall) begin
+      if (pulse_seen_q && (clk_fall ? !rose_q : rose_q)) begin
+        $display("%%Error: %m: two CLK %0s pulses with no %0s between", clk_fall ? "fall" : "rise",
+                 clk_fall ? "rise" : "fall");
+        pulse_bad_q <= 1'b1;
+      end
+      pulse_seen_q <= 1'b1;
+      rose_q       <= clk_en;
+    end
   always_ff @(posedge clk) if (clk_en) begin
+    if (pulse_bad_q) check_q <= 1'b1;
     // Port A reads the destination as the unit starts: no operand address
     // is formed from it on that clock.
     if (md_lda && mem_take) begin

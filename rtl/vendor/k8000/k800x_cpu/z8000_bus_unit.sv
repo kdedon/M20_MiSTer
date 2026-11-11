@@ -1,19 +1,22 @@
 // z8000_bus_unit -- Z-Bus machine cycles and the bus pins.
 //
 // A machine cycle is one transaction plus its tail, or one internal
-// operation. The pins are registers: each rising edge updates them as below
-// (values just after the edge).
+// operation. The pins are registers. State advances on the CLK rise; the
+// strobes timed from the CLK fall change on the fall. Values just after
+// each edge:
 //
-//   T1   /AS Low, address and status driven; /DS /MREQ High
-//   T2   /AS High; /MREQ Low (memory, refresh); read: /DS Low, AD
-//        released; write: data on AD
-//   TAW  automatic waits: one for I/O (/DS falls), five for an
-//        acknowledge (/DS falls at the fourth)
-//   T3   /WAIT sampled; Low holds the cycle here as a TW. A write's /DS
-//        falls on the first post-T2 edge. Read data is taken at this edge
-//        and `done` is raised in the same clock.
-//   next /DS /MREQ (and write data) released: the strobe trail. If the
-//        next machine cycle opens on this edge its T1 overrides the release.
+//   T1 rise  /AS Low, address and status driven; /DS /MREQ High
+//   T1 fall  /AS High; /MREQ Low (memory, refresh)
+//   T2 rise  read: /DS Low, AD released; write: data on AD
+//   T2 fall  write, I/O, EPU transfer: /DS Low; /WAIT sampled
+//   TAW      automatic waits: one for I/O, five for an acknowledge (/DS
+//            falls on the rise opening the fourth)
+//   T3 rise  /WAIT as sampled on the fall before; Low holds the cycle
+//            here as a TW. Read data is taken at this edge and `done` is
+//            raised in the same clock.
+//   T3 fall  /DS /MREQ High
+//   next     a write's data released: the trail. If the next machine
+//            cycle opens on this edge its T1 overrides the release.
 //   tail `tail` more clocks after the T3 clock, given by the requester
 //        during that clock. /AS /DS /MREQ High, AD released; ST, N/S, R/W,
 //        B/W and SN hold.
@@ -28,9 +31,11 @@
 // (`unit_last`) is taken, which may come before Tlen. `cyc_iop` is High
 // through an internal operation.
 //
-// /WAIT is specified at the T2 falling edge; with outputs changing only on
-// rising edges, that sample is the edge that would open T3. /ABORT is
-// sampled as T2 opens and with each Low /WAIT sample (`abt_smp`).
+// /WAIT is sampled on every CLK fall and acted on at the next rise.
+// A rise and a fall in one master clock (a board pulsing CLK every master
+// clock) act as the fall then the rise: the rise sees the fall's /WAIT
+// sample and overrides the fall's pin changes.
+// /ABORT is sampled as T2 opens and with each Low /WAIT sample (`abt_smp`).
 //
 // One requester. A request is taken on the edge that ends the machine
 // cycle in flight (`cyc_end`), or on any edge while idle; it holds until
@@ -56,6 +61,7 @@ module z8000_bus_unit
 ) (
   input  logic        clk,
   input  logic        clk_en,   // CLK rising edge seen this clock
+  input  logic        clk_fall, // CLK falling edge seen this clock
   input  logic        reset_n,
 
   // the next machine cycle, held until taken
@@ -133,6 +139,8 @@ module z8000_bus_unit
   logic        back_q, back_d;       // /BUSACK High again this clock
   logic        rel_q, rel_d;         // /BUSREQ seen High while granted
   logic        tw_q;                 // this clock is a wait state
+  logic        wait_q;               // /WAIT as of the last CLK fall
+  logic        wait_s;               // the same, this clock's fall included
   logic [3:0]  cyc_st_q, cyc_st_d;   // status of the cycle in flight
   logic        cyc_write_q, cyc_write_d;
   logic        cyc_epu_q, cyc_epu_d;
@@ -201,15 +209,16 @@ module z8000_bus_unit
   assign held    = (gnt_q || back_q) && state_q == BUS_IDLE;
   assign away    = give || gnt_q;
   assign cyc_iop = state_q == BUS_HOLD && iop_q;
-  assign done  = state_q == BUS_T3 && wait_n;
-  assign twait = state_q == BUS_T3 && !wait_n;
+  assign wait_s = (clk_en && clk_fall) ? wait_n : wait_q;
+  assign done  = state_q == BUS_T3 && wait_s;
+  assign twait = state_q == BUS_T3 && !wait_s;
   assign lost  = gnt_q || tw_q;
   assign rdata = ad_in;
 
   // /ABORT is sampled as a memory transaction's T2 opens and at each wait
   // after it; not for I/O, an acknowledge, refresh, an EPU transfer or an
   // aborted IF1.
-  assign abt_smp = (state_q == BUS_T2 || (state_q == BUS_T3 && !wait_n)) &&
+  assign abt_smp = (state_q == BUS_T2 || (state_q == BUS_T3 && !wait_s)) &&
                    cyc_st_q[3] && !cyc_epux && !cyc_nod_q;
 
   logic [2:0] taw_dec;
@@ -260,12 +269,12 @@ module z8000_bus_unit
         BUS_TAW: begin
           // An external wait delays the acknowledge string. I/O samples
           // /WAIT only mid-TWA, in BUS_T3 (Fig 9-5).
-          if (wait_n || !cyc_ack) begin
+          if (wait_s || !cyc_ack) begin
             taw_d = taw_dec;
             if (taw_dec == 3'd0) state_d = BUS_T3;
           end
         end
-        BUS_T3:    if (wait_n) state_d = BUS_T3CLK;
+        BUS_T3:    if (wait_s) state_d = BUS_T3CLK;
         BUS_T3CLK: begin
           rest_d  = {1'b0, tail} - 4'd1;
           iop_d   = 1'b0;
@@ -303,23 +312,38 @@ module z8000_bus_unit
     end
   end
 
+  // ---- pins on the CLK fall ---------------------------------------------------
+  // /AS rises in T1 (its only Low half); /MREQ falls in a memory or refresh
+  // T1 (state BUS_T2); /DS falls in a write's T2 (BUS_T3) or an I/O-timed
+  // T2 (BUS_TAW); /DS and /MREQ rise in T3. SN goes out in the clock before
+  // a transaction's T1, so it is set up for the T1 rise.
+  logic mreq_fall, ds_fall, strobes_rise;
+  assign mreq_fall    = state_q == BUS_T2 && !(cyc_io || cyc_ack || cyc_epux || cyc_nod_q);
+  assign ds_fall      = (state_q == BUS_T3 && cyc_write_q && !cyc_refresh && !cyc_iot) ||
+                        (state_q == BUS_TAW && cyc_iot);
+  assign strobes_rise = state_q == BUS_T3CLK;
+
+  // The strobes after this clock's fall, the base for its rise.
+  logic as_n_f, ds_n_f, mreq_n_f;
+  assign as_n_f   = clk_fall || as_n;
+  assign ds_n_f   = !clk_fall ? ds_n   : strobes_rise || (!ds_fall && ds_n);
+  assign mreq_n_f = !clk_fall ? mreq_n : strobes_rise || (!mreq_fall && mreq_n);
+
   // ---- pins -----------------------------------------------------------------------------
   always_comb begin
     trail_d    = trail_q;
     ad_out_d   = ad_out;
     ad_drive_d = ad_drive;
     sn_d       = sn;
-    as_n_d     = as_n;
-    ds_n_d     = ds_n;
-    mreq_n_d   = mreq_n;
+    as_n_d     = as_n_f;
+    ds_n_d     = ds_n_f;
+    mreq_n_d   = mreq_n_f;
     r_w_d      = r_w;
     b_w_d      = b_w;
     n_s_d      = n_s;
     st_d       = st;
 
     if (trail_q) begin
-      ds_n_d     = 1'b1;
-      mreq_n_d   = 1'b1;
       ad_drive_d = 1'b0;
       trail_d    = 1'b0;
     end
@@ -349,8 +373,6 @@ module z8000_bus_unit
     end else begin
       unique case (state_q)
         BUS_T2: begin
-          as_n_d   = 1'b1;
-          mreq_n_d = cyc_io || cyc_ack || cyc_epux || cyc_nod_q;
           if (!cyc_refresh && !cyc_ack && !cyc_iot && !cyc_write_q && !cyc_nod_q)
             ds_n_d = 1'b0;
           if (cyc_write_q && !cyc_epu_q) begin
@@ -361,22 +383,17 @@ module z8000_bus_unit
           end
         end
         BUS_TAW: begin
-          if (!cyc_ack || (wait_n && taw_dec <= 3'd1))
+          if (cyc_ack && wait_s && taw_dec <= 3'd1)
             ds_n_d = 1'b0;
         end
         BUS_T3: begin
-          if (cyc_write_q && !cyc_refresh && !cyc_iot)
-            ds_n_d = 1'b0;
-          if (wait_n) begin
+          if (wait_s) begin
             if (!cyc_write_q)
               ad_drive_d = 1'b0;
             trail_d = 1'b1;
           end
         end
-        BUS_HOLD: begin
-          as_n_d     = 1'b1;
-          ad_drive_d = 1'b0;
-        end
+        BUS_HOLD: ad_drive_d = 1'b0;
         default: ;
       endcase
     end
@@ -400,6 +417,7 @@ module z8000_bus_unit
       back_q      <= 1'b0;
       rel_q       <= 1'b0;
       tw_q        <= 1'b0;
+      wait_q      <= 1'b1;
       busack_n    <= 1'b1;
       bus_drive   <= 1'b1;
       cyc_st_q    <= 4'b1111;
@@ -424,7 +442,7 @@ module z8000_bus_unit
       back_q      <= back_d;
       rel_q       <= rel_d;
       // An acknowledge's external waits count too.
-      tw_q        <= twait || (state_q == BUS_TAW && cyc_ack && !wait_n);
+      tw_q        <= twait || (state_q == BUS_TAW && cyc_ack && !wait_s);
       busack_n    <= !gnt_d;
       bus_drive   <= !gnt_d;
       cyc_st_q    <= cyc_st_d;
@@ -436,6 +454,8 @@ module z8000_bus_unit
         cyc_byte_q <= req_byte;
         cyc_odd_q  <= req_odd;
       end
+    end else if (clk_fall) begin
+      wait_q      <= wait_n;
     end
   end
 
@@ -464,6 +484,11 @@ module z8000_bus_unit
       b_w      <= b_w_d;
       n_s      <= n_s_d;
       st       <= st_d;
+    end else if (clk_fall) begin
+      if (start_txn) sn <= SEGMENTED ? req_addr[22:16] : 7'd0;
+      as_n     <= as_n_f;
+      ds_n     <= ds_n_f;
+      mreq_n   <= mreq_n_f;
     end
   end
 

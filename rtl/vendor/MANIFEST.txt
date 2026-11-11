@@ -1,6 +1,6 @@
 # Vendored RTL. Never edit files here: wrap them, or copy into a block dir with a header saying what changed.
 # Copied 2026-11-08 from ~/git/C900_MiSTer @ de89fb65d6704b23000db9827cd4fc304ed6690d, whose vendor tree records:
-k8000 a46a68827bc1e7a3d023034aa095f03d76c04eb3 rtl/k800x_cpu -> k8000/k800x_cpu/ (via C900_MiSTer rtl/vendor)
+k8000 ca12d967f9166806abc5d6474b32f581ec67d8e7 rtl/k800x_cpu -> k8000/k800x_cpu/ (copied 2026-11-12 from ~/git/k8000)
 C900 d220d2c3246a93ad3549ad931442a95f340070c7 mc6845 netlist + VHDL -> c900/mc6845/; fd_pkg -> c900/fdc/
 SDRAM 227d4f418fd908a66712329400a6f619ca4fee77 rtl/mem/sdram.sv (github.com/MiSTer-devel/NeoGeo_MiSTer) -> sdram/
 Template_MiSTer 76dd8f5c509a2237b8e707773032a31df5905048 sys/ (via C900_MiSTer)
@@ -9,7 +9,6 @@ Template_MiSTer 76dd8f5c509a2237b8e707773032a31df5905048 sys/ (via C900_MiSTer)
 KF8259 PCXT_MiSTer fa80b40 rtl/KFPC-XT/HDL/KF8259 (upstream github.com/kitune-san/KF8259 b432853) -> KF8259/
 KF8253 PCXT_MiSTer fa80b40 rtl/KFPC-XT/HDL/KF8253 (upstream github.com/kitune-san/KF8253 1b4dca3) -> KF8253/
 KF8255 PCXT_MiSTer fa80b40 rtl/KFPC-XT/HDL/KF8255 (upstream github.com/kitune-san/KF8255 e8bb573) -> KF8255/
-# Local patches (copies outside rtl/vendor, header states the change): rtl/cpu/z8000_execute.sv, z8000_sequencer.sv, z8000_cpu.sv (LDA segment word bit 15)
 # 8086 CPU, Apache-2.0 (stated in its README.md, copied here; the repo has no LICENSE file and the sources no headers):
 z8086 596d9a6616b90c31f35b0d0947d4c1b11aa7a674 github.com/nand2mario/z8086 src/z8086/z8086.sv, alu.sv, README.md -> z8086/
 #   src/z8086/ucode.hex (Intel 8086 microcode, copyright unclear) is not vendored: scripts/make_apb_rom.sh fetches it into apb.rom.

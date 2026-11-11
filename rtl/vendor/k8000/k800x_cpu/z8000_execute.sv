@@ -102,6 +102,7 @@ module z8000_execute
   input  logic [15:0] pc_off,       // the PC offset, past the instruction's words
   input  logic        cyc_end3,     // the third edge from now ends the bus cycle
   input  logic [22:0] ea_word,      // address from the address words
+  input  logic        ea_long,      // ... a long address (segment word bit 15)
   input  logic        mem_take,     // the operand cycle is taken on this edge
   input  logic        int_take,     // an internal operation is taken on this edge
   input  logic        opnd_take,    // its read word is in on this edge
@@ -395,8 +396,8 @@ module z8000_execute
   // from its read word (ph_q 1 in the T3 clock): Rs steps in the second
   // tail clock, Rd in the third as it addresses the write, and in the
   // write's T1 the count decrements, V loads and the repeat is decided,
-  // read by the sequencer in T3. An interrupt between elements would be
-  // taken there; it is not wired. A refresh or bus hold between an
+  // read by the sequencer in T3. An interrupt between elements is
+  // sampled there by the sequencer, which ends the repeat. A refresh or bus hold between an
   // element's cycles stops the count: an edge ending a cycle with none of
   // the element's taken, and the refresh's clocks. The steps below
   // select port A on a held edge too; only their loads are held.
@@ -853,6 +854,10 @@ module z8000_execute
   assign lea_addr = {(mem_ra || mem_ba || mem_bx) ? ptr_seg : ea_word[22:16],
                      (mem_x || mem_ra || mem_ba || mem_bx) ? off_sum : ea_word[15:0]};
 
+  // Bit 15 of the segment word LDA writes: from the base register or the address word.
+  logic lea_seg15;
+  assign lea_seg15 = seg_ir ? rf_rdata[31] : !mem_ra && ea_long;
+
   // A pointer or base in R15 (RR14 segmented) addresses the stack; a
   // Z8003/Z8004 TSET reads with the bus-lock status.
   always_comb begin
@@ -1062,7 +1067,7 @@ module z8000_execute
       rf_we     = 1'b1;
       rf_wwidth = RF_WORD;
       rf_wsel   = seg_mode ? {w0[3:1], last} : w0[3:0];
-      rf_wdata  = (seg_mode && !last) ? {1'b0, lea_addr[22:16], 8'h00} : lea_addr[15:0];
+      rf_wdata  = (seg_mode && !last) ? {lea_seg15, lea_addr[22:16], 8'h00} : lea_addr[15:0];
     end else if (pop_we) begin
       rf_we     = 1'b1;
       rf_wwidth = RF_WORD;
