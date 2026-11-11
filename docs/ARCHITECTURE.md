@@ -37,7 +37,8 @@ M20.sv          hps_io, CONF_STR, pll, SDRAM, disk_stream, video_mixer, UART
     ├── periph/m20_pic.sv      8259 (vector on D1–D8, two-pulse INTA)
     ├── periph/m20_pit.sv      8253
     ├── periph/m20_ppi.sv      8255, Centronics stub
-    ├── periph/i8251.sv ×2     async USART
+    ├── periph/i8251.sv        async USART (keyboard U22)
+    ├── periph/m20_rs232.sv    RS-232 U131 (i8251), UART routing, CTS/DSR held asserted
     ├── periph/m20_kbd.sv      keyboard: PS/2 in, 1200 8N2 serial
     ├── fdc/m20_fdc.sv         FD1797 on the sd_* block interface
     ├── hdc/m20_hdc.sv         hard disk card (WD1000 registers), ports 0x1C0-0x1CF
@@ -122,7 +123,7 @@ Plane *n* is DRAM device *n*, block 0. CPU writes there are mirrored into the vi
 | IR7 | twin RS-232 card (slave) |
 | IR3 | RS-232 RxRDY |
 | IR4 | keyboard RxRDY |
-| IR5 | keyboard TxRDY (JP4 6-3) |
+| IR5 | RS-232 TxRDY (JP4) |
 | IR6 | 8255 PC3 |
 
 ### 3.5 T3 stretch

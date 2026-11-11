@@ -12,7 +12,7 @@
 // identifier low byte is 2n.
 //
 // IR0 FDC INTRQ, IR1 *COMVI1, IR2 *COMVI2, IR3 RS-232 RxRDY, IR4 keyboard
-// RxRDY, IR5 keyboard TxRDY, IR6 8255 PC3, IR7 *SYSINT.  The ROM programs
+// RxRDY, IR5 RS-232 TxRDY (JP4), IR6 8255 PC3, IR7 *SYSINT.  The ROM programs
 // cascade mode with slaves on IR1, IR2, IR7: for those the master puts the
 // slave number on CAS0-2 during the acknowledge and drives no vector.
 `default_nettype none
@@ -37,7 +37,7 @@ module m20_pic (
   input  logic        ir_comvi2,      // IR2
   input  logic        ir_ser_rxrdy,   // IR3
   input  logic        ir_kbd_rxrdy,   // IR4
-  input  logic        ir_kbd_txrdy,   // IR5
+  input  logic        ir_ser_txrdy,   // IR5
   input  logic        ir_ppi,         // IR6
   input  logic        ir_sysint,      // IR7
   output logic [2:0]  cas             // CAS0-2
@@ -46,7 +46,7 @@ module m20_pic (
   wire       rd_act = cs_pic & io_rd;
   wire       wr_act = cs_pic & io_wr;
   wire       inta   = ~pic_inta_n;
-  wire [7:0] ir     = {ir_sysint, ir_ppi, ir_kbd_txrdy, ir_kbd_rxrdy, ir_ser_rxrdy,
+  wire [7:0] ir     = {ir_sysint, ir_ppi, ir_ser_txrdy, ir_kbd_rxrdy, ir_ser_rxrdy,
                        ir_comvi2, ir_comvi1, ir_fdc};
 
   logic [7:0] kf_dout;

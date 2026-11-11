@@ -134,7 +134,7 @@ module tb_core;
     .hd_mounted(d_mounted[3:2]), .hd_lba(hd_lba), .hd_rd(hd_rd), .hd_wr(hd_wr),
     .hd_ack(d_ack[3:2]), .hd_buff_din(hd_din),
     .ps2_key(ps2_key), .osd_active(1'b0),
-    .ser_rxd(1'b1), .ser_txd(ser_txd), .ser_cts_n(1'b0), .ser_dsr_n(1'b0),
+    .ser_rxd(1'b1), .ser_txd(ser_txd),
     .ser_rts_n(ser_rts_n), .ser_dtr_n(ser_dtr_n),
     .ce_pix(ce_pix), .vid_r(vid_r), .vid_g(vid_g), .vid_b(vid_b),
     .hsync(hsync), .vsync(vsync), .hblank(hblank), .vblank(vblank),

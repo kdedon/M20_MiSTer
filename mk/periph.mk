@@ -16,11 +16,11 @@ PERIPH_KF8255 := $(addprefix $(ROOT)/rtl/vendor/KF8255/, \
   KF8255_Control_Logic.sv KF8255_Group.sv KF8255_Port.sv KF8255_Port_C.sv KF8255.sv)
 
 PERIPH_SRCS := $(PERIPH_KF8259) $(ROOT)/rtl/periph/KF8259_Control_Logic.sv $(PERIPH_KF8253) $(PERIPH_KF8255) \
-  $(addprefix $(ROOT)/rtl/periph/, m20_pic.sv m20_pit.sv m20_ppi.sv i8251.sv m20_kbd.sv)
+  $(addprefix $(ROOT)/rtl/periph/, m20_pic.sv m20_pit.sv m20_ppi.sv i8251.sv m20_rs232.sv m20_kbd.sv)
 PERIPH_HDRS := $(wildcard $(ROOT)/rtl/periph/inc/*.svh)
 PERIPH_VFLAGS := -I$(ROOT)/rtl/periph/inc $(ROOT)/lint/vendor.vlt $(ROOT)/rtl/periph/periph.vlt
 
-PERIPH_TOPS := m20_pic m20_pit m20_ppi i8251 m20_kbd
+PERIPH_TOPS := m20_pic m20_pit m20_ppi i8251 m20_rs232 m20_kbd
 
 .PHONY: tb-periph lint-periph
 

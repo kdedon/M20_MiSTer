@@ -1,4 +1,5 @@
-# Peripheral benches: one per module plus the 8251 <-> keyboard loopback.
+# Peripheral benches: one per module plus the 8251 <-> keyboard loopback
+# and the RS-232 port with its 8253 clock.
 #   make            build and run all
 #   make tb_pic     build and run one
 #   make lint       verilator -Wall on each module
@@ -8,7 +9,7 @@ VERILATOR ?= verilator
 ROOT      := ../..
 include $(ROOT)/mk/periph.mk
 
-BENCHES := tb_pic tb_pit tb_ppi tb_i8251 tb_kbd tb_kbd_loop
+BENCHES := tb_pic tb_pit tb_ppi tb_i8251 tb_rs232 tb_kbd tb_kbd_loop
 OBJ     := obj_dir
 VFLAGS  := --binary --timing --timescale 1ns/1ps -j 2 \
            --x-initial unique --x-assign unique -Wno-fatal -Wno-lint -Wno-style \

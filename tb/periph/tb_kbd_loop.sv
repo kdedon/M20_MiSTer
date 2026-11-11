@@ -1,6 +1,6 @@
 // Keyboard path end to end, as the boot ROM drives it: 8253 ch1 (count
 // 0x40) clocks the keyboard 8251, whose TxD/RxD run to m20_kbd at 1200
-// baud 8N2; RxRDY is IR4 and TxRDY IR5 on the 8259.
+// baud 8N2; RxRDY is IR4 on the 8259.
 //   EK0/EK1: 0x03 -> reply polled within 0x2800 tries, = 0x0F
 //   bell:    0x0A twice through send_to_keyb, beep sounds, no reply
 //   E11:     0x80 -> reply by interrupt within 0x3000 loops: RxRDY -> IR4
@@ -46,7 +46,7 @@ module tb_kbd_loop;
     .cs_pic (cs_pic), .io_rd (io_rd), .io_wr (io_wr), .io_rd_end (io_rd_end), .io_wr_end (io_wr_end),
     .io_addr (io_addr), .io_wdata (io_wdata), .pic_rdata (pic_rdata),
     .pic_inta_n (pic_inta_n), .pic_int (pic_int),
-    .ir_fdc (1'b0), .ir_ser_rxrdy (1'b0), .ir_kbd_rxrdy (kbd_rxrdy), .ir_kbd_txrdy (kbd_txrdy),
+    .ir_fdc (1'b0), .ir_ser_rxrdy (1'b0), .ir_kbd_rxrdy (kbd_rxrdy), .ir_ser_txrdy (1'b0),
     .ir_ppi (1'b0)
   );
 
