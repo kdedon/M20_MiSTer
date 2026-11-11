@@ -4,10 +4,11 @@
 //                  port 0x21, NVI/VI, T3 stretch
 //   m20_video      MC6845, bitmap planes, palette
 //   m20_pic        8259A (U33)      IR0 FDC, IR3 RS-232 RxRDY, IR4 kbd RxRDY,
-//                                   IR5 kbd TxRDY (JP4 6-3), IR6 8255 PC3
+//                                   IR5 RS-232 TxRDY (JP4), IR6 8255 PC3
 //   m20_pit        8253 (U152)      OUT0 RS-232 baud, OUT1 kbd baud, OUT2 NVI
 //   m20_ppi        8255A (U62)      Centronics, no printer fitted
-//   i8251 x2       U22 keyboard, U131 RS-232 (J7, the HPS UART)
+//   i8251          U22 keyboard
+//   m20_rs232      U131 RS-232 (J7) and the HPS UART routing
 //   m20_kbd        the keyboard unit (8048 HLE) on the U22 serial line
 //   m20_fdc        FD1797 (U14) and two drives on the disk_stream drive side
 //   m20_hdc        hard disk card, two drives on the disk_stream drive side;
@@ -16,8 +17,8 @@
 //   m20_twin       twin RS-232 card (optional), slave 8259 on IR7
 //   m20_apb        APB 1086 8086 card (optional), bus master via /BUSREQ
 //
-// The UART (ser_*) goes to one RS-232 port, picked by ser_sel; the others
-// see an idle line with CTS and DSR asserted.
+// The UART (ser_*) goes to one RS-232 port, picked by ser_sel; every
+// port sees CTS and DSR asserted.
 
 `default_nettype none
 
@@ -87,8 +88,6 @@ module m20_core (
   // UART
   input  logic             ser_rxd,
   output logic             ser_txd,
-  input  logic             ser_cts_n,
-  input  logic             ser_dsr_n,
   output logic             ser_rts_n,
   output logic             ser_dtr_n,
 
@@ -128,7 +127,7 @@ module m20_core (
   logic        fdc_motor, fdc_dden_n, fdc_tg43;
   logic        fdc_intrq, fdc_drq, fdc_busy;
   logic        hdc_intrq;
-  logic        kbd_rxrdy, kbd_txrdy, ser_rxrdy;
+  logic        kbd_rxrdy, kbd_txrdy, ser_rxrdy, ser_txrdy;
   logic        kbd_txd, kbd_rxd;
   logic        ppi_ir6;
   logic [7:0]  ppi_pa, ppi_pc;
@@ -188,7 +187,7 @@ module m20_core (
     .clk, .rst_n, .cs_pic, .io_rd, .io_wr, .io_rd_end, .io_wr_end, .io_addr, .io_wdata,
     .pic_rdata(mpic_rdata), .pic_inta_n, .pic_int,
     .ir_fdc(fdc_intrq), .ir_comvi1(comvi1), .ir_comvi2(1'b0), .ir_ser_rxrdy(ser_rxrdy),
-    .ir_kbd_rxrdy(kbd_rxrdy), .ir_kbd_txrdy(kbd_txrdy), .ir_ppi(ppi_ir6), .ir_sysint(sysint),
+    .ir_kbd_rxrdy(kbd_rxrdy), .ir_ser_txrdy(ser_txrdy), .ir_ppi(ppi_ir6), .ir_sysint(sysint),
     .cas(pic_cas)
   );
 
@@ -247,38 +246,15 @@ module m20_core (
     .txrdy(kbd_txrdy), .rxrdy(kbd_rxrdy), .txempty(kbd_txempty), .syndet(kbd_syndet)
   );
 
-  // RS-232 U131: TxC = RxC = 8253 OUT0 (jumpers R/S internal).
-  logic ser_txrdy, ser_txempty, ser_syndet;
-  logic mb_txd, mb_rts_n, mb_dtr_n;
-  logic [2:0] on_uart;
-  assign on_uart = {ser_sel == 2'd2, ser_sel == 2'd1, ser_sel == 2'd0};
-  i8251 u_ser_usart (
-    .clk, .rst_n, .ce_usart, .cs(cs_ser), .io_rd, .io_wr, .io_rd_end, .io_wr_end, .io_addr, .io_wdata,
-    .rdata(ser_rdata), .txc(pit_out0), .rxc(pit_out0),
-    .rxd(on_uart[0] ? ser_rxd : 1'b1), .txd(mb_txd),
-    .cts_n(on_uart[0] && ser_cts_n), .dsr_n(on_uart[0] && ser_dsr_n),
-    .dtr_n(mb_dtr_n), .rts_n(mb_rts_n),
-    .txrdy(ser_txrdy), .rxrdy(ser_rxrdy), .txempty(ser_txempty), .syndet(ser_syndet)
+  m20_rs232 u_rs232 (
+    .clk, .rst_n, .ce_usart, .cfg_twin, .ser_sel,
+    .cs_ser, .io_rd, .io_wr, .io_rd_end, .io_wr_end, .io_addr, .io_wdata,
+    .ser_rdata, .ser_rxrdy, .ser_txrdy, .txc(pit_out0),
+    .ser_rxd, .ser_txd, .ser_rts_n, .ser_dtr_n,
+    .tw_rxd, .tw_cts_n, .tw_dsr_n, .tw_txd, .tw_rts_n, .tw_dtr_n
   );
-
-  assign tw_rxd   = {on_uart[2] ? ser_rxd : 1'b1, on_uart[1] ? ser_rxd : 1'b1};
-  assign tw_cts_n = {on_uart[2] && ser_cts_n, on_uart[1] && ser_cts_n};
-  assign tw_dsr_n = {on_uart[2] && ser_dsr_n, on_uart[1] && ser_dsr_n};
-
-  // A twin channel picked with the card out leaves the UART idle.
-  always_comb begin
-    ser_txd   = mb_txd;
-    ser_rts_n = mb_rts_n;
-    ser_dtr_n = mb_dtr_n;
-    if (!on_uart[0]) begin
-      ser_txd   = !cfg_twin || (on_uart[1] ? tw_txd[0]   : tw_txd[1]);
-      ser_rts_n = !cfg_twin || (on_uart[1] ? tw_rts_n[0] : tw_rts_n[1]);
-      ser_dtr_n = !cfg_twin || (on_uart[1] ? tw_dtr_n[0] : tw_dtr_n[1]);
-    end
-  end
   logic unused_usart;
-  assign unused_usart = &{1'b0, kbd_txempty, kbd_syndet, kbd_dtr_n, kbd_rts_n,
-                          ser_txrdy, ser_txempty, ser_syndet};
+  assign unused_usart = &{1'b0, kbd_txrdy, kbd_txempty, kbd_syndet, kbd_dtr_n, kbd_rts_n};
 
   // ------------------------------------------------------------ keyboard
   // Keys typed while the OSD is open belong to the OSD.

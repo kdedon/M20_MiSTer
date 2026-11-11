@@ -249,11 +249,10 @@ c900_sdram u_sdram (
 
 ///////////////////////   SERIAL   ///////////////////////////////
 
-// The HPS UART goes to the RS-232 port picked in the OSD.
-wire uart_rxd_s, uart_cts_s, uart_dsr_s;
+// The HPS UART goes to the RS-232 port picked in the OSD.  UART_CTS and
+// UART_DSR are not used: the core holds CTS and DSR asserted.
+wire uart_rxd_s;
 c900_sync2 #(.INIT(1'b1)) u_rxd_sync (.clk(clk_sys), .d(UART_RXD), .q(uart_rxd_s));
-c900_sync2 #(.INIT(1'b1)) u_cts_sync (.clk(clk_sys), .d(UART_CTS), .q(uart_cts_s));
-c900_sync2 #(.INIT(1'b1)) u_dsr_sync (.clk(clk_sys), .d(UART_DSR), .q(uart_dsr_s));
 
 reg  [1:0] ser_sel = 2'd0;
 always @(posedge clk_sys) ser_sel <= status[10:9];
@@ -337,7 +336,7 @@ m20_core u_core (
 	.hd_mounted(core_img_mounted[3:2]), .hd_lba(core_hd_lba), .hd_rd(core_hd_rd), .hd_wr(core_hd_wr),
 	.hd_ack(core_sd_ack[3:2]), .hd_buff_din(core_hd_buff_din),
 	.ps2_key(ps2_key), .osd_active(OSD_STATUS),
-	.ser_rxd(uart_rxd_s), .ser_txd(ser_txd), .ser_cts_n(uart_cts_s), .ser_dsr_n(uart_dsr_s),
+	.ser_rxd(uart_rxd_s), .ser_txd(ser_txd),
 	.ser_rts_n(ser_rts_n), .ser_dtr_n(ser_dtr_n),
 	.ce_pix(ce_pix), .vid_r(vid_r), .vid_g(vid_g), .vid_b(vid_b),
 	.hsync(hsync), .vsync(vsync), .hblank(hblank), .vblank(vblank),

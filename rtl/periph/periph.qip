@@ -19,4 +19,5 @@ set_global_assignment -name SYSTEMVERILOG_FILE rtl/periph/m20_pic.sv
 set_global_assignment -name SYSTEMVERILOG_FILE rtl/periph/m20_pit.sv
 set_global_assignment -name SYSTEMVERILOG_FILE rtl/periph/m20_ppi.sv
 set_global_assignment -name SYSTEMVERILOG_FILE rtl/periph/i8251.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/periph/m20_rs232.sv
 set_global_assignment -name SYSTEMVERILOG_FILE rtl/periph/m20_kbd.sv

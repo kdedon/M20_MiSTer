@@ -8,7 +8,7 @@ module tb_pic;
 
   logic [15:0] pic_rdata;
   logic        pic_int;
-  logic        ir_fdc = 1'b0, ir_ser = 1'b0, ir_kbd_rx = 1'b0, ir_kbd_tx = 1'b0, ir_ppi = 1'b0;
+  logic        ir_fdc = 1'b0, ir_ser = 1'b0, ir_kbd_rx = 1'b0, ir_ser_tx = 1'b0, ir_ppi = 1'b0;
 
   m20_pic dut (
     .clk          (clk),
@@ -28,7 +28,7 @@ module tb_pic;
     .ir_comvi2    (1'b0),
     .ir_ser_rxrdy (ir_ser),
     .ir_kbd_rxrdy (ir_kbd_rx),
-    .ir_kbd_txrdy (ir_kbd_tx),
+    .ir_ser_txrdy (ir_ser_tx),
     .ir_ppi       (ir_ppi),
     .ir_sysint    (1'b0),
     .cas          ()
@@ -156,7 +156,7 @@ module tb_pic;
     clocks(4);
     ack(0, "IR0");
     io_write(16'h0140, 16'h00C0);
-    ir_kbd_tx <= 1'b1;
+    ir_ser_tx <= 1'b1;
     clocks(4);
     ack(5, "IR5");
     io_write(16'h0140, 16'h00CA);

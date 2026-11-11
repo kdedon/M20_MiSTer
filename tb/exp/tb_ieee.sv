@@ -21,7 +21,7 @@ module tb_ieee;
     .clk, .rst_n, .cs_pic, .io_rd, .io_wr, .io_rd_end, .io_wr_end, .io_addr, .io_wdata,
     .pic_rdata(master_word), .pic_inta_n, .pic_int,
     .ir_fdc(1'b0), .ir_comvi1(comvi1), .ir_comvi2(1'b0), .ir_ser_rxrdy(1'b0),
-    .ir_kbd_rxrdy(1'b0), .ir_kbd_txrdy(1'b0), .ir_ppi(1'b0), .ir_sysint(1'b0), .cas
+    .ir_kbd_rxrdy(1'b0), .ir_ser_txrdy(1'b0), .ir_ppi(1'b0), .ir_sysint(1'b0), .cas
   );
 
   m20_cascade u_casc (
