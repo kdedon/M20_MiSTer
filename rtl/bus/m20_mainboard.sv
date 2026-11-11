@@ -40,14 +40,15 @@
 //                        ext_clk_rise = the CPU clock rise the card steps on,
 //                        nvi = the NVI flip-flop
 //
-// Bus cycle timing (CPU clock rises e0..; master clocks between rises >= 12):
-//   memory read   e0 /AS, e1 /DS low (DRAM read requested), e2 data taken,
-//                 e3 /DS high
-//   memory write  e0 /AS, e1 data on AD, e2 /DS low (DRAM write requested),
-//                 e3 /DS high
+// Bus cycle timing (CPU clock rises e0.., falls f0..; master clocks between
+// rises >= 12):
+//   memory read   e0 /AS low, f0 /AS high, e1 /DS low (DRAM read requested),
+//                 e2 data taken, f2 /DS high
+//   memory write  e0 /AS low, f0 /AS high, e1 data on AD, f1 /DS low (DRAM
+//                 write requested), f2 /DS high
 // U29 is held before e2 until a DRAM read word is in, and before any rise
-// while a DRAM write is outstanding.  The CRT stretch holds U29 with SCLOCK
-// High in T3 (after e2) for STRETCH 16 MHz steps.
+// after /DS rises while a DRAM write is outstanding.  The CRT stretch holds
+// U29 with SCLOCK High in T3 (after e2) for STRETCH 16 MHz steps.
 //
 // Assumed: the CRT DRAM window is CRT_WIN clocks from
 // crt_fetch; port 0x21 latch, boot and SEGT flip-flops reset as below; the
@@ -187,7 +188,7 @@ module m20_mainboard
   logic [3:0]  z_st;
 
   z8000_cpu #(.SEGMENTED(1'b1), .VMPU(1'b0)) u58 (
-    .clk(clk), .reset_n(cpu_rst_n), .clk_in(cpu_clk_rise),
+    .clk(clk), .reset_n(cpu_rst_n), .clk_rise(cpu_clk_rise), .clk_fall(cpu_clk_fall),
     .ad_in(ad_q), .stop_n(1'b1), .wait_n(1'b1), .busreq_n(ext_busreq_n),
     .nmi_n(ext_nmi_n), .nvi_n(!nvi_q), .vi_n(!pic_int), .segt_n(segt_n_q),
     .abort_n(1'b1), .mi_n(1'b1),
@@ -354,7 +355,7 @@ module m20_mainboard
   logic wait_rd;
   assign wait_rd  = dram_sel && rw_q && !cpu_ds_n && tst_q == 2'd1 && !rd_have;
   assign u29_hold = !mem_ready || str_hold ||
-                    (u29_q == 2'b01 && (wait_rd || wr_busy));
+                    (u29_q == 2'b01 && (wait_rd || (wr_busy && !cyc_q)));
 
   // ---- port 0x21 latch U16 (write) / U15 (read) ---------------------------
   logic [4:0]  lat_q;              // D7, D3-D0 (U16 O4-O6 open)

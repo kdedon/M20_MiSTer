@@ -12,7 +12,7 @@ K8000_SRCS := $(K8000_DIR)/gen/z8000_zbus_pkg.sv $(K8000_DIR)/gen/z8000_ctrl_pkg
   $(K8000_DIR)/gen/z8000_mc_rom_gen.sv $(K8000_DIR)/z8000_alu.sv $(K8000_DIR)/z8000_cond.sv \
   $(K8000_DIR)/z8000_decode.sv $(K8000_DIR)/z8000_regfile.sv $(K8000_DIR)/z8000_refresh.sv \
   $(K8000_DIR)/z8000_int_unit.sv $(K8000_DIR)/z8000_bus_unit.sv $(K8000_DIR)/z8000_serial.sv \
-  $(ROOT)/rtl/cpu/z8000_execute.sv $(ROOT)/rtl/cpu/z8000_sequencer.sv $(ROOT)/rtl/cpu/z8000_cpu.sv
+  $(K8000_DIR)/z8000_execute.sv $(K8000_DIR)/z8000_sequencer.sv $(K8000_DIR)/z8000_cpu.sv
 
 BUS_SRCS := $(K8000_SRCS) \
   $(ROOT)/rtl/bus/m20_clkgen.sv $(ROOT)/rtl/bus/m20_prom.sv $(ROOT)/rtl/bus/m20_boot_rom.sv \

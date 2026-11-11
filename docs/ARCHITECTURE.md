@@ -60,7 +60,7 @@ M20.sv          hps_io, CONF_STR, pll, SDRAM, disk_stream, video_mixer, UART
 
 Each block has a `<dir>.qip` (included from `files.qip`) and `mk/<dir>.mk` (`<DIR>_SRCS`, `tb-<dir>` target).
 
-`rtl/vendor/` is never edited; changed copies live in the block directory with a header naming the change (`rtl/cpu/` holds the patched Z8000 files, see `rtl/vendor/MANIFEST.txt`).
+`rtl/vendor/` is never edited; changed copies live in the block directory with a header naming the change (see `rtl/vendor/MANIFEST.txt`).
 
 ## 3. Interfaces (all on `clk`)
 

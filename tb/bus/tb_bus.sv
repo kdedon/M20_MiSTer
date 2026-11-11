@@ -211,7 +211,7 @@ module tb_bus;
       t_rise = clk_n;
     end
     if (dut.str_hold && dut.ce16) n_str++;
-    if (dut.ce16 && dut.u29_q == 2'b01 && (dut.wait_rd || dut.wr_busy)) n_freeze_rd++;
+    if (dut.ce16 && dut.u29_q == 2'b01 && (dut.wait_rd || (dut.wr_busy && !dut.cyc_q))) n_freeze_rd++;
 
     // End of a cycle with a data strobe (before a T1 on the same edge)
     if (!p_ds && ds_n) begin

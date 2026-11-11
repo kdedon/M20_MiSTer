@@ -9,13 +9,13 @@ set_global_assignment -name SYSTEMVERILOG_FILE rtl/vendor/k8000/k800x_cpu/z8000_
 set_global_assignment -name SYSTEMVERILOG_FILE rtl/vendor/k8000/k800x_cpu/z8000_bus_unit.sv
 set_global_assignment -name SYSTEMVERILOG_FILE rtl/vendor/k8000/k800x_cpu/z8000_cond.sv
 set_global_assignment -name SYSTEMVERILOG_FILE rtl/vendor/k8000/k800x_cpu/z8000_decode.sv
-set_global_assignment -name SYSTEMVERILOG_FILE rtl/cpu/z8000_execute.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/vendor/k8000/k800x_cpu/z8000_execute.sv
 set_global_assignment -name SYSTEMVERILOG_FILE rtl/vendor/k8000/k800x_cpu/z8000_int_unit.sv
 set_global_assignment -name SYSTEMVERILOG_FILE rtl/vendor/k8000/k800x_cpu/z8000_refresh.sv
 set_global_assignment -name SYSTEMVERILOG_FILE rtl/vendor/k8000/k800x_cpu/z8000_regfile.sv
-set_global_assignment -name SYSTEMVERILOG_FILE rtl/cpu/z8000_sequencer.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/vendor/k8000/k800x_cpu/z8000_sequencer.sv
 set_global_assignment -name SYSTEMVERILOG_FILE rtl/vendor/k8000/k800x_cpu/z8000_serial.sv
-set_global_assignment -name SYSTEMVERILOG_FILE rtl/cpu/z8000_cpu.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/vendor/k8000/k800x_cpu/z8000_cpu.sv
 set_global_assignment -name VERILOG_FILE rtl/vendor/c900/mc6845/mc6845_synth.v
 set_global_assignment -name SYSTEMVERILOG_FILE rtl/vendor/sdram/sdram.sv
 

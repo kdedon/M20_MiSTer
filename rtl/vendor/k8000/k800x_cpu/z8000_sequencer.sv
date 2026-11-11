@@ -43,8 +43,8 @@
 // Refreshes skipped while the bus was granted or waited go after any
 // cycle, back to back.
 // STOP Low as an IF1, or an EPU instruction's second word, starts runs
-// refreshes after its T3 until STOP is High again. Instructions the execute unit does not run yet (and HALT in
-// normal mode) stop the sequencer after their IF1 machine cycle.
+// refreshes after its T3 until STOP is High again. An undefined first word, and HALT in normal mode, stop the
+// sequencer after their IF1 machine cycle.
 //
 // The datapath picks a program's path and says whether its repeated part
 // runs again (`more`). The first word's condition (`cc_met`, for the word
@@ -130,6 +130,7 @@ module z8000_sequencer
   output logic [15:0] ir_w1,
   output logic [15:0] ir_w2,
   output logic [22:0] ir_ea,        // the instruction's address: segment, offset
+  output logic        ir_ea_long,   // ... from a long address (segment word bit 15)
   input  logic [22:0] mem_addr,     // operand cycle address and status
   input  logic [3:0]  mem_st,
   output logic        mem_take,     // an operand cycle is taken on this edge
@@ -173,7 +174,7 @@ module z8000_sequencer
     SEQ_FETCH,      // request the first IF1
     SEQ_IF1,        // IF1 in flight, its word not yet in
     SEQ_PROG,       // the instruction's program runs
-    SEQ_STOP        // an instruction not run yet
+    SEQ_STOP        // a decoded word execute does not run
   } seq_state_e;
 
   typedef enum logic [1:0] {
@@ -727,27 +728,32 @@ module z8000_sequencer
     end
   end
 
-  // STOP Low in the T1 clock of an IF1, or of an EPU instruction's second
-  // word, puts a stream of refreshes after its T3. STOP is sampled again in
-  // each T3 clock; once High, one more refresh runs, then the cycle's tail.
-  // While the bus is away the sample from the last T3 is kept for the
-  // refresh that follows.
-  logic stp_take;
+  // STOP (sampled on each CLK fall, `stop_n`) Low before an IF1's T1, or
+  // before an EPU instruction's second word, puts a stream of refreshes
+  // after its T3. STOP is sampled again on each T3's fall; once High, one
+  // more refresh runs, then the cycle's tail. The T3-fall sample is taken
+  // on the edge ending T3 and kept while the bus is away.
+  logic stp_take, t3_q, stop_t3_q, stop_t3;
   assign stp_take = take_if1 || (take && next == NEXT_FETCH && nxt.kind == MC_FN &&
                                  nwords_q == 2'd1 && dec_exec == CLS_EPU);
+  assign stop_t3  = t3_q ? stop_n : stop_t3_q;
   always_ff @(posedge clk or negedge reset_n) begin
     if (!reset_n) begin
       stop_q    <= 1'b1;
       stp_t1_q  <= 1'b0;
       stop_go_q <= 1'b0;
       stop_rf_q <= 1'b0;
+      t3_q      <= 1'b0;
+      stop_t3_q <= 1'b1;
     end else if (clk_en) begin
       if (!bus_away) stop_q <= stop_n;
-      stp_t1_q <= stp_take;
+      t3_q      <= bus_done;
+      stop_t3_q <= stop_t3;
+      stp_t1_q  <= stp_take;
       if (stp_t1_q)
         stop_go_q <= !stop_q;
       else if (take)
-        stop_go_q <= take_rf && stop_go_q && !stop_q;
+        stop_go_q <= take_rf && stop_go_q && !stop_t3;
       if (take)
         stop_rf_q <= take_rf && stop_go_q;
     end
@@ -759,6 +765,7 @@ module z8000_sequencer
   assign ir_w1     = ir1_q;
   assign ir_w2     = ir2_q;
   assign ir_ea     = ea_q;
+  assign ir_ea_long = col_q == MC_COL_SL;
   assign iter      = iter_q;
   assign in_rf     = in_rf_q;
   assign rf_due    = rf_go;
