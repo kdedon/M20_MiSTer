@@ -18,7 +18,7 @@ The Olivetti L1 M20 (1982): a Zilog Z8001 personal computer running PCOS.
 
 ## Installation
 
-- Copy `M20_*.rbf` to `_Computer/`.
+- Copy `releases/M20_*.rbf` to `_Computer/`.
 - Put the boot ROM in `games/M20/boot.rom` (loaded at start), or load one with **Load Firmware**.
 - Put disk images in `games/M20/`.
 
