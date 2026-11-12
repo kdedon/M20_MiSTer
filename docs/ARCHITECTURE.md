@@ -22,7 +22,7 @@ All other timing is clock enables from `clk`:
 | `ce_crtc` | 750 kHz | `ce_pix` ÷16 | MC6845 CLK |
 
 Resets are active-low `rst_n` with synchronous release.
-- **Machine:** `RESET | status[0] | buttons[1] | rom_loading`.
+- **Machine:** `RESET | status[0] | buttons[1] | ioctl_download | ~sdram_ready`, plus power-on until Main has sent the options, `boot.rom` and the mounts.
 - **SDRAM:** PLL lock only, so memory survives a machine reset as DRAM does.
 
 ## 2. Blocks

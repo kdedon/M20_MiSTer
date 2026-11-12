@@ -84,7 +84,7 @@ module m20_core (
   // Keyboard
   input  logic [10:0]      ps2_key,
   input  logic             osd_active,
-  input  logic [3:0]       kbd_layout,        // 0 Italian, 3 UK, 4 US
+  input  logic [3:0]       kbd_layout,        // 0 Italian, 1 German, 3 UK, 4 US
 
   // UART
   input  logic             ser_rxd,

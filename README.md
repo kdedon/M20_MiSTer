@@ -94,7 +94,7 @@ A blank disk reads as formatted and empty: ROM 2.x reports `Invalid File Error 0
 | Load APB ROM | Load the APB image |
 | Reset | |
 
-Change the configuration, jumpers or cards, then reset. Options are kept in `config/M20_v5.CFG`; delete it to return to the defaults.
+Change the configuration, jumpers or cards, then reset. Options are kept in `config/M20_v6.CFG`; delete it to return to the defaults.
 
 ## Keyboard
 
@@ -121,8 +121,23 @@ Under MS-DOS, Tab+Esc (COMMAND+RESET) returns to the Z8001 and restarts it.
 
 ## Status
 
-Boots ROM 1.0 and 2.0f to the PCOS prompt in simulation, with 512 KB and a correct memory count. Not yet tested on hardware; disk writes are untested.
-With the APB card, ROM 2.0f hands over to the 8086, which passes its power-on tests and boots MS-DOS 2.0 to the `A>` prompt in simulation (128K B/W); Tab+Esc returns to the Z8001.
+Tested on a DE10-Nano:
+
+- ROM 1.0 and 2.0f; PCOS 1.02, 1.3d, 2.0f, 2.0h, 3.0e and 4.1a; BASIC; CP/M-8000 1.1.
+- Black and white, 4 and 8 colours; 128 KB to 512 KB.
+- Floppy writes persist; the hard disk formats (`vformat 10:`, `hdisk`) under PCOS 4.1a.
+- APB card: MS-DOS 2.0 boots, formats and copies floppies, runs with a hard disk mounted; Tab+Esc returns to the Z8001.
+- RS-232 both ways in OLITERM (4800 8N2).
+- US and German keyboards.
+
+Known issues:
+
+- The bell from software (`PRINT CHR$(7)`) is silent on hardware, though the power-on beep sounds and simulation rings it.
+- The twin RS-232 card is untested: no PCOS program found opens its ports.
+- The hard disk card's interrupt is not connected; PCOS polls it.
+- Under ROM 2.x, CP/M-8000 shows a stray pixel row, as in MAME.
+
+How the core works: [docs/theory](docs/theory/README.md).
 
 ## Help wanted: APB 1086 PALs
 

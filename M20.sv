@@ -364,7 +364,7 @@ assign AUDIO_MIX = 0;
 ///////////////////////   VIDEO   ////////////////////////////////
 
 // 12 MHz dots (ce_pix) on the 48 MHz CLK_VIDEO: 4 clocks per pixel.
-// 18.75 kHz lines take the scandoubler.
+// 18.3-18.75 kHz lines take the scandoubler.
 assign CLK_VIDEO = clk_sys;
 
 video_mixer #(.LINE_LENGTH(660), .HALF_DEPTH(0), .GAMMA(0)) video_mixer
