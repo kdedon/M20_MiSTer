@@ -1,4 +1,4 @@
-// i8253 interval timer U152, wrapping KF8253 (with the LSB/MSB preset fix).
+// i8253 interval timer U152, wrapping KF8253 (PCXT_MiSTer copy, with its LSB/MSB preset fix).
 // Ports 0x121/0x123/0x125 counters 0-2, 0x127 control.
 //
 // All CLK inputs are ce_pit (16 MHz / 13 = 1.230769 MHz); KF8253 counts

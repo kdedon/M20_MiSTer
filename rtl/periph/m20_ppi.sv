@@ -1,4 +1,4 @@
-// i8255A-5 parallel interface U62, wrapping KF8255 (with the IBF fix).
+// i8255A-5 parallel interface U62, wrapping KF8255 (PCXT_MiSTer copy, with its IBF fix).
 // Ports 0x81 PA, 0x83 PB, 0x85 PC, 0x87 control.
 //
 // The ROM sets mode 0xA6: PA strobed output (Centronics data latch, read

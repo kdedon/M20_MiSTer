@@ -53,9 +53,9 @@
 // density are not recorded.  Read Track returns no data and ends at the
 // second index pulse.
 //
-// Image blocks are fetched on demand into a 4 KB track buffer (8 slots).
-// Sector writes read-modify-write their block; Write Track loads all 8
-// blocks first and writes them back after the second index.
+// Image blocks are fetched on demand into an 8 KB track buffer (16 slots,
+// enough for a PC track).  Sector writes read-modify-write their block;
+// Write Track loads the whole track first and writes them back after the second index.
 `default_nettype none
 module m20_fdc #(
   parameter int unsigned SLOT_T = 12500,    // ticks per sector slot (200 ms / 16)
