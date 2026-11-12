@@ -12,9 +12,10 @@
 // every +fevery frames, and <out>/last.ppm at the end.
 //
 // Keys: +keys=<text> is typed once the disk has been quiet for +kquiet
-// clocks after the ROM was left (letters, digits, space, '.', ',';
+// clocks after the ROM was left (US PC legends, shifted ones with Shift;
 // '~' = RETURN, '`' = wait 1 s, then until the disks are quiet; a RETURN is
-// added at the end).  The run then continues for
+// added at the end).  +keysfile=<file> reads
+// the text from a file.  +layout=<n> sets the keyboard national code.  The run then continues for
 // +kpost clocks after the last key, or until the disk is quiet again.
 //
 // Plusargs: +rom=<file> (8 or 16 KB) +img=<file> +out=<dir> +maxclk=<n> +cfg=<n> +za=<n> +spare1=<n>
@@ -49,6 +50,7 @@ module tb_core;
   logic [2:0] cfg = 3'd5;
   logic       za = 1'b1;
   logic       spare1 = 1'b1;
+  logic [3:0] layout = 4'd0;
   logic        rom_wr = 1'b0;
   logic [15:0] rom_addr = 16'd0;
   logic [7:0]  rom_data = 8'd0;
@@ -133,7 +135,7 @@ module tb_core;
     .fd_buff_wr(d_buff_wr),
     .hd_mounted(d_mounted[3:2]), .hd_lba(hd_lba), .hd_rd(hd_rd), .hd_wr(hd_wr),
     .hd_ack(d_ack[3:2]), .hd_buff_din(hd_din),
-    .ps2_key(ps2_key), .osd_active(1'b0),
+    .ps2_key(ps2_key), .osd_active(1'b0), .kbd_layout(layout),
     .ser_rxd(1'b1), .ser_txd(ser_txd),
     .ser_rts_n(ser_rts_n), .ser_dtr_n(ser_dtr_n),
     .ce_pix(ce_pix), .vid_r(vid_r), .vid_g(vid_g), .vid_b(vid_b),
@@ -142,7 +144,7 @@ module tb_core;
   );
 
   // ---- run state ----
-  string  img_file, out_dir, keys, hd_file;
+  string  img_file, out_dir, keys, keys_file, hd_file;
   int     img_sz = 0, hd_sz = 0;
   logic [7:0] img [IMG_MX];
   logic [7:0] hd_img [HD_MX];
@@ -307,6 +309,8 @@ module tb_core;
     if (p_ds && !ds_n && !c_rw) c_wdata = ad;
     if (!p_ds && ds_n && c_st == ST_IO && iolog_from >= 0 && clk_n >= iolog_from && !c_rw)
       io_event($sformatf("OUT %04h <- %04h", c_addr, c_wdata));
+    if (!p_ds && ds_n && c_st == ST_IO && !c_rw && c_addr[15:11] == 5'd0 && c_addr[8:5] == 4'b0101)
+      $display("[%9.3f ms] kbd 8251 %s <- %02h", ms(), c_addr[1] ? "ctl" : "data", c_wdata[7:0]);
     if (p_as && !as_n) begin
       c_addr = ad; c_sn = sn; c_st = st; c_rw = rw;
     end
@@ -556,22 +560,48 @@ module tb_core;
     wait (frames >= f0 + 2 && !dump_req);
   endtask
 
+  // ---- keyboard unit: commands received, bell ----
+  logic bell_on_q = 1'b0;
+  always @(posedge clk) if (rst_n) begin
+    bell_on_q <= dut.u_kbd.bell_q != '0;
+    if (dut.u_kbd.cmd_v) $display("[%9.3f ms] kbd unit got %02h", ms(), dut.u_kbd.rx_sh_q);
+    if (dut.u_kbd.bell_q != '0 && !bell_on_q) $display("[%9.3f ms] bell", ms());
+  end
+
   // ---- PS/2 key injector ----
-  function automatic logic [8:0] ps2_code(input byte c);   // {E0, set-2 code}
+  function automatic logic [8:0] ps2_letter(input byte c);
+    logic [8:0] t [0:25];
+    t = '{9'h01C, 9'h032, 9'h021, 9'h023, 9'h024, 9'h02B, 9'h034, 9'h033, 9'h043, 9'h03B,
+          9'h042, 9'h04B, 9'h03A, 9'h031, 9'h044, 9'h04D, 9'h015, 9'h02D, 9'h01B, 9'h02C,
+          9'h03C, 9'h02A, 9'h01D, 9'h022, 9'h035, 9'h01A};
+    return t[c - "A"];
+  endfunction
+
+  function automatic logic [9:0] ps2_code(input byte c);   // {shift, E0, set-2 code}
     case (c)
-      "a": return 9'h01C; "b": return 9'h032; "c": return 9'h021; "d": return 9'h023;
-      "e": return 9'h024; "f": return 9'h02B; "g": return 9'h034; "h": return 9'h033;
-      "i": return 9'h043; "j": return 9'h03B; "k": return 9'h042; "l": return 9'h04B;
-      "m": return 9'h03A; "n": return 9'h031; "o": return 9'h044; "p": return 9'h04D;
-      "q": return 9'h015; "r": return 9'h02D; "s": return 9'h01B; "t": return 9'h02C;
-      "u": return 9'h03C; "v": return 9'h02A; "w": return 9'h01D; "x": return 9'h022;
-      "y": return 9'h035; "z": return 9'h01A;
-      "0": return 9'h045; "1": return 9'h016; "2": return 9'h01E; "3": return 9'h026;
-      "4": return 9'h025; "5": return 9'h02E; "6": return 9'h036; "7": return 9'h03D;
-      "8": return 9'h03E; "9": return 9'h046;
-      " ": return 9'h029; ".": return 9'h049; ",": return 9'h041; "~": return 9'h05A;
-      default: return 9'h000;
+      "a": return 10'h01C; "b": return 10'h032; "c": return 10'h021; "d": return 10'h023;
+      "e": return 10'h024; "f": return 10'h02B; "g": return 10'h034; "h": return 10'h033;
+      "i": return 10'h043; "j": return 10'h03B; "k": return 10'h042; "l": return 10'h04B;
+      "m": return 10'h03A; "n": return 10'h031; "o": return 10'h044; "p": return 10'h04D;
+      "q": return 10'h015; "r": return 10'h02D; "s": return 10'h01B; "t": return 10'h02C;
+      "u": return 10'h03C; "v": return 10'h02A; "w": return 10'h01D; "x": return 10'h022;
+      "y": return 10'h035; "z": return 10'h01A;
+      "0": return 10'h045; "1": return 10'h016; "2": return 10'h01E; "3": return 10'h026;
+      "4": return 10'h025; "5": return 10'h02E; "6": return 10'h036; "7": return 10'h03D;
+      "8": return 10'h03E; "9": return 10'h046;
+      " ": return 10'h029; ".": return 10'h049; ",": return 10'h041; "~": return 10'h05A;
+      "-": return 10'h04E; "=": return 10'h055; "[": return 10'h054; "]": return 10'h05B;
+      "\\": return 10'h05D; ";": return 10'h04C; "'": return 10'h052; "/": return 10'h04A;
+      "`": return 10'h00E;
+      ")": return 10'h245; "!": return 10'h216; "@": return 10'h21E; "#": return 10'h226;
+      "$": return 10'h225; "%": return 10'h22E; "^": return 10'h236; "&": return 10'h23D;
+      "*": return 10'h23E; "(": return 10'h246; "_": return 10'h24E; "+": return 10'h255;
+      "{": return 10'h254; "}": return 10'h25B; "|": return 10'h25D; ":": return 10'h24C;
+      "\"": return 10'h252; "<": return 10'h241; ">": return 10'h249; "?": return 10'h24A;
+      default: ;
     endcase
+    if (c >= "A" && c <= "Z") return {1'b1, ps2_letter(c)};
+    return 10'h000;
   endfunction
 
   task automatic key_event(input logic [8:0] code, input bit press);
@@ -584,7 +614,7 @@ module tb_core;
 
   task automatic type_keys(input string s);
     for (int i = 0; i < s.len(); i++) begin
-      logic [8:0] k;
+      logic [9:0] k;
       if (s[i] == "`") begin
         $display("[%9.3f ms] waiting for the disks to be quiet", ms());
         repeat (48_000_000) @(posedge clk);
@@ -604,11 +634,19 @@ module tb_core;
         continue;
       end
       k = ps2_code(s[i]);
-      if (k == 9'h000) begin $display("key '%c' not mapped", s[i]); continue; end
+      if (k == 10'h000) begin $display("key '%c' not mapped", s[i]); continue; end
       $display("[%9.3f ms] key '%s'", ms(), (s[i] == "~") ? "RETURN" : string'(s[i]));
-      key_event(k, 1'b1);
+      if (k[9]) begin
+        key_event(9'h012, 1'b1);            // LShift
+        repeat (240_000) @(posedge clk);
+      end
+      key_event(k[8:0], 1'b1);
       repeat (960_000) @(posedge clk);      // 20 ms held
-      key_event(k, 1'b0);
+      key_event(k[8:0], 1'b0);
+      if (k[9]) begin
+        repeat (240_000) @(posedge clk);
+        key_event(9'h012, 1'b0);
+      end
       repeat (kgap) @(posedge clk);
     end
   endtask
@@ -643,6 +681,14 @@ module tb_core;
     if (!$value$plusargs("img=%s", img_file)) img_file = "m20_boot.img";
     if (!$value$plusargs("out=%s", out_dir)) out_dir = "out";
     if (!$value$plusargs("keys=%s", keys)) keys = "";
+    if ($value$plusargs("keysfile=%s", keys_file)) begin
+      fd = $fopen(keys_file, "r");
+      if (fd == 0 || $fgets(keys, fd) == 0) $fatal(1, "cannot read %s", keys_file);
+      $fclose(fd);
+      while (keys.len() > 0 && (keys[keys.len()-1] == 8'h0A || keys[keys.len()-1] == 8'h0D))
+        keys = keys.substr(0, keys.len() - 2);
+    end
+    if ($value$plusargs("layout=%d", code)) layout = 4'(code);
     void'($value$plusargs("maxclk=%d", maxclk));
     void'($value$plusargs("fevery=%d", fevery));
     void'($value$plusargs("pctrace=%d", pctrace_from));
@@ -681,8 +727,8 @@ module tb_core;
     $fclose(fd);
     if (img_sz != 286720 && img_sz != 368640) $fatal(1, "%s: %0d bytes, expected 286720 or 368640", img_file, img_sz);
 
-    $display("tb_core: config code %0d, ZA %0d, rom %s, drive 0 %s (%0d B), keys \"%s\"",
-             cfg, za, rom_file, img_file, img_sz, keys);
+    $display("tb_core: config code %0d, ZA %0d, layout %0d, rom %s, drive 0 %s (%0d B), keys \"%s\"",
+             cfg, za, layout, rom_file, img_file, img_sz, keys);
 
     repeat (4) @(posedge clk);
     ds_rst_n <= 1'b1;

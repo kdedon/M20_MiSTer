@@ -1,11 +1,13 @@
 // Keyboard path end to end, as the boot ROM drives it: 8253 ch1 (count
 // 0x40) clocks the keyboard 8251, whose TxD/RxD run to m20_kbd at 1200
 // baud 8N2; RxRDY is IR4 on the 8259.
-//   EK0/EK1: 0x03 -> reply polled within 0x2800 tries, = 0x0F
+//   EK0/EK1: 0x03 -> reply polled within 0x2800 tries, = 0x0F; 0x4F (US)
 //   bell:    0x0A twice through send_to_keyb, beep sounds, no reply
 //   E11:     0x80 -> reply by interrupt within 0x3000 loops: RxRDY -> IR4
 //            -> INT, two-pulse acknowledge gives identifier 0xFE08 (low
 //            byte 0x08 = vector 4), vec_int4 reads 0x80 and sends EOI 0xC8
+//   key+bell: Enter pressed, 0x0A written without a TxRDY poll at
+//            0-14 ms after the press: key read as 0xC1, bell sounds
 // CPU instruction times are Z8001 clocks (12 clk each).
 `timescale 1ns/1ps
 `default_nettype none
@@ -19,6 +21,8 @@ module tb_kbd_loop;
   logic        m20_txd, kbd_line;
   logic        kbd_txrdy, kbd_rxrdy, kbd_txempty, kbd_syndet, kbd_dtr_n, kbd_rts_n;
   logic        beep, overflow;
+  logic [3:0]  layout = 4'h0;
+  logic [10:0] ps2_key = 11'd0;
 
   m20_pit u_pit (
     .clk (clk), .rst_n (rst_n), .ce_pit (ce_pit),
@@ -37,7 +41,7 @@ module tb_kbd_loop;
   );
 
   m20_kbd u_kbd (
-    .clk (clk), .rst_n (rst_n), .ps2_key (11'd0), .kbd_layout (4'h0),
+    .clk (clk), .rst_n (rst_n), .ps2_key (ps2_key), .kbd_layout (layout),
     .kbd_txd (m20_txd), .kbd_rxd (kbd_line), .beep (beep), .kbd_overflow (overflow)
   );
 
@@ -146,6 +150,24 @@ module tb_kbd_loop;
     clocks(8);
     check("polled reply leaves no INT pending", pic_int, 0);
 
+    // US jumpers: the same poll reads 0x4F.
+    layout = 4'h4;
+    outb(T_IO_DA, 16'h00A1, 8'h03);
+    tries = 0;
+    got = 1'b0;
+    while (tries < 16'h2800 && !got) begin
+      tries++;
+      cpu(4 + 6);
+      inb(T_IO_DA, 16'h00A3, s);
+      cpu(4 + 6);
+      got = s[1];
+    end
+    check("US: reply within 0x2800 polls", got, 1);
+    inb(T_IO_DA, 16'h00A1, b);
+    check("US: reply 0x4F", b, 8'h4F);
+    layout = 4'h0;
+    clocks(8);
+
     // Bell twice; no reply comes back.
     for (int i = 0; i < 2; i++) begin
       cpu(1000);                           // ROM: djnz delay (shortened)
@@ -192,11 +214,39 @@ module tb_kbd_loop;
     check("ISR clear after EOI 0xC8", id[8:1], 8'h00);
     check("no FIFO overflow", overflow, 0);
 
+    // Enter, then a bell written with no TxRDY poll, at a sweep of delays.
+    for (int d = 0; d <= 14_000; d += 250) begin
+      int beeps;
+      logic was;
+      ps2_key = {~ps2_key[10], 1'b1, 9'h05A};
+      clocks(48 * d);
+      outb(T_IO_DA, 16'h00A1, 8'h0A);
+      tries = 0;
+      beeps = 0;
+      got   = 1'b0;
+      was   = beep;
+      b     = 8'h00;
+      while (tries < 120 * 48_000) begin
+        @(posedge clk);
+        tries++;
+        if (beep && !was) beeps++;
+        was = beep;
+        if (kbd_rxrdy && !got) begin
+          inb(T_IO_DA, 16'h00A1, b);
+          got = 1'b1;
+        end
+      end
+      check($sformatf("key at %0d us: read", d), got, 1);
+      check($sformatf("key at %0d us: code", d), b, 8'hC1);
+      check($sformatf("key at %0d us: bell", d), beeps > 0, 1);
+    end
+    check("no FIFO overflow after the key sweep", overflow, 0);
+
     finish();
   end
 
   initial begin
-    #1s;
+    #20s;
     $fatal(1, "timeout");
   end
 endmodule
