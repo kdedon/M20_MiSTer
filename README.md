@@ -84,6 +84,7 @@ A blank disk reads as formatted and empty: ROM 2.x reports `Invalid File Error 0
 | Hard disk 0 / 1 | Mount an image; the card is fitted while one is mounted (ROM 2.x) |
 | Configuration | Memory and video cards: B/W, 4 or 8 colours, 32K, 128K or no cards. Default B/W 128K cards (512 KB); PCOS 2.x does not boot with no cards |
 | Jumpers ZA/SPARE1 | ROM 2.x: drive type (320K, 640K, 160K, or ask). ROM 1.x: run or skip self-tests. Default 2.x 320K drives; ROM 1.x needs 1.x full tests, since skipping them also skips the keyboard check that tells PCOS 1.x its layout |
+| Keyboard | US, UK, Italian or German layout |
 | Aspect ratio | Original, full screen, custom |
 | IEEE-488 card, Twin RS-232 card | Fit the card |
 | Serial port | RS-232 port on the MiSTer UART: mainboard, twin card A or B. The others see an idle line. |
@@ -97,17 +98,23 @@ Change the configuration, jumpers or cards, then reset. Options are kept in `con
 
 ## Keyboard
 
-Italian layout. Keys map by position, except , ; . which follow their legends.
+OSD Keyboard selects the layout and the national code the keyboard reports (US 4, UK 3, Italian 0, German 1; codes from the Service Manual keyboard jumper table and the SL country list).
+
+- US, UK: PC keys type their legends under the PCOS ASCII table. UK has no £ or ¬: Shift+3 types #, Shift with the backtick key types a backtick.
+- Italian: keys map by position, except , ; . which follow their legends. Needs PCOS set to Italian (SL 0).
+- German: a QWERTZ PC keyboard maps by position. Needs PCOS set to German (SL 1), as on the German program disks. The PCOS 2.0h system disk is saved with SL 15, the original German typewriter layout, where Shift with 1-0 types ; " = % & ( ) _ § /; type `sl 1` there. The M20 has no °, ´, @, \\, \|, [ ] { } ~ or €; AltGr does nothing. The M20 has ' where the PC has ´ and ^ on Shift+#, so ´ types ', ^ and Shift+^ type ^, Shift+# types '.
 
 Ctrl+Esc is CTRL+RESET, the PCOS logical reset (boot PCOS again). RESET on its own is an ordinary key, and the boot ROM has no reset key: at its prompts use OSD Reset.
+
+PCOS 2.x and later keep the ASCII table until SL (Set Language, tables in kb.all) changes it; PCOS 1.x selects its table from the reported code.
 
 | PC key | M20 key |
 |---|---|
 | Esc | RESET |
 | Tab | COMMAND |
-| \\ or F1 | S1 |
+| F1 (and \\ on Italian) | S1 |
 | Backspace or F2 | S2 |
-| Left Alt or ISO <> | < > |
+| Left Alt or ISO <> | < > (Italian, German), \\ \| (US, UK) |
 | Keypad | Keypad |
 
 Under MS-DOS, Tab+Esc (COMMAND+RESET) returns to the Z8001 and restarts it.

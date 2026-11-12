@@ -39,6 +39,7 @@ assign USER_OUT  = 7'h7F;
 //   8       twin RS-232 card
 //   10:9    serial port on the UART: mainboard, twin A, twin B
 //   11      APB 1086 8086 card
+//   13:12   keyboard layout
 //   122:121 aspect ratio
 //////////////////////////////////////////////////////////////////
 
@@ -58,6 +59,7 @@ localparam CONF_STR = {
 	"-;",
 	"O[3:1],Configuration,B/W 128K cards,B/W 32K cards,B/W no cards,4 colours 32K,4 colours 128K,8 colours 32K,8 colours 128K;",
 	"O[6:4],Jumpers ZA/SPARE1,2.x 320K drives,2.x 640K drives,2.x 160K drives,2.x ask drive type,1.x full tests,1.x skip tests;",
+	"O[13:12],Keyboard,US,UK,Italian,German;",
 	"-;",
 	"O[7],IEEE-488 card,Off,On;",
 	"O[8],Twin RS-232 card,Off,On;",
@@ -70,7 +72,7 @@ localparam CONF_STR = {
 	"F2,ROMBIN,Load extension ROM;",
 	"F3,ROM,Load APB ROM;",
 	"R[0],Reset;",
-	"v,5;",
+	"v,6;",
 	"V,v",`BUILD_DATE
 };
 
@@ -314,6 +316,11 @@ disk_stream #(.UMAX(99)) u_disk_stream (
 
 ///////////////////////   CORE   /////////////////////////////////
 
+// Keyboard national code (P14-P17 jumpers): US 4, UK 3, Italian 0, German 1.
+wire [3:0] kbd_layout = (status[13:12] == 2'd0) ? 4'd4 :
+                        (status[13:12] == 2'd1) ? 4'd3 :
+                        (status[13:12] == 2'd2) ? 4'd0 : 4'd1;
+
 wire       ce_pix, hsync, vsync, hblank, vblank;
 wire [7:0] vid_r, vid_g, vid_b;
 wire       beep, led_fdd, apb_run;
@@ -335,7 +342,7 @@ m20_core u_core (
 	.fd_buff_wr(core_sd_buff_wr),
 	.hd_mounted(core_img_mounted[3:2]), .hd_lba(core_hd_lba), .hd_rd(core_hd_rd), .hd_wr(core_hd_wr),
 	.hd_ack(core_sd_ack[3:2]), .hd_buff_din(core_hd_buff_din),
-	.ps2_key(ps2_key), .osd_active(OSD_STATUS),
+	.ps2_key(ps2_key), .osd_active(OSD_STATUS), .kbd_layout(kbd_layout),
 	.ser_rxd(uart_rxd_s), .ser_txd(ser_txd),
 	.ser_rts_n(ser_rts_n), .ser_dtr_n(ser_dtr_n),
 	.ce_pix(ce_pix), .vid_r(vid_r), .vid_g(vid_g), .vid_b(vid_b),

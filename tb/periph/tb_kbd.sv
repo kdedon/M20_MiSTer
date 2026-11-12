@@ -1,6 +1,7 @@
 // m20_kbd: 1200 baud 8N2 frames, the 0x03 / 0x0A / 0x80 commands, make
 // codes with the modifier offsets, replies before queued keys, no
-// transmission while a host byte is arriving, and FIFO overflow.
+// transmission while a host byte is arriving, FIFO overflow, and the
+// US / UK legend maps and the German positional map.
 `timescale 1ns/1ps
 `default_nettype none
 module tb_kbd;
@@ -29,6 +30,7 @@ module tb_kbd;
 
   // ---- host UART receiver: collects bytes, checks start/stop bits.
   logic [7:0] rxq[$];
+  logic [7:0] dig[4] = '{8'h3D, 8'h3E, 8'h46, 8'h45};   // PC 7 8 9 0
   longint     rx_start[$];
   initial begin
     forever begin
@@ -157,6 +159,100 @@ module tb_kbd;
     for (int i = 0; i < 10; i++) key(1'b0, 8'h16 + 8'(i == 9 ? 8 : 0), 1'b1);
     check("overflow flag", overflow, 1);
     expect_bytes("9 of 10 rapid keys", '{8'h1D, 8'h1D, 8'h1D, 8'h1D, 8'h1D, 8'h1D, 8'h1D, 8'h1D, 8'h1D}, 10);
+
+    // ---- US (4): legends to PCOS ASCII table codes
+    layout <= 4'h4;
+    clocks(10);
+    tap(1'b0, 8'h1D);                                                   // w 0x18
+    tap(1'b0, 8'h1A);                                                   // z 0x1B
+    tap(1'b0, 8'h3A);                                                   // m 0x0E
+    tap(1'b0, 8'h55);                                                   // = 0x56
+    tap(1'b0, 8'h52);                                                   // ' 0x53
+    tap(1'b0, 8'h5D);                                                   // \ 0x01
+    tap(1'b0, 8'h05);                                                   // F1 S1 0xC2
+    tap(1'b0, 8'h76);                                                   // Esc 0x00
+    expect_bytes("US plain", '{8'h18, 8'h1B, 8'h0E, 8'h56, 8'h53, 8'h01, 8'hC2, 8'h00}, 9);
+    key(1'b0, 8'h12, 1'b1);
+    tap(1'b0, 8'h1E);                                                   // @ 0x28
+    tap(1'b0, 8'h36);                                                   // ^ 0x27
+    tap(1'b0, 8'h52);                                                   // " 0x4E
+    tap(1'b0, 8'h55);                                                   // + 0x5A
+    tap(1'b0, 8'h5D);                                                   // | 0x31
+    tap(1'b0, 8'h1D);                                                   // W 0x48
+    tap(1'b0, 8'h45);                                                   // ) 0x55
+    tap(1'b0, 8'h29);                                                   // space +0x30 0xF0
+    key(1'b0, 8'h12, 1'b0);
+    expect_bytes("US shifted", '{8'h28, 8'h27, 8'h4E, 8'h5A, 8'h31, 8'h48, 8'h55, 8'hF0}, 9);
+    key(1'b0, 8'h14, 1'b1); tap(1'b0, 8'h1D); tap(1'b0, 8'h55); key(1'b0, 8'h14, 1'b0);  // ^W 0x78, ^= 0x86
+    key(1'b0, 8'h0D, 1'b1); tap(1'b0, 8'h1A); key(1'b0, 8'h0D, 1'b0);  // COMMAND z 0xAB
+    key(1'b0, 8'h12, 1'b1); key(1'b0, 8'h14, 1'b1); tap(1'b0, 8'h52);
+    key(1'b0, 8'h14, 1'b0); key(1'b0, 8'h12, 1'b0);                     // shift+ctrl ' -> key 0x23
+    expect_bytes("US ctrl, command", '{8'h78, 8'h86, 8'hAB, 8'h23}, 5);
+
+    // ---- UK (3)
+    layout <= 4'h3;
+    clocks(10);
+    tap(1'b0, 8'h5D);                                                   // # 0x4F
+    tap(1'b0, 8'h61);                                                   // ISO \ 0x01
+    key(1'b0, 8'h59, 1'b1);
+    tap(1'b0, 8'h1E);                                                   // " 0x4E
+    tap(1'b0, 8'h52);                                                   // @ 0x28
+    tap(1'b0, 8'h26);                                                   // pound -> # 0x4F
+    tap(1'b0, 8'h5D);                                                   // ~ 0x57
+    tap(1'b0, 8'h61);                                                   // | 0x31
+    key(1'b0, 8'h59, 1'b0);
+    expect_bytes("UK", '{8'h4F, 8'h01, 8'h4E, 8'h28, 8'h4F, 8'h57, 8'h31}, 8);
+
+    // ---- German (1): QWERTZ by position.  Expected codes index the PCOS
+    // German table to the PC legend (umlauts and ß replace {|}[\]~@).
+    layout <= 4'h1;
+    clocks(10);
+    host_send(8'h03);
+    expect_bytes("German 0x03", '{8'h1F}, 2);
+    tap(1'b0, 8'h1A);                                                   // y 0x1B
+    tap(1'b0, 8'h35);                                                   // z 0x1A
+    tap(1'b0, 8'h3A);                                                   // m 0x0E
+    tap(1'b0, 8'h4C);                                                   // ö 0x2A
+    tap(1'b0, 8'h52);                                                   // ä 0x2B
+    tap(1'b0, 8'h54);                                                   // ü 0x28
+    tap(1'b0, 8'h4E);                                                   // ß 0x26
+    expect_bytes("German letters", '{8'h1B, 8'h1A, 8'h0E, 8'h2A, 8'h2B, 8'h28, 8'h26}, 8);
+    tap(1'b0, 8'h5D);                                                   // # 0x2C
+    tap(1'b0, 8'h0E);                                                   // ^ 0x5C
+    tap(1'b0, 8'h4A);                                                   // - 0x2F
+    expect_bytes("German symbols", '{8'h2C, 8'h5C, 8'h2F}, 4);
+    key(1'b0, 8'h12, 1'b1);
+    tap(1'b0, 8'h26);                                                   // § 0x4F
+    tap(1'b0, 8'h3D);                                                   // / 0x53
+    tap(1'b0, 8'h45);                                                   // = 0x4C
+    tap(1'b0, 8'h4E);                                                   // ? 0x56
+    tap(1'b0, 8'h4C);                                                   // Ö 0x5A
+    key(1'b0, 8'h12, 1'b0);
+    expect_bytes("German shifted", '{8'h4F, 8'h53, 8'h4C, 8'h56, 8'h5A}, 6);
+    // Shift+7 8 9 0 each as Shift make, key make, key break, Shift break.
+    // SL 1 types / ( ) =; a disk saved with SL 15 shows ) _ § / instead.
+    foreach (dig[i]) begin
+      key(1'b0, 8'h12, 1'b1);
+      tap(1'b0, dig[i]);
+      key(1'b0, 8'h12, 1'b0);
+    end
+    expect_bytes("German Shift+7-0", '{8'h53, 8'h54, 8'h55, 8'h4C}, 5);
+    key(1'b0, 8'h12, 1'b1);
+    tap(1'b0, 8'h5D);                                                   // ' 0x27
+    tap(1'b0, 8'h41);                                                   // ; 0x5D
+    tap(1'b0, 8'h61);                                                   // > 0x31
+    tap(1'b0, 8'h35);                                                   // Z 0x4A
+    key(1'b0, 8'h12, 1'b0);
+    expect_bytes("German shifted 2", '{8'h27, 8'h5D, 8'h31, 8'h4A}, 5);
+    key(1'b0, 8'h14, 1'b1); tap(1'b0, 8'h1A); key(1'b0, 8'h14, 1'b0);  // ^Y 0x7B
+    expect_bytes("German ctrl", '{8'h7B}, 2);
+
+    // ---- back to Italian: \ is S1 again
+    layout <= 4'h0;
+    clocks(10);
+    tap(1'b0, 8'h5D);
+    tap(1'b0, 8'h1D);
+    expect_bytes("Italian again", '{8'hC2, 8'h1B}, 3);
 
     finish();
   end

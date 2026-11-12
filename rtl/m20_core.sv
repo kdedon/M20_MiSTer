@@ -84,6 +84,7 @@ module m20_core (
   // Keyboard
   input  logic [10:0]      ps2_key,
   input  logic             osd_active,
+  input  logic [3:0]       kbd_layout,        // 0 Italian, 3 UK, 4 US
 
   // UART
   input  logic             ser_rxd,
@@ -266,7 +267,7 @@ module m20_core (
 
   logic kbd_overflow;
   m20_kbd u_kbd (
-    .clk, .rst_n, .ps2_key(key_q), .kbd_layout(4'd0),
+    .clk, .rst_n, .ps2_key(key_q), .kbd_layout,
     .kbd_txd, .kbd_rxd, .beep, .kbd_overflow
   );
   logic unused_kbd;
