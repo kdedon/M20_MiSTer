@@ -155,6 +155,10 @@ The APB 1086 (G0246) 8086 board is being built from a best-guess reconstruction 
 
 Please open an issue.
 
+## AI disclosure
+
+This core was developed with AI assistance (Claude, by Anthropic): writing and reviewing the RTL, simulation benches and documentation, analysing the original software in MAME, and running the hardware tests. Hardware results were checked on a real DE10-Nano.
+
 ## Credits
 
 - Z8001 CPU: k8000.
