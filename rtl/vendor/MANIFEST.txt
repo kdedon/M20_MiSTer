@@ -3,7 +3,7 @@
 k8000 ca12d967f9166806abc5d6474b32f581ec67d8e7 rtl/k800x_cpu -> k8000/k800x_cpu/ (copied 2026-11-12 from ~/git/k8000)
 C900 d220d2c3246a93ad3549ad931442a95f340070c7 mc6845 netlist + VHDL -> c900/mc6845/; fd_pkg -> c900/fdc/
 SDRAM 227d4f418fd908a66712329400a6f619ca4fee77 rtl/mem/sdram.sv (github.com/MiSTer-devel/NeoGeo_MiSTer) -> sdram/
-Template_MiSTer 76dd8f5c509a2237b8e707773032a31df5905048 sys/ (via C900_MiSTer)
+Template_MiSTer e901a9fa6548f4eb024619357b89d48be94fd9f8 sys/ (via C900_MiSTer)
 # From C900_MiSTer's own tree (not vendored there): rtl/sdram/c900_sdram.sv, rtl/host/disk_stream.sv, rtl/common/c900_*.sv
 # Intel-family peripherals, MIT (LICENSE in each dir):
 KF8259 PCXT_MiSTer fa80b40 rtl/KFPC-XT/HDL/KF8259 (upstream github.com/kitune-san/KF8259 b432853) -> KF8259/
